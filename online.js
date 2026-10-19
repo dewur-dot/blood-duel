@@ -25,7 +25,7 @@
     if(error&&error.code==='permission-denied') return '결투 저장 권한이 없습니다. Firebase 인증과 보안 규칙을 확인해 주세요.';
     return '결투 서버에 연결하지 못했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.';
   };
-  const clearLink=()=>{ try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){} };
+  const clearLink=()=>{ try{ const q=String(location.search||'').replace(/^\?/,'').split('&').filter(x=>x&&!/^invite=/.test(x)).join('&'); history.replaceState(null,'',location.pathname+(q?'?'+q:'')); }catch(_){} };
 
   const xml=value=>String(value??'').replace(/[&<>"']/g,char=>({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'
@@ -90,7 +90,7 @@
         ui.letter=unpackDuel(current.data().challenger)?.letter||'';
       }
       remember(ref.id);
-      const link=baseUrl()+'#duel-id='+ref.id;
+      const link=baseUrl()+'?invite='+ref.id+'#duel-id='+ref.id;
       const intro=`⚔ ${S.hero.name}의 결투 신청`+(ui.letter?`\n\n"${ui.letter}"`:'');
       const message=intro+`\n\n${link}`;
       if(!copyOnly&&navigator.share){
