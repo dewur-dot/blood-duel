@@ -465,7 +465,8 @@ const CRITS={
 };
 function wpickC(list){ const t=list.reduce((a,x)=>a+x.w,0); let r=Math.random()*t; for(const x of list){ r-=x.w; if(r<0) return x; } return list[0]; }
 // 결투 시작 문구 (매번 다르게)
-const START_LINES=['{a} · {b}, 결투 개시','{a}와 {b}, 서로의 목을 노린다','까마귀들이 모여든다. {a}와 {b}의 결투','{a}가 침을 뱉었다. {b}가 웃는다. 시작이다','오딘이 지켜본다. {a} 대 {b}','둘 중 하나는 오늘 묘지로 간다. {a} 대 {b}','{b}의 눈에 핏발이 섰다. {a}도 마찬가지다','피 냄새가 진동한다. {a}와 {b}, 맞붙는다','{a}가 주먹을 쥐었다. {b}가 이를 갈았다','전장의 북이 울린다. {a} 대 {b}','{a}, 오늘 {b}의 이름을 묘비에 새기겠다고 맹세했다','{b}가 먼저 으르렁댔다. {a}는 대답 대신 다가간다','발할라의 문이 열렸다. 누가 먼저 들어갈 것인가. {a} 대 {b}','자비 없는 결투. {a}와 {b}','{a}와 {b}, 말은 필요 없다'];
+const START_LINES=['{a} · {b}, 결투 개시','{a}와 {b}, 서로의 목을 노린다','까마귀들이 모여든다. {a}와 {b}의 결투','{a}가 침을 뱉었다. {b}가 웃는다. 시작이다','오딘이 지켜본다. {a} 대 {b}','둘 중 하나는 오늘 묘지로 간다. {a} 대 {b}','{b}의 눈에 핏발이 섰다. {a}도 마찬가지다','피 냄새가 진동한다. {a}와 {b}, 맞붙는다','{a}가 주먹을 쥐었다. {b}가 이를 갈았다','전장의 북이 울린다. {a} 대 {b}','{a}, 오늘 {b}의 이름을 묘비에 새기겠다고 맹세했다','{b}가 먼저 으르렁댔다. {a}는 대답 대신 다가간다','발할라의 문이 열렸다. 누가 먼저 들어갈 것인가. {a} 대 {b}','자비 없는 결투. {a}와 {b}','{a}와 {b}, 말은 필요 없다',
+  '{a}: 너의 비명을 자장가로 들어주겠다.','{a}: 아, 달콤한 전장이여.','{a}: 좋은 적은 죽은 적이다.','{b}: 네 해골로 꿀술을 마시겠다.','{a}: 오늘 밤 네 이름은 까마귀 밥이다.','{b}: 무릎 꿇어라. 그럼 빨리 끝내주마.','{a}: 네 어미에게 작별 인사는 했나?','{b}: 피 냄새가 좋구나. 곧 네 것이 될 테니.','{a}: 발할라에 자리 맡아 둬라. 금방 따라가진 않겠지만.','{b}: 네 갈비뼈로 울타리를 세우겠다.','{a}: 비명은 짧게. 나는 바쁘다.','{b}: 오딘이여, 이 제물을 받으소서.','{a}: 네 이빨을 목걸이로 걸고 다니겠다.','{b}: 도망쳐도 좋다. 등이 더 때리기 쉬우니까.','{a}: 오늘 땅은 네 피로 목을 축인다.','{b}: 웃어라. 마지막 웃음이니.','{a}: 내 도끼가 네 이름을 불렀다.','{b}: 살려달라고 빌어라. 들어주진 않겠지만.','{a}: 늑대들아, 저녁밥이 왔다.','{b}: 죽기 좋은 날이군. 너한테.'];
 // 이겼을 때 / 죽었을 때 문구
 const WIN_LINES=['살아남았다. 오늘은.','적의 피로 목을 축였다.','까마귀들이 너에게 감사한다.','발할라는 오늘도 너를 거절했다.','놈의 묘비에 네 이름이 새겨질 것이다.','오딘이 고개를 끄덕였다.','또 하나의 해골을 술잔으로.','네 도끼는 아직 배고프다.','무릎 꿇은 건 놈이었다.','전장은 강한 자의 것이다.','적의 가문이 오늘 밤 울 것이다.','피 묻은 손으로 승리를 쥐었다.'];
 const LOSE_LINES=['묘지에 이름이 새겨졌다. 까마귀들이 감사해한다.','발할라의 문이 열렸다. 들어가라.','오늘 까마귀가 배부르다. 네 덕분이다.','땅이 네 피를 마셨다.','전사는 쓰러졌다. 전설은… 글쎄.','적의 술잔이 될 운명이었다.','눈을 감아라. 싸움은 끝났다.','오딘이 고개를 돌렸다.','네 이름은 묘비에만 남는다.','무릎 꿇은 채 숨이 멎었다.','뼈는 늑대가, 이름은 묘지가 가져갔다.','다음 생엔 더 굶주려 태어나라.'];
@@ -1742,7 +1743,7 @@ function dims3(h){
   const SWf=0.255*sM*(F?0.86:1)*(1+0.12*musc+0.16*MX);
   const chestW=Math.min(SWf*0.97,SWf*Math.min(1.1+0.06*MX,0.82*(0.45+0.55*bM)*(1+(F?0:0.1)*musc+0.08*MX))*(F?0.92:1));
   const chestW2=Math.min(chestW,SWf*(F?0.8:0.8+0.03*Math.min(MX,1)));
-  const hipW0=(F?0.19:0.172)*(0.72+0.28*bM)*(1+0.05*Math.min(MT,2)), waistW=F?Math.min(chestW2*0.92,hipW0*(0.66+0.08*bM)):Math.min(chestW2*0.8,hipW0*(0.84+0.06*bM)*(1+0.04*MX));
+  const hipW0=(F?0.2:0.172)*(0.72+0.28*bM)*(1+0.05*Math.min(MT,2)), waistW=F?Math.min(chestW2*0.82,hipW0*(0.6+0.08*bM)):Math.min(chestW2*0.8,hipW0*(0.84+0.06*bM)*(1+0.04*MX));
   const bL=0.62+0.38*Math.min(bM,1.7); // 체격이 커도 팔다리가 풍선처럼 부풀지 않게
   const wa=Math.min(0.085,0.05*bL*(F?0.84:1)*(1+0.24*musc+0.14*MX)), ua=0.17*aM, fa=0.15*aM;
   const t0=Math.min(0.105,0.075*bL*(F?0.98:1)*(1+0.12*musc+0.08*MX));
@@ -1759,11 +1760,11 @@ function pchip(xs,ys){ const n=xs.length, h=[], d=[], m=new Array(n).fill(0);
     m[0]=d[0]*0.5; m[n-1]=d[n-2]*0.5; }
   return x=>{ if(x<=xs[0]) return ys[0]; if(x>=xs[n-1]) return ys[n-1]; let i=0; while(i<n-2&&x>xs[i+1]) i++;
     const t=(x-xs[i])/h[i], t2=t*t, t3=t2*t; return (2*t3-3*t2+1)*ys[i]+(t3-2*t2+t)*h[i]*m[i]+(-2*t3+3*t2)*ys[i+1]+(t3-t2)*h[i]*m[i+1]; }; }
-const LK=['w','f','b','z','pk','pg','gv','n'];
+const LK=['w','f','b','z','pk','pg','gv','n','ps'];
 // ctrl: [{t,w,f,b,z,pk,pg,gv,n}] t 0..1 (위→아래), L 길이. opt: {ta,tb,cap0,cap1,inf,steps,seg}
 function geoLoft(ctrl,L,opt){
   opt=opt||{}; const seg=opt.seg||26, steps=opt.steps||18, ta=opt.ta??0, tb=opt.tb??1, inf=opt.inf||0;
-  const xs=ctrl.map(c=>c.t), F={}; LK.forEach(k=>{ F[k]=pchip(xs,ctrl.map(c=>c[k]??(k==='n'?2:k==='f'||k==='b'?c.w:0))); });
+  const xs=ctrl.map(c=>c.t), F={}; LK.forEach(k=>{ F[k]=pchip(xs,ctrl.map(c=>c[k]??(k==='n'?2:k==='ps'?0.25:k==='f'||k==='b'?c.w:0))); });
   const ring=t=>{ const r={}; LK.forEach(k=>r[k]=F[k](t)); r.w+=inf; r.f+=inf; r.b+=inf; r.y=-t*L; r.s=1; r.tt=t; return r; }; const DN=inf?null:opt.dents, AB=inf?null:opt.abs;
   const R=[]; const capN=5;
   const r0=ring(ta), r1=ring(tb);
@@ -1774,7 +1775,7 @@ function geoLoft(ctrl,L,opt){
     for(let i=0;i<seg;i++){ const a=i/seg*Math.PI*2, c=Math.cos(a), sn=Math.sin(a);
       const x=r.w*Math.sign(c)*Math.pow(Math.abs(c),e); let z=(sn>=0?r.f:r.b)*Math.sign(sn)*Math.pow(Math.abs(sn),e);
       const xn=r.w>1e-6?Math.abs(x)/r.w:0;
-      if(sn>0){ z+=r.pk*Math.pow(sn,1.5)*Math.exp(-Math.pow((xn-0.46)/0.25,2)); z-=r.gv*sn*Math.exp(-Math.pow(xn/0.13,2)); }
+      if(sn>0){ z+=r.pk*Math.pow(sn,1.5)*Math.exp(-Math.pow((xn-0.46)/r.ps,2)); z-=r.gv*sn*Math.exp(-Math.pow(xn/0.13,2)); }
       else z-=r.pg*Math.pow(-sn,1.5)*Math.exp(-Math.pow((xn-0.45)/0.33,2));
       if(AB&&sn>0&&r.tt>AB.t0&&r.tt<AB.t1){ const u=(r.tt-AB.t0)/(AB.t1-AB.t0), q=Math.pow(Math.sin(Math.PI*AB.n*u),2)*Math.sin(Math.PI*u); z+=AB.a*q*Math.exp(-Math.pow((xn-AB.x)/AB.s,2))*sn; }
       if(DN){ const tt=r.tt; for(const d of DN){ if(d.b?sn>=0:sn<=0) continue; const g=Math.exp(-Math.pow((tt-d.t)/d.w,2)); if(g<0.01) continue; const v=d.d*g*Math.exp(-Math.pow((xn-(d.x||0))/(d.s||0.35),2))*Math.abs(sn); z+=d.b?v:-v; } }
@@ -1828,12 +1829,13 @@ function torsoCtrl(D,g){
     {t:0.06, w:nw*1.12+(shw-nw)*(F?0.2:0.28+0.1*m+0.2*X), f:Math.max(T*(0.12+0.01*m),nw*1.05), b:T*(0.125+0.05*X), z:-T*0.005},
     {t:0.115, w:nw+(shw-nw)*(F?0.68:0.75), f:T*(0.145+0.006*m), b:T*0.15, z:-T*0.004},
     {t:0.16, w:shw*0.96, f:T*(0.158+0.008*m), b:T*0.158, n:2.1},
-    {t:0.22, w:Math.max(cw*1.0,shw*0.86), f:T*(F?0.17:0.166+0.006*m), b:T*0.17, pk:F?bs*0.3:T*(0.014+0.02*m), gv:F?bs*0.06:T*(0.006+0.008*m), n:2.1},
-    {t:0.29, w:cw*(1+(F?0:0.04*m+0.05*X)), f:T*(F?0.165:0.168+0.006*m), b:T*0.165, pk:F?bs*0.72:T*(0.022+0.024*m), gv:F?bs*0.14:T*(0.008+0.01*m), n:F?2.4:2.1},
-    {t:0.39, w:cw*(F?0.9:0.95+0.03*X), f:T*(F?0.15:0.163), b:T*0.155, pk:F?bs*0.25:T*0.012*m, gv:F?0:T*0.008*m},
+    {t:0.22, w:Math.max(cw*1.0,shw*0.86), f:T*(F?0.165:0.166+0.006*m), b:T*0.17, ps:F?0.2:0.25, pk:F?bs*0.35:T*(0.014+0.02*m), gv:F?bs*0.06:T*(0.006+0.008*m), n:2.1},
+    {t:0.3, w:cw*(1+(F?0:0.04*m+0.05*X)), f:T*(F?0.16:0.168+0.006*m), b:T*0.165, ps:F?0.21:0.25, pk:F?bs*0.95:T*(0.022+0.024*m), gv:F?bs*0.14:T*(0.008+0.01*m), n:F?2.4:2.1},
+    {t:0.36, w:cw*(F?0.88:0.95+0.03*X), f:T*(F?0.15:0.163), b:T*0.155, ps:F?0.2:0.25, pk:F?bs*0.55:T*0.012*m, gv:F?0:T*0.008*m},
+    {t:0.41, w:cw*(F?0.84:0.93), f:T*0.145, b:T*0.15, pk:F?0:T*0.004*m},
     {t:0.56, w:ww, f:T*0.14, b:T*0.125, gv:F?0:T*0.012*m},
-    {t:0.74, w:(ww+hw)/2*1.02, f:T*0.145, b:T*0.135},
-    {t:0.86, w:hw*1.0, f:T*0.15, b:T*(F?0.16:0.145), pg:T*(F?0.05:0.035)},
+    {t:0.74, w:F?ww*0.6+hw*0.4:(ww+hw)/2*1.02, f:T*0.145, b:T*0.135},
+    {t:0.86, w:hw*(F?1.04:1.0), f:T*0.15, b:T*(F?0.16:0.145), pg:T*(F?0.05:0.035)},
     {t:0.96, w:hw*0.97, f:T*0.13, b:T*(F?0.17:0.15), pg:T*(F?0.065:0.05)},
     {t:1.04, w:hw*0.84, f:T*0.11, b:T*0.12},
     {t:1.1, w:hw*0.4, f:T*0.06, b:T*0.07}
@@ -1884,8 +1886,9 @@ function build3(h,dead){
   // 사타구니 둔덕: 몸통과 두 허벅지 사이를 메워 자연스럽게 이어지게 (남자는 조금 더 도톰)
   { const gc=legCol||(ou._loin?skin:uw), gi=legCol?0.005:0.0035; add3(spine,sph(gc,0,-T*(F?1.0:1.02),T*(F?0.02:0.07),D.hipW*(F?0.2:0.22)+gi,T*(F?0.09:0.12)+gi,T*(F?0.06:0.09)+gi,{met:legCol?legMet:0})); }
   if(F&&!topCol){ // 브라: 가슴 표면을 따라 덮는 두 컵(몸통 표면을 살짝 부풀림) + 끈
-    add3(spine,loft(uw,TC,TL,{ta:0.205,tb:0.36,inf:0.0032,steps:10}));
-    const cw2=D.chestW/2; [-1,1].forEach(sd=>{ const st=add3(spine,box(uw,sd*cw2*0.52,-T*0.12,T*0.11,T*0.012,T*0.17,T*0.01)); st.R=[0.3,0,0]; }); }
+    add3(spine,loft(uw,TC,TL,{ta:0.25,tb:0.38,inf:0.0032,steps:12}));
+    { const z0=T*0.16+(g.bust||1)*D.chestW/2*0.42*0.4; add3(spine,box(mix(uw,'#000000',0.3),0,-T*0.31,z0*0.9,T*0.012,T*0.07,T*0.01)); } // 가운데 이음새
+    const cw2=D.chestW/2; [-1,1].forEach(sd=>{ const st=add3(spine,box(uw,sd*cw2*0.5,-T*0.15,T*0.12,T*0.012,T*0.2,T*0.01)); st.R=[0.3,0,0]; }); }
   // 상의
   if(topCol){
     const shirt=TC.filter(c=>c.t<=0.9).map(c=>Object.assign({},c,{pg:0}));
