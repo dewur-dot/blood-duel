@@ -2021,7 +2021,7 @@ function drawNode(n,parent,des,list){
 // figs: [{J, M(world matrix of root), des}], cam: {l,r,b,t}, w,h px
 function g3render(figs,cam,w,h){
   const gl=G3.gl; if(G3.cv.width!==w||G3.cv.height!==h){ G3.cv.width=w; G3.cv.height=h; }
-  gl.viewport(0,0,w,h); gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  gl.viewport(0,0,w,h); gl.clearColor(0,0,0,0); gl.clear(cam.keep?gl.DEPTH_BUFFER_BIT:(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT));
   gl.enable(gl.DEPTH_TEST); gl.disable(gl.BLEND); gl.disable(gl.CULL_FACE);
   const PV=cam.PV||M4.ortho(cam.l,cam.r,cam.b,cam.t,-5000,5000);
   gl.useProgram(G3.prog); const U=G3.u; gl.uniformMatrix4fv(U.PV,false,PV);
@@ -2822,6 +2822,39 @@ async function bustCanvas(h,w,hh){
   g3render([{J,M:M4.I(),des:false}],{l:-w/(2*k),r:w/(2*k),b:y0,t:y1},w,hh);
   const c=document.createElement('canvas'); c.width=w; c.height=hh; c.getContext('2d').drawImage(G3.cv,0,0); return c;
 }
+/* ---- 3D 결투장: 땅, 산, 숲, 롱하우스, 화톳불, 바위 (픽셀 단위 월드, 무대 바닥 = gy) ---- */
+function arena3d(W,gy){
+  const root=N3(null), rnd=(a,b)=>a+Math.random()*(b-a), E={met:2};
+  add3(root,box('#6f9a42',W/2,gy-20,-12000,W*80,40,40000));                 // 땅
+  const ar=add3(root,N3(MS.lathe([[0,1],[1,1]],0.02,1),'#c49a5e')); ar.T=[W/2,gy+0.5,0]; ar.S=[W*0.66,1,W*0.32];   // 결투장 흙바닥
+  const ar2=add3(root,N3(MS.lathe([[0,1],[1,1]],0.02,1),'#d4ab6c')); ar2.T=[W/2,gy+0.8,0]; ar2.S=[W*0.42,1,W*0.18];
+  // 흙 얼룩, 핏자국, 풀 덤불, 돌
+  for(let i=0;i<26;i++){ const d=add3(root,N3(MS.lathe([[0,1],[1,1]],0.02,1),i%5?'#a8814c':'#7a2a1e')); d.T=[W/2+rnd(-W*1.5,W*1.5),gy+0.3,rnd(-500,250)]; d.S=[rnd(15,60),1,rnd(8,30)]; }
+  for(let i=0;i<70;i++){ const x=W/2+rnd(-W*2.5,W*2.5), z=rnd(-1400,300); if(Math.abs(x-W/2)<W*0.5&&z>-300) continue; for(let k=0;k<4;k++){ const bl=add3(root,box(k%2?'#5e8a34':'#4a7228',x+rnd(-6,6),gy+7,z+rnd(-4,4),2,16,2)); bl.R=[rnd(-0.4,0.4),0,rnd(-0.5,0.5)]; } }
+  for(let i=0;i<40;i++){ const x=W/2+rnd(-W*1.8,W*1.8), z=rnd(-300,320), r=rnd(3,10); add3(root,sph(i%3?'#8a8478':'#9e978a',x,gy+r*0.25,z,r,r*0.55,r*0.8)); }
+  // 울타리 말뚝 + 방패 + 해골 꽂힌 창
+  for(let i=0;i<46;i++){ const x=W/2-W*2.2+i*W*0.1; if(Math.abs(x-W/2)<W*0.38) continue; const h=rnd(42,58); add3(root,cyl('#7a5a3a',x,gy+h/2,-620,5,h)); add3(root,N3(MS.lathe([[0,0.001],[1,5]],8,2),'#7a5a3a')).T=[x,gy+h+8,-620];
+    if(i%4===1){ const sh=add3(root,cyl(['#8a2a1e','#2a4a7a','#c8a040','#5a2a5a'][i%4===1?(i>>2)%4:0],x+5,gy+h*0.55,-612,13,3)); sh.R=[Math.PI/2,0,0]; add3(root,sph('#9a9a9a',x+5,gy+h*0.55,-609,3,3,2,{met:1})); } }
+  [[-0.5,-560],[0.55,-580],[-1.2,-700],[1.3,-650]].forEach(([dx,z])=>{ const x=W/2+dx*W; add3(root,cyl('#4a3a2a',x,gy+45,z,2.5,90)); add3(root,sph('#d9d0bc',x,gy+96,z,9,10,9)); add3(root,sph('#1a1410',x-3,gy+97,z+7,2.2,2.6,1)); add3(root,sph('#1a1410',x+3,gy+97,z+7,2.2,2.6,1)); });
+  // 화톳불 (빛나는 불꽃)
+  [-1,1].forEach(sd=>{ const x=W/2+sd*W*0.62, z=-140; add3(root,cyl('#1a1410',x,gy+26,z,3,52)); add3(root,N3(MS.lathe([[0,14],[1,8]],12,2),'#2a211a')).T=[x,gy+58,z];
+    add3(root,sph('#ff6a1a',x,gy+72,z,12,22,12,E)); add3(root,sph('#ffd060',x,gy+67,z,6,13,6,E));
+    const gl=add3(root,N3(MS.lathe([[0,1],[1,1]],0.02,1),'#b07a40')); gl.T=[x,gy+1,z]; gl.S=[90,1,50]; });
+  // 숲
+  for(let i=0;i<220;i++){ const x=W/2+rnd(-W*22,W*22), z=rnd(-14000,-5000), h=rnd(160,360); add3(root,cyl('#5a3e26',x,gy+h*0.12,z,6,h*0.24));
+    const t=add3(root,N3(MS.lathe([[0,0.001],[0.5,h*0.2],[1,h*0.28]],h,4),i%3?'#2e5a2a':'#3a6a32')); t.T=[x,gy+h*1.1,z]; }
+  // 마을: 롱하우스 여러 채, 불 켜진 창, 지붕 위 연기
+  [[-1.4,-1400],[1.6,-1700],[-3,-2200],[2.9,-2500],[0.2,-3000]].forEach(([dx,z],k)=>{ const x=W/2+dx*W, L=rnd(220,300);
+    add3(root,box('#7a5634',x,gy+40,z,L,80,120)); const rf=add3(root,box('#5a3a22',x,gy+105,z+35,L+20,14,140)); rf.R=[-0.6,0,0]; const rb=add3(root,box('#5a3a22',x,gy+105,z-35,L+20,14,140)); rb.R=[0.6,0,0];
+    for(let w=0;w<3;w++) add3(root,box('#ffa040',x-L*0.3+w*L*0.3,gy+46,z+61,14,16,2,E));
+    add3(root,box('#140e08',x,gy+30,z+61,26,50,2));
+    add3(root,cyl('#1a120c',x+L*0.3,gy+140,z,7,40)); });
+  // 산
+  for(let i=0;i<9;i++){ const x=W/2+(i-4)*W*6+rnd(-600,600), z=rnd(-30000,-24000), h=rnd(5000,8000), r=h*rnd(0.9,1.3);
+    const mt=add3(root,N3(MS.lathe([[0,0.001],[0.18,r*0.17],[1,r]],h,6),'#6a7a94')); mt.T=[x,gy-60+h,z];
+    const sn=add3(root,N3(MS.lathe([[0,0.001],[1,r*0.19]],h*0.19,3),'#f2f5fa')); sn.T=[x,gy-60+h+2,z]; }
+  return root;
+}
 function battle3d(now){
   const cv=$('#st3d'), st=$('#stage'); if(!cv||!st||!ui.rep) return;
   const W=st.clientWidth, Hs=st.clientHeight; if(W<80||Hs<120) return; // 화면이 숨겨진 동안엔 그리지 않음
@@ -2899,9 +2932,17 @@ function battle3d(now){
     pose3(J,fighterAngles3(f,now),0);
     figs.push({J,M:M4.mul(M4.mul(M4.T(x,ybot,0),M4.RZ(roll)),M4.S(s,s*sya,s)),des:ko,roll});
   });
-  // 시작 질주: 카메라가 멀리서 점점 다가감 (정사영이라 사람이 화면을 뚫고 커지는 일이 없음)
-  let Z=1; if(ui.intro){ const u=Math.min(1,(now-ui.intro.t0)/ui.intro.D); Z=1+1.3*Math.pow(1-u,1.4); if(u>=1&&now-ui.intro.t0>ui.intro.D+50) ui.intro=null; }
-  g3render(figs,{l:W/2-W/2*Z,r:W/2+W/2*Z,b:0,t:Hs*Z},cw,ch);
+  // 1) 3D 배경: 원근 카메라가 높고 먼 곳에서 스윽 내려와 결투 각도로 (배경에는 사람이 없음)
+  let u=1; if(ui.intro){ u=Math.max(0,Math.min(1,(now-ui.intro.t0)/ui.intro.D)); if(u>=1&&now-ui.intro.t0>ui.intro.D+50) ui.intro=null; }
+  const gy=ui.b3.gy??(ui.b3.gy=Math.max(0,Math.min(Hs*0.3,ui.b3.yA??Hs*0.06))); if(!ui.b3.world||ui.b3.wW!==W){ ui.b3.world=arena3d(W,gy); ui.b3.wW=W; }
+  const e=1-Math.pow(1-u,2.4), Dz=2600, lerp=(a,b)=>a+(b-a)*e;
+  const eye=[W/2+lerp(-W*0.5,0),lerp(Hs*0.5+1500,Hs*0.5),lerp(Dz+3600,Dz)], tgt=[W/2,lerp(gy,Hs*0.5),lerp(-300,0)];
+  const PV=M4.mul(M4.persp(2*Math.atan(Hs/2/Dz),W/Hs,60,90000),M4.look(eye,tgt,[0,1,0]));
+  const sbg=st.querySelector('.sbg'); if(sbg&&!sbg._sky){ sbg._sky=1; sbg.querySelectorAll('path,ellipse:not(.cl),rect:not(:first-of-type),circle').forEach(n=>{ if(!n.closest('g[fill="#fff"]')) n.style.display='none'; }); }
+  g3render([{J:{root:ui.b3.world,noHead:true},M:M4.I(),des:false}],{PV},cw,ch);
+  // 2) 사람은 정사영으로 그 위에 그림 (어떤 경우에도 화면을 뚫고 커지지 않음)
+  const Z=1+1.3*Math.pow(1-u,1.4);
+  g3render(figs,{l:W/2-W/2*Z,r:W/2+W/2*Z,b:0,t:Hs*Z,keep:1},cw,ch);
   const ctx=cv.getContext('2d'); ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cw,ch); ctx.drawImage(G3.cv,0,0);
 }
 function g3frame(now){
