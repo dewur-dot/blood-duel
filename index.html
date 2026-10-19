@@ -2362,21 +2362,21 @@ function stageBg(){
   let rocks=''; for(let i=0;i<14;i++){ const x=rnd(0,400), y=rnd(268,306), r=rnd(2,6); rocks+=`<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${r.toFixed(1)}" ry="${(r*0.55).toFixed(1)}" fill="#0f0c0a" opacity=".7"/><ellipse cx="${(x-r*0.2).toFixed(1)}" cy="${(y-r*0.2).toFixed(1)}" rx="${(r*0.6).toFixed(1)}" ry="${(r*0.25).toFixed(1)}" fill="#5a4a3c" opacity=".35"/>`; }
   const brazier=(x)=>`<g><ellipse cx="${x}" cy="248" rx="46" ry="40" fill="url(#fg)"/><path d="M${x-7} 270 L${x-2} 252 M${x+7} 270 L${x+2} 252 M${x} 270 L${x} 252" stroke="#1a1410" stroke-width="2.2"/><path d="M${x-11} 248 Q${x} 258 ${x+11} 248 Z" fill="#2a211a" stroke="#0d0a08"/><g class="flame"><path d="M${x-9} 248 Q${x-10} 236 ${x-3} 228 Q${x-2} 236 ${x} 232 Q${x+2} 220 ${x+4} 214 Q${x+6} 228 ${x+9} 234 Q${x+11} 242 ${x+9} 248 Z" fill="#e8742a"/><path d="M${x-5} 248 Q${x-5} 240 ${x-1} 234 Q${x+1} 240 ${x+3} 230 Q${x+6} 240 ${x+5} 248 Z" fill="#ffc35a"/></g></g>`;
   return `<svg class="sbg" viewBox="0 0 400 310" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><defs>`+
-    `<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d1426"/><stop offset=".42" stop-color="#1b2130"/><stop offset=".7" stop-color="#4a3328"/><stop offset=".8" stop-color="#8a4a24"/><stop offset="1" stop-color="#2a1810"/></linearGradient>`+
+    `<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5f9be0"/><stop offset=".5" stop-color="#a9cdf0"/><stop offset=".8" stop-color="#e2ecf2"/><stop offset="1" stop-color="#c8d8b0"/></linearGradient>`+
     `<radialGradient id="mg"><stop offset="0" stop-color="#e9e4d4" stop-opacity=".35"/><stop offset="1" stop-color="#e9e4d4" stop-opacity="0"/></radialGradient>`+
     `<radialGradient id="fg"><stop offset="0" stop-color="#ff8a3a" stop-opacity=".45"/><stop offset="1" stop-color="#ff8a3a" stop-opacity="0"/></radialGradient>`+
     `<linearGradient id="fog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9b8a3" stop-opacity="0"/><stop offset=".6" stop-color="#c9b8a3" stop-opacity=".12"/><stop offset="1" stop-color="#c9b8a3" stop-opacity="0"/></linearGradient>`+
-    `<linearGradient id="gnd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2c22"/><stop offset=".35" stop-color="#2a2019"/><stop offset="1" stop-color="#110d0b"/></linearGradient>`+
-    `<radialGradient id="arena" cx=".5" cy=".3" r=".6"><stop offset="0" stop-color="#6b513b" stop-opacity=".45"/><stop offset="1" stop-color="#6b513b" stop-opacity="0"/></radialGradient>`+
-    `<radialGradient id="vig" cx=".5" cy=".55" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></radialGradient></defs>`+
-    `<rect width="400" height="310" fill="url(#sky)"/><path class="aur" d="M-10 70 C60 40 120 95 190 60 C260 25 320 80 410 45 L410 75 C330 110 260 60 190 95 C120 125 60 75 -10 105 Z" fill="#3ee8a0" opacity=".14"/><path class="aur" d="M-10 52 C80 30 140 70 220 44 C290 22 350 55 410 34 L410 50 C340 72 290 42 220 66 C140 92 80 52 -10 76 Z" fill="#7affc8" opacity=".09"/>${stars}<circle cx="318" cy="56" r="60" fill="url(#mg)"/><circle cx="318" cy="56" r="15" fill="#e9e2cf"/><circle cx="313" cy="52" r="3" fill="#cfc6b0" opacity=".6"/><circle cx="322" cy="61" r="2" fill="#cfc6b0" opacity=".5"/>`+
-    `<path d="M0 196 L38 150 L62 168 L104 118 L132 146 L168 104 L206 150 L238 128 L276 160 L312 112 L352 150 L400 126 L400 230 L0 230 Z" fill="#262b38"/>`+
-    `<path d="M92 132 L104 118 L114 128 L106 126 L100 133 Z M158 114 L168 104 L178 116 L170 113 L164 118 Z M302 122 L312 112 L322 124 L314 120 L308 126 Z" fill="#a7aebb" opacity=".55"/>`+
+    `<linearGradient id="gnd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7aa34e"/><stop offset=".35" stop-color="#6a9444"/><stop offset="1" stop-color="#4f7a34"/></linearGradient>`+
+    `<radialGradient id="arena" cx=".5" cy=".3" r=".6"><stop offset="0" stop-color="#d6ab6a" stop-opacity="1"/><stop offset=".75" stop-color="#c49a5e" stop-opacity=".9"/><stop offset="1" stop-color="#c49a5e" stop-opacity="0"/></radialGradient>`+
+    `<radialGradient id="vig" cx=".5" cy=".55" r=".75"><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></radialGradient></defs>`+
+    `<rect width="400" height="310" fill="url(#sky)"/><circle cx="318" cy="50" r="46" fill="#fff6c8" opacity=".35"/><circle cx="318" cy="50" r="16" fill="#fff4b0"/><g fill="#fff" opacity=".85"><ellipse cx="60" cy="40" rx="38" ry="12.2"/><ellipse cx="46.7" cy="33.2" rx="17.1" ry="11.4"/><ellipse cx="69.5" cy="31.6" rx="19.0" ry="12.9"/></g><g fill="#fff" opacity=".85"><ellipse cx="150" cy="26" rx="28" ry="9.0"/><ellipse cx="140.2" cy="21.0" rx="12.6" ry="8.4"/><ellipse cx="157.0" cy="19.8" rx="14.0" ry="9.5"/></g><g fill="#fff" opacity=".85"><ellipse cx="230" cy="62" rx="30" ry="9.6"/><ellipse cx="219.5" cy="56.6" rx="13.5" ry="9.0"/><ellipse cx="237.5" cy="55.4" rx="15.0" ry="10.2"/></g><g fill="#fff" opacity=".85"><ellipse cx="370" cy="30" rx="26" ry="8.3"/><ellipse cx="360.9" cy="25.3" rx="11.7" ry="7.8"/><ellipse cx="376.5" cy="24.3" rx="13.0" ry="8.8"/></g>`+
+    `<path d="M0 196 L38 150 L62 168 L104 118 L132 146 L168 104 L206 150 L238 128 L276 160 L312 112 L352 150 L400 126 L400 230 L0 230 Z" fill="#7d8ca8"/>`+
+    `<path d="M92 132 L104 118 L114 128 L106 126 L100 133 Z M158 114 L168 104 L178 116 L170 113 L164 118 Z M302 122 L312 112 L322 124 L314 120 L308 126 Z" fill="#ffffff" opacity=".9"/>`+
     `<rect y="160" width="400" height="70" fill="url(#fog)"/>`+
-    `<path d="M0 222 L50 196 L96 214 L150 186 L206 210 L262 190 L318 214 L366 194 L400 206 L400 250 L0 250 Z" fill="#17151a"/>`+
-    `<path d="${pines}" fill="#0f0c0c"/>`+
-    `<path d="M22 246 L22 226 L50 210 L78 226 L78 246 Z" fill="#0c0a09"/><path d="M18 228 L50 206 L82 228" stroke="#0c0a09" stroke-width="4" fill="none"/><rect x="44" y="232" width="6" height="7" fill="#e07a33" opacity=".85"/>`+
-    `<path d="${posts}" fill="#14100d"/>`+
+    `<path d="M0 222 L50 196 L96 214 L150 186 L206 210 L262 190 L318 214 L366 194 L400 206 L400 250 L0 250 Z" fill="#5d8a46"/>`+
+    `<path d="${pines}" fill="#2f5a2c"/>`+
+    `<path d="M22 246 L22 226 L50 210 L78 226 L78 246 Z" fill="#7a5634"/><path d="M18 228 L50 206 L82 228" stroke="#4a3020" stroke-width="4" fill="none"/><rect x="44" y="232" width="6" height="7" fill="#e07a33" opacity=".85"/>`+
+    `<path d="${posts}" fill="#7a5a3a"/>`+
     `<rect y="250" width="400" height="60" fill="url(#gnd)"/><ellipse cx="200" cy="282" rx="190" ry="30" fill="url(#arena)"/>${rocks}`+
     `${brazier(26)}${brazier(374)}<rect width="400" height="310" fill="url(#vig)"/></svg>`;
 }
@@ -2817,39 +2817,6 @@ async function bustCanvas(h,w,hh){
   g3render([{J,M:M4.I(),des:false}],{l:-w/(2*k),r:w/(2*k),b:y0,t:y1},w,hh);
   const c=document.createElement('canvas'); c.width=w; c.height=hh; c.getContext('2d').drawImage(G3.cv,0,0); return c;
 }
-/* ---- 3D 결투장: 땅, 산, 숲, 롱하우스, 화톳불, 바위 (픽셀 단위 월드, 무대 바닥 = gy) ---- */
-function arena3d(W,gy){
-  const root=N3(null), rnd=(a,b)=>a+Math.random()*(b-a), E={met:2};
-  add3(root,box('#6f9a42',W/2,gy-20,-12000,W*80,40,40000));                 // 땅
-  const ar=add3(root,N3(MS.lathe([[0,1],[1,1]],0.02,1),'#c49a5e')); ar.T=[W/2,gy+0.5,0]; ar.S=[W*0.66,1,W*0.32];   // 결투장 흙바닥
-  const ar2=add3(root,N3(MS.lathe([[0,1],[1,1]],0.02,1),'#d4ab6c')); ar2.T=[W/2,gy+0.8,0]; ar2.S=[W*0.42,1,W*0.18];
-  // 흙 얼룩, 핏자국, 풀 덤불, 돌
-  for(let i=0;i<26;i++){ const d=add3(root,N3(MS.lathe([[0,1],[1,1]],0.02,1),i%5?'#a8814c':'#7a2a1e')); d.T=[W/2+rnd(-W*1.5,W*1.5),gy+0.3,rnd(-500,250)]; d.S=[rnd(15,60),1,rnd(8,30)]; }
-  for(let i=0;i<70;i++){ const x=W/2+rnd(-W*2.5,W*2.5), z=rnd(-1400,300); if(Math.abs(x-W/2)<W*0.5&&z>-300) continue; for(let k=0;k<4;k++){ const bl=add3(root,box(k%2?'#5e8a34':'#4a7228',x+rnd(-6,6),gy+7,z+rnd(-4,4),2,16,2)); bl.R=[rnd(-0.4,0.4),0,rnd(-0.5,0.5)]; } }
-  for(let i=0;i<40;i++){ const x=W/2+rnd(-W*1.8,W*1.8), z=rnd(-300,320), r=rnd(3,10); add3(root,sph(i%3?'#8a8478':'#9e978a',x,gy+r*0.25,z,r,r*0.55,r*0.8)); }
-  // 울타리 말뚝 + 방패 + 해골 꽂힌 창
-  for(let i=0;i<46;i++){ const x=W/2-W*2.2+i*W*0.1; if(Math.abs(x-W/2)<W*0.38) continue; const h=rnd(42,58); add3(root,cyl('#7a5a3a',x,gy+h/2,-620,5,h)); add3(root,N3(MS.lathe([[0,0.001],[1,5]],8,2),'#7a5a3a')).T=[x,gy+h+8,-620];
-    if(i%4===1){ const sh=add3(root,cyl(['#8a2a1e','#2a4a7a','#c8a040','#5a2a5a'][i%4===1?(i>>2)%4:0],x+5,gy+h*0.55,-612,13,3)); sh.R=[Math.PI/2,0,0]; add3(root,sph('#9a9a9a',x+5,gy+h*0.55,-609,3,3,2,{met:1})); } }
-  [[-0.5,-560],[0.55,-580],[-1.2,-700],[1.3,-650]].forEach(([dx,z])=>{ const x=W/2+dx*W; add3(root,cyl('#4a3a2a',x,gy+45,z,2.5,90)); add3(root,sph('#d9d0bc',x,gy+96,z,9,10,9)); add3(root,sph('#1a1410',x-3,gy+97,z+7,2.2,2.6,1)); add3(root,sph('#1a1410',x+3,gy+97,z+7,2.2,2.6,1)); });
-  // 화톳불 (빛나는 불꽃)
-  [-1,1].forEach(sd=>{ const x=W/2+sd*W*0.62, z=-140; add3(root,cyl('#1a1410',x,gy+26,z,3,52)); add3(root,N3(MS.lathe([[0,14],[1,8]],12,2),'#2a211a')).T=[x,gy+58,z];
-    add3(root,sph('#ff6a1a',x,gy+72,z,12,22,12,E)); add3(root,sph('#ffd060',x,gy+67,z,6,13,6,E));
-    const gl=add3(root,N3(MS.lathe([[0,1],[1,1]],0.02,1),'#b07a40')); gl.T=[x,gy+1,z]; gl.S=[90,1,50]; });
-  // 숲
-  for(let i=0;i<220;i++){ const x=W/2+rnd(-W*22,W*22), z=rnd(-14000,-5000), h=rnd(160,360); add3(root,cyl('#5a3e26',x,gy+h*0.12,z,6,h*0.24));
-    const t=add3(root,N3(MS.lathe([[0,0.001],[0.5,h*0.2],[1,h*0.28]],h,4),i%3?'#2e5a2a':'#3a6a32')); t.T=[x,gy+h*1.1,z]; }
-  // 마을: 롱하우스 여러 채, 불 켜진 창, 지붕 위 연기
-  [[-1.4,-1400],[1.6,-1700],[-3,-2200],[2.9,-2500],[0.2,-3000]].forEach(([dx,z],k)=>{ const x=W/2+dx*W, L=rnd(220,300);
-    add3(root,box('#7a5634',x,gy+40,z,L,80,120)); const rf=add3(root,box('#5a3a22',x,gy+105,z+35,L+20,14,140)); rf.R=[-0.6,0,0]; const rb=add3(root,box('#5a3a22',x,gy+105,z-35,L+20,14,140)); rb.R=[0.6,0,0];
-    for(let w=0;w<3;w++) add3(root,box('#ffa040',x-L*0.3+w*L*0.3,gy+46,z+61,14,16,2,E));
-    add3(root,box('#140e08',x,gy+30,z+61,26,50,2));
-    add3(root,cyl('#1a120c',x+L*0.3,gy+140,z,7,40)); });
-  // 산
-  for(let i=0;i<9;i++){ const x=W/2+(i-4)*W*6+rnd(-600,600), z=rnd(-30000,-24000), h=rnd(5000,8000), r=h*rnd(0.9,1.3);
-    const mt=add3(root,N3(MS.lathe([[0,0.001],[0.18,r*0.17],[1,r]],h,6),'#6a7a94')); mt.T=[x,gy-60+h,z];
-    const sn=add3(root,N3(MS.lathe([[0,0.001],[1,r*0.19]],h*0.19,3),'#f2f5fa')); sn.T=[x,gy-60+h+2,z]; }
-  return root;
-}
 function battle3d(now){
   const cv=$('#st3d'), st=$('#stage'); if(!cv||!st||!ui.rep) return;
   const W=st.clientWidth, Hs=st.clientHeight; if(W<80||Hs<120) return; // 화면이 숨겨진 동안엔 그리지 않음
@@ -2927,15 +2894,9 @@ function battle3d(now){
     pose3(J,fighterAngles3(f,now),0);
     figs.push({J,M:M4.mul(M4.mul(M4.T(x,ybot,0),M4.RZ(roll)),M4.S(s,s*sya,s)),des:ko,roll});
   });
-  // 3D 배경 + 카메라: 높고 먼 곳에서 스윽 내려와 지금의 결투 각도로 다가감
-  const gy=ui.b3.gy??(ui.b3.gy=(ui.b3.yA??Hs*0.06)); if(!ui.b3.world||ui.b3.wW!==W){ ui.b3.world=arena3d(W,gy); ui.b3.wW=W; }
-  figs.unshift({J:{root:ui.b3.world,noHead:true},M:M4.I(),des:false});
-  let u=1; if(ui.intro){ u=Math.min(1,(now-ui.intro.t0)/ui.intro.D); if(u>=1&&now-ui.intro.t0>ui.intro.D+50) ui.intro=null; }
-  const e=1-Math.pow(1-u,2.4), Dz=2600, lerp=(a,b)=>a+(b-a)*e;
-  const eye=[W/2+lerp(-W*0.5,0),lerp(Hs*0.5+1500,Hs*0.5),lerp(Dz+3600,Dz)], tgt=[W/2,lerp(gy,Hs*0.5),lerp(-300,0)];
-  const fov=2*Math.atan(Hs/2/Dz), PV=M4.mul(M4.persp(fov,W/Hs,40,90000),M4.look(eye,tgt,[0,1,0]));
-  const sbg=st.querySelector('.sbg'); if(sbg&&!sbg._sky){ sbg._sky=1; sbg.innerHTML='<defs><linearGradient id="dsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5f9be0"/><stop offset=".6" stop-color="#a9cdf0"/><stop offset="1" stop-color="#dfeaf2"/></linearGradient></defs><rect width="400" height="310" fill="url(#dsky)"/>'+[[60,40,38],[150,26,28],[300,48,44],[370,22,24],[230,70,30]].map(([x,y,r])=>`<g fill="#fff" opacity=".85"><ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r*0.32}"/><ellipse cx="${x-r*0.35}" cy="${y-r*0.18}" rx="${r*0.45}" ry="${r*0.3}"/><ellipse cx="${x+r*0.25}" cy="${y-r*0.22}" rx="${r*0.5}" ry="${r*0.34}"/></g>`).join(''); }
-  g3render(figs,{PV},cw,ch);
+  // 시작 질주: 카메라가 멀리서 점점 다가감 (정사영이라 사람이 화면을 뚫고 커지는 일이 없음)
+  let Z=1; if(ui.intro){ const u=Math.min(1,(now-ui.intro.t0)/ui.intro.D); Z=1+1.3*Math.pow(1-u,1.4); if(u>=1&&now-ui.intro.t0>ui.intro.D+50) ui.intro=null; }
+  g3render(figs,{l:W/2-W/2*Z,r:W/2+W/2*Z,b:0,t:Hs*Z},cw,ch);
   const ctx=cv.getContext('2d'); ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cw,ch); ctx.drawImage(G3.cv,0,0);
 }
 function g3frame(now){
