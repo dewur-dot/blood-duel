@@ -2560,8 +2560,10 @@ function battle3d(now){
         figs.push({J:{root:P.n,noHead:true},M:M4.mul(M4.mul(M4.T(P.x,y0+P.y,0),M4.RZ(P.rot)),M4.S(s,s,s)),des:false}); });
       return;
     }
-    const x=f.offsetLeft+sw*cxr+fm.e+am.e, ybot=Hs-(f.offsetTop+f.offsetHeight)+L.ground*hpx-(fm.f+am.f);
-    const roll=-Math.atan2(am.b,am.a), sxa=Math.hypot(am.a,am.b)||1, sya=(am.a*am.d-am.b*am.c)/sxa||1;
+    const crawl3=f.classList.contains('feral')&&f.classList.contains('run');
+    const x=f.offsetLeft+sw*cxr+fm.e+am.e, ybot=Hs-(f.offsetTop+f.offsetHeight)+L.ground*hpx-(fm.f+(crawl3?0:am.f));
+    // 네발 기기(지능 10 이하)는 2D용 기울임 애니메이션을 3D 몸에 적용하지 않음: 3D 자세가 직접 엎드려 김
+    const roll=crawl3?0:-Math.atan2(am.b,am.a), sxa=Math.hypot(am.a,am.b)||1, sya=crawl3?1:((am.a*am.d-am.b*am.c)/sxa||1);
     pose3(J,fighterAngles3(f,now),0);
     figs.push({J,M:M4.mul(M4.mul(M4.T(x,ybot,0),M4.RZ(roll)),M4.S(s,s*sya,s)),des:ko,roll});
   });
@@ -2636,7 +2638,7 @@ function fighterAngles3(f,now){
   if(c.contains('run')){
     if((+f.dataset.int||50)<=10){
       const ph=t*2*Math.PI/.7, s=Math.sin(ph);
-      return {a0:-118+20*s,a1:-118-20*s,e0:-18,e1:-18,l0:-32-16*s,l1:-32+16*s,k0:64+14*s,k1:64-14*s,ln:68,tw:5*s,by:.012*Math.abs(s)};
+      return {a0:-112+16*s,a1:-112-16*s,e0:-12,e1:-12,z:4,l0:-6-12*s,l1:-6+12*s,k0:84+10*s,k1:84-10*s,ln:76,tw:5*s};
     }
     const ph=t*2*Math.PI/0.95, s=Math.sin(ph);
     return {a0:22*s,a1:-22*s,e0:-22-14*Math.max(0,s),e1:-22-14*Math.max(0,-s),l0:-28*s,l1:28*s,k0:40*Math.max(0,Math.sin(ph-1.1)),k1:40*Math.max(0,Math.sin(ph-1.1+Math.PI)),z:4,ln:7,tw:7*s};
