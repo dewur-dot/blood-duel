@@ -27,6 +27,47 @@
   };
   const clearLink=()=>{ try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){} };
 
+  const xml=value=>String(value??'').replace(/[&<>"']/g,char=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'
+  })[char]);
+  async function profileShareFile(hero){
+    if(typeof File==='undefined'||typeof drawPortrait!=='function') return null;
+    const portrait=drawPortrait(hero,false).replace('<svg ','<svg x="54" y="88" width="340" height="425" ');
+    const stats=hero.st||{};
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+      <defs>
+        <radialGradient id="bg" cx="35%" cy="20%" r="85%"><stop stop-color="#3b281c"/><stop offset="1" stop-color="#0e0d0c"/></radialGradient>
+        <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#28211c"/><stop offset="1" stop-color="#171310"/></linearGradient>
+      </defs>
+      <rect width="1200" height="630" fill="url(#bg)"/>
+      <rect x="28" y="28" width="1144" height="574" rx="18" fill="none" stroke="#6a594a" stroke-width="3"/>
+      <rect x="54" y="88" width="340" height="425" rx="8" fill="url(#panel)" stroke="#9a8069" stroke-width="3"/>
+      ${portrait}
+      <text x="450" y="100" fill="#d8762a" font-size="28" font-weight="700" font-family="serif" letter-spacing="7">피의 결투장</text>
+      <text x="450" y="180" fill="#f0e6d2" font-size="58" font-weight="800" font-family="serif">${xml(hero.name)}</text>
+      <text x="450" y="225" fill="#d8762a" font-size="27" font-weight="700" font-family="sans-serif">${xml(hero.nick||'이름 없는 전사')}</text>
+      <line x1="450" y1="258" x2="1110" y2="258" stroke="#5a5046" stroke-width="2"/>
+      <text x="450" y="315" fill="#aaa090" font-size="25" font-family="sans-serif">신장</text><text x="610" y="315" fill="#f0e6d2" font-size="31" font-weight="700" font-family="sans-serif">${xml(hero.cm)} cm</text>
+      <text x="790" y="315" fill="#aaa090" font-size="25" font-family="sans-serif">전적</text><text x="920" y="315" fill="#f0e6d2" font-size="31" font-weight="700" font-family="sans-serif">${xml(hero.wins||0)} 승</text>
+      <text x="450" y="380" fill="#aaa090" font-size="25" font-family="sans-serif">체력</text><text x="610" y="380" fill="#f0e6d2" font-size="31" font-weight="700" font-family="sans-serif">${xml(hero.maxhp||stats.hp||0)}</text>
+      <text x="790" y="380" fill="#aaa090" font-size="25" font-family="sans-serif">힘</text><text x="920" y="380" fill="#f0e6d2" font-size="31" font-weight="700" font-family="sans-serif">${xml(stats.str||0)}</text>
+      <text x="450" y="445" fill="#aaa090" font-size="25" font-family="sans-serif">속도</text><text x="610" y="445" fill="#f0e6d2" font-size="31" font-weight="700" font-family="sans-serif">${xml(stats.spd||0)}</text>
+      <text x="790" y="445" fill="#aaa090" font-size="25" font-family="sans-serif">맷집</text><text x="920" y="445" fill="#f0e6d2" font-size="31" font-weight="700" font-family="sans-serif">${xml(stats.def||0)}</text>
+      <rect x="450" y="490" width="660" height="70" rx="8" fill="#8d2018" stroke="#df6b3d" stroke-width="2"/>
+      <text x="780" y="536" text-anchor="middle" fill="#fff4e8" font-size="28" font-weight="800" font-family="sans-serif">결투할 것인가, 도주할 것인가</text>
+    </svg>`;
+    const image=new Image();
+    const source=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
+    try{
+      await new Promise((resolve,reject)=>{ image.onload=resolve; image.onerror=reject; image.src=source; });
+      const canvas=document.createElement('canvas'); canvas.width=1200; canvas.height=630;
+      canvas.getContext('2d').drawImage(image,0,0);
+      const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png',.92));
+      return blob?new File([blob],`${String(hero.name||'blood-duel').replace(/[^\w가-힣-]+/g,'-')}-결투장.png`,{type:'image/png'}):null;
+    }catch(_){ return null; }
+    finally{ URL.revokeObjectURL(source); }
+  }
+
   async function send(copyOnly){
     if(!S.hero){ say('먼저 전사를 만들어 주세요.'); return; }
     if(sending) return;
@@ -50,9 +91,18 @@
       }
       remember(ref.id);
       const link=baseUrl()+'#duel-id='+ref.id;
-      const message=`⚔ ${S.hero.name}의 결투 신청`+(ui.letter?`\n\n"${ui.letter}"`:'')+`\n\n${link}`;
+      const intro=`⚔ ${S.hero.name}의 결투 신청`+(ui.letter?`\n\n"${ui.letter}"`:'');
+      const message=intro+`\n\n${link}`;
       if(!copyOnly&&navigator.share){
-        try{ await navigator.share({title:'피의 결투',text:message}); say('결투장을 보냈습니다. 상대의 선택은 이 기기에서 게임을 다시 열면 확인할 수 있습니다.'); return; }
+        try{
+          const file=await profileShareFile(S.hero);
+          const payload=file&&navigator.canShare&&navigator.canShare({files:[file]})
+            ?{title:'피의 결투',text:intro,url:link,files:[file]}
+            :{title:'피의 결투',text:message};
+          await navigator.share(payload);
+          say(file&&payload.files?'전사 프로필과 결투장을 보냈습니다. 상대의 선택은 이 기기에서 게임을 다시 열면 확인할 수 있습니다.':'결투장을 보냈습니다. 상대의 선택은 이 기기에서 게임을 다시 열면 확인할 수 있습니다.');
+          return;
+        }
         catch(error){ if(error&&error.name==='AbortError'){ say('공유를 취소했습니다. 결투장은 생성되어 있습니다.'); return; } }
       }
       try{ await navigator.clipboard.writeText(copyOnly?link:message); say('결투 링크를 복사했습니다. 카카오톡에 붙여넣어 보내세요.'); }

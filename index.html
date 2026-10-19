@@ -1,4 +1,20 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <title>피의 결투</title>
+<meta name="description" content="전사를 만들어 친구에게 결투장을 던져라. 도망칠 것인가, 피를 볼 것인가.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="피의 결투">
+<meta property="og:title" content="피의 결투장이 날아왔다">
+<meta property="og:description" content="도전자의 전사를 확인하고 결투하거나 도주하세요.">
+<meta property="og:url" content="https://dewur-dot.github.io/blood-duel/">
+<meta property="og:image" content="https://dewur-dot.github.io/blood-duel/share-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0E0D0C">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <style>
@@ -23,6 +39,8 @@ body{
   padding-left:max(16px,env(safe-area-inset-left,0px));
   padding-right:max(16px,env(safe-area-inset-right,0px));
   min-height:100vh;
+  min-height:100dvh;
+  margin:0;
 }
 #app{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 button{font:inherit;color:inherit;cursor:pointer}
@@ -349,7 +367,27 @@ canvas.v3d{display:block}
 .figbox.shout .scream{animation:scr 1.6s ease-out}
 .sbg .flame{transform-box:fill-box;transform-origin:50% 100%;animation:flick .22s ease-in-out infinite alternate}
 @keyframes flick{0%{transform:scale(1,1) skewX(0)}50%{transform:scale(.92,1.08) skewX(3deg)}100%{transform:scale(1.05,.94) skewX(-3deg)}}
+@media (max-width:600px){
+  body{
+    font-size:16px;
+    padding-top:max(12px,env(safe-area-inset-top,0px));
+    padding-bottom:max(32px,env(safe-area-inset-bottom,0px));
+    padding-left:max(12px,env(safe-area-inset-left,0px));
+    padding-right:max(12px,env(safe-area-inset-right,0px));
+  }
+  #app{width:100%;max-width:none;gap:14px}
+  .card{padding:16px}
+  .brand{font-size:21px}
+  .top{position:sticky;top:0;z-index:20;background:rgba(14,13,12,.94);padding-top:4px;backdrop-filter:blur(8px)}
+  .bigroll{width:min(72vw,310px)}
+  .btn{min-height:52px;font-size:17px}
+  .fightbig{min-height:108px}
+  .stage{height:min(54vh,430px)}
+  .invp .portrait{width:min(82%,320px)}
+}
 </style>
+</head>
+<body>
 
 <main id="app"></main>
 
@@ -2630,3 +2668,5 @@ requestAnimationFrame(animTick);
 render();
 </script>
 <script src="./online.js"></script>
+</body>
+</html>
