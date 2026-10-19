@@ -52,7 +52,7 @@
       <text x="450" y="380" fill="#aaa090" font-size="25" font-family="sans-serif">체력</text><text x="610" y="380" fill="#f0e6d2" font-size="31" font-weight="700" font-family="sans-serif">${xml(hero.maxhp||stats.hp||0)}</text>
       <text x="790" y="380" fill="#aaa090" font-size="25" font-family="sans-serif">힘</text><text x="920" y="380" fill="#f0e6d2" font-size="31" font-weight="700" font-family="sans-serif">${xml(stats.str||0)}</text>
       <text x="450" y="445" fill="#aaa090" font-size="25" font-family="sans-serif">속도</text><text x="610" y="445" fill="#f0e6d2" font-size="31" font-weight="700" font-family="sans-serif">${xml(stats.spd||0)}</text>
-      <text x="790" y="445" fill="#aaa090" font-size="25" font-family="sans-serif">맷집</text><text x="920" y="445" fill="#f0e6d2" font-size="31" font-weight="700" font-family="sans-serif">${xml(stats.def||0)}</text>
+      <text x="790" y="445" fill="#aaa090" font-size="25" font-family="sans-serif">지능</text><text x="920" y="445" fill="#f0e6d2" font-size="31" font-weight="700" font-family="sans-serif">${xml(stats.int||50)}</text>
       <rect x="450" y="490" width="660" height="70" rx="8" fill="#8d2018" stroke="#df6b3d" stroke-width="2"/>
       <text x="780" y="536" text-anchor="middle" fill="#fff4e8" font-size="28" font-weight="800" font-family="sans-serif">결투할 것인가, 도주할 것인가</text>
     </svg>`;

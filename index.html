@@ -138,8 +138,8 @@ details .sheet{margin-top:10px}
 .ember-p{position:absolute;bottom:20px;width:3px;height:3px;border-radius:50%;background:var(--ember);opacity:0;z-index:1;animation:rise 5s linear infinite}
 @keyframes rise{0%{transform:translate(0,0);opacity:0}15%{opacity:.9}100%{transform:translate(var(--dx,20px),-240px);opacity:0}}
 .fighter{position:absolute;bottom:14px;width:38%;transition:left 2.8s cubic-bezier(.35,0,.4,1);z-index:2}
-.fighter.a{--d:1}
-.fighter.b{--d:-1}
+.fighter.a{--d:1;--crawl:58deg;--crawl2:64deg}
+.fighter.b{--d:-1;--crawl:-58deg;--crawl2:-64deg}
 .act{transform-origin:50% 100%}
 .flip svg{display:block;width:100%;height:auto}
 .fighter.b .flip{transform:scaleX(-1)}
@@ -160,6 +160,8 @@ details .sheet{margin-top:10px}
 @keyframes walkB{from{transform:rotate(28deg)}to{transform:rotate(-28deg)}}
 .fighter.run .act{animation:bob .55s ease-in-out infinite alternate}
 @keyframes bob{from{transform:translateY(0) rotate(1.5deg)}to{transform:translateY(-5px) rotate(-1.5deg)}}
+.fighter.feral.run .act{transform-origin:50% 92%;animation:feralCrawl .42s ease-in-out infinite alternate}
+@keyframes feralCrawl{from{transform:translateY(18%) rotate(var(--crawl)) scale(.88)}to{transform:translateY(22%) rotate(var(--crawl2)) scale(.88)}}
 /* 대치 자세 */
 @keyframes sway{from{transform:translateY(0)}to{transform:translateY(-4px)}}
 @keyframes guardA{from{transform:rotate(-48deg)}to{transform:rotate(-62deg)}}
@@ -647,7 +649,7 @@ const SGROUPS=[
   ['공격',[['str','근력'],['acc','명중'],['crit','치명타'],['reach','리치']]],
   ['방어',[['def','맷집'],['dodge','회피'],['reflex','반사신경'],['bal','균형감'],['guts','근성']]],
   ['기술',[['punch','주먹'],['kick','발차기'],['head','박치기'],['slam','몸통박치기']]],
-  ['운',[['luck','운']]]
+  ['정신',[['int','지능'],['luck','운']]]
 ];
 const SKEYS=SGROUPS.flatMap(g=>g[1].map(x=>x[0]));
 const wpick=l=>{ const t=l.reduce((a,x)=>a+x[1],0); let r=Math.random()*t; for(const x of l){ r-=x[1]; if(r<0) return x[0]; } return l[0][0]; };
@@ -739,6 +741,7 @@ function calcStats(g){
     reflex:cl(25+p.eyeSize*1.5+p.eyeSpace+RI(-10,30)-6*L(k)),
     bal:cl(45+12*L(lM)-12*L(hM)-8*L(k)+n()-mL*15+F*5),
     guts:cl(RI(5,70)+p.brow*2+F*8),
+    int:RI(1,100),
     luck:RI(1,99),
     punch:cl(str*0.7+reach*0.3+RI(-8,8)-mA*8),
     kick:cl(str*0.45+dodge*0.3+20*L(lM)+10+RI(-8,8)-mL*20),
@@ -773,12 +776,13 @@ function makeNick(g){
 }
 function newHero(){
   const sex=Math.random()<0.45?'f':'m', eth=wpick(ETHW), g=newGenes(sex,eth), c=calcStats(g), nm=[makeName(sex,eth),''];
-  return {id:uid(),name:nm[0],flag:nm[1],nick:makeNick(g),g,st:c.st,cm:c.cm,kg:c.kg,hp:c.st.hp,maxhp:c.st.hp,wins:0,weapon:null,outfit:{top:0,bottom:0,boots:0,fur:0,helm:0},tags:makeTags(g)};
+  const tags=makeTags(g); if(c.st.int<=10) tags.push(['야수 지능 · 네발 보행',1]);
+  return {id:uid(),name:nm[0],flag:nm[1],nick:makeNick(g),g,st:c.st,cm:c.cm,kg:c.kg,hp:c.st.hp,maxhp:c.st.hp,wins:0,weapon:null,outfit:{top:0,bottom:0,boots:0,fur:0,helm:0},tags};
 }
 // 이길 때마다 고정값으로 성장. 연승 보너스: 5연승마다 오름폭 +2, 5·10·15…연승 달성 시 전 능력치 +5
 function grow(h){
   const gain={}, streak=h.wins+1, bonus=Math.floor(streak/5)*2;
-  const add=(k,v)=>{ const nv=Math.min(9999,Math.round(h.st[k]+v)); gain[k]=(gain[k]||0)+nv-h.st[k]; h.st[k]=nv; };
+  const add=(k,v)=>{ const nv=Math.min(k==='int'?100:9999,Math.round(h.st[k]+v)); gain[k]=(gain[k]||0)+nv-h.st[k]; h.st[k]=nv; };
   const keys=SKEYS.filter(k=>k!=='hp'&&k!=='luck'&&k!=='str').sort(()=>Math.random()-0.5).slice(0,6);
   add('str',RI(3,5)+bonus);
   keys.forEach(k=>add(k,RI(2,4)+bonus));
@@ -1888,6 +1892,9 @@ function saveState(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e
 let S=Object.assign({hero:null,yard:[],fights:0,board:[],seeded:false,flag:'',duels:[],handledDuels:[]},loadState());
 if(!Array.isArray(S.duels)) S.duels=[];
 if(!Array.isArray(S.handledDuels)) S.handledDuels=[];
+let intMigrated=false;
+const ensureInt=h=>{ if(h&&h.st&&!Number.isFinite(h.st.int)){ h.st.int=RI(1,100); intMigrated=true; } if(h&&h.st&&h.st.int<=10&&Array.isArray(h.tags)&&!h.tags.some(t=>t[0]==='야수 지능 · 네발 보행')) h.tags.push(['야수 지능 · 네발 보행',1]); };
+ensureInt(S.hero); if(Array.isArray(S.board)) S.board.forEach(ensureInt); if(intMigrated) saveState();
 if(!S.flag&&S.hero&&S.hero.flag&&FLAGS.includes(S.hero.flag)) S.flag=S.hero.flag;
 let view=S.hero?'card':'home';
 let ui={shop:false,rolling:false,rep:null,code:'',timer:null,detail:null,msg:''};
@@ -1964,7 +1971,7 @@ function bar(v,cap){ const M=cap>200?30000:2500; return Math.max(2,Math.min(100,
 function statSheet(h){
   return `<div class="sheet">`+SGROUPS.map(([gn,rows])=>
     `<div class="sgrp"><h3>${gn}</h3>`+rows.map(([k,l])=>
-      `<div class="srow"><span>${l}</span><i><b style="width:${bar(h.st[k],k==='hp'?250:99)}%"></b></i><em>${h.st[k]}</em></div>`).join('')+`</div>`).join('')+`</div>`;
+      `<div class="srow"><span>${l}</span><i><b style="width:${bar(h.st[k],k==='hp'?250:k==='int'?100:99)}%"></b></i><em>${h.st[k]}</em></div>`).join('')+`</div>`).join('')+`</div>`;
 }
 const BMAP={build:M.build,headSize:M.head,shoulder:M.sh,armLen:M.arm,legLen:M.leg,neck:M.neck};
 function looksSheet(h){
@@ -2080,7 +2087,7 @@ const flg=h=>h&&h.flag?flagSvg(h.flag)+' ':'';
 const isFlag=f=>/^[\u{1F1E6}-\u{1F1FF}]{2}$/u.test(f||'');
 const ARTIFACT_URL='https://claude.ai/artifact/5TPAbwznvYPonbH9Njr5MJ';
 function baseUrl(){ try{ const l=location; if((l.protocol==='https:'||l.protocol==='http:')&&!/claude\.(ai|site)|claudeusercontent/.test(l.hostname)) return l.origin+l.pathname; }catch(e){} return ARTIFACT_URL; }
-const STK=['hp','sta','spd','str','acc','crit','reach','def','dodge','reflex','bal','guts','luck','punch','kick','head','slam'];
+const STK=['hp','sta','spd','str','acc','crit','reach','def','dodge','reflex','bal','guts','luck','punch','kick','head','slam','int'];
 const b64=str=>btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const unb64=str=>{ const b=str.replace(/-/g,'+').replace(/_/g,'/'); return decodeURIComponent(escape(atob(b+'==='.slice((b.length+3)%4)))); };
 const hx=c=>String(c).replace('#','');
@@ -2100,7 +2107,7 @@ function unpackDuel(str){
     const o=JSON.parse(unb64(str)); if(!Array.isArray(o)||o.length<25) return null;
     const [n,k,cm,kg,wins,pp,skin,ec,hc,hs,bd,scar,tat,tun,pan,fur,ap,lp,ok,bl,of,wk,stv,hp0,letter]=o;
     const p={}; PKEYS.forEach((key,i)=>{ const c=pp[i]; p[key]=c==='a'?10:cl(+c||5,1,10); });
-    const sv=String(stv).split('.'), st={}; STK.forEach((key,i)=>{ st[key]=cl(+sv[i]||1,1,key==='hp'?4000:199); });
+    const sv=String(stv).split('.'), st={}; STK.forEach((key,i)=>{ const v=+sv[i]; st[key]=cl(Number.isFinite(v)&&v>0?v:(key==='int'?50:1),1,key==='hp'?4000:key==='int'?100:199); });
     const col=c=>/^[0-9a-fA-F]{6}$/.test(c)?'#'+c:'#888888';
     const pose=(x,lo,hi)=>String(x).split('.').slice(0,2).map(v=>cl(+v||lo,lo,hi));
     const g={p,blessed:!!bl,cm:cl(+cm||175,20,1000),skin:cl(+skin||5,1,10),eyeColor:col(ec),hairColor:col(hc),hairStyle:cl(+hs||0,0,7),beard:cl(+bd||0,0,5),scar:!!scar,tattoo:cl(+tat||0,0,3),
@@ -2163,7 +2170,7 @@ function embers(){ let s=''; for(let i=0;i<10;i++) s+=`<span class="ember-p" sty
 const roman='';
 function battleView(){
   const r=ui.rep;
-  const fig=(id,h)=>`<div class="fighter ${id==='A'?'a':'b'}" id="f${id}"${h.weapon?' data-w="1"':''}><div class="act" id="a${id}"><div class="flip" id="fig${id}">${drawChar(Object.assign({},h,{g:Object.assign({},h.g,{expr:h.g.expr==='snarl'?'snarl':'angry'})}))}</div></div></div>`;
+  const fig=(id,h)=>`<div class="fighter ${id==='A'?'a':'b'}${(h.st.int||50)<=10?' feral':''}" id="f${id}" data-int="${h.st.int||50}"${h.weapon?' data-w="1"':''}><div class="act" id="a${id}"><div class="flip" id="fig${id}">${drawChar(Object.assign({},h,{g:Object.assign({},h.g,{expr:h.g.expr==='snarl'?'snarl':'angry'})}))}</div></div></div>`;
   return topbar()+`<section class="hud"><div><span class="lbl">내 전사 · ${fmtH(r.me.cm)}</span><div class="nm">${flg(r.me)}${esc(r.me.name)}</div><div class="hpbar"><i id="hpA"></i></div><div class="stbar"><i id="stA"></i></div><div class="hpv" id="hpAv"></div></div><div class="r"><span class="lbl">친구의 전사 · ${fmtH(r.foe.cm)}</span><div class="nm">${flg(r.foe)}${esc(r.foe.name)}</div><div class="hpbar"><i id="hpB"></i></div><div class="stbar"><i id="stB"></i></div><div class="hpv" id="hpBv"></div></div></section>`+
     `<section class="stage" id="stage">${stageBg()}${embers()}${fig('A',r.me)}${fig('B',r.foe)}<canvas class="st3d" id="st3d"></canvas><div class="fxl" id="fx"></div></section>`+
     `<div class="log" id="log" aria-live="polite"></div><div class="after" id="after"><button class="btn" data-act="skip">바로 끝장내기</button></div>`;
@@ -2583,6 +2590,10 @@ function kfv(arr,t){ for(let i=1;i<arr.length;i++){ if(t<=arr[i][0]){ const t0=a
 function fighterAngles(f,now){
   const c=f.classList, t=now/1000;
   if(c.contains('run')){
+    if((+f.dataset.int||50)<=10){
+      const ph=t*2*Math.PI/.7, s=Math.sin(ph);
+      return {a0:-112+18*s,a1:-112-18*s,e0:-18,e1:-18,l0:-28-16*s,l1:-28+16*s,k0:58+12*s,k1:58-12*s};
+    }
     const ph=t*2*Math.PI/1.15, s=Math.sin(ph), s2=Math.sin(ph+Math.PI);
     return {a0:20*s,a1:-20*s,e0:-18-12*Math.max(0,s),e1:-18-12*Math.max(0,-s),l0:-24*s,l1:24*s,k0:34*Math.max(0,Math.sin(ph-1)),k1:34*Math.max(0,Math.sin(ph-1+Math.PI))};
   }
@@ -2623,6 +2634,10 @@ const KF3={
 function fighterAngles3(f,now){
   const c=f.classList, t=now/1000;
   if(c.contains('run')){
+    if((+f.dataset.int||50)<=10){
+      const ph=t*2*Math.PI/.7, s=Math.sin(ph);
+      return {a0:-118+20*s,a1:-118-20*s,e0:-18,e1:-18,l0:-32-16*s,l1:-32+16*s,k0:64+14*s,k1:64-14*s,ln:68,tw:5*s,by:.012*Math.abs(s)};
+    }
     const ph=t*2*Math.PI/0.95, s=Math.sin(ph);
     return {a0:22*s,a1:-22*s,e0:-22-14*Math.max(0,s),e1:-22-14*Math.max(0,-s),l0:-28*s,l1:28*s,k0:40*Math.max(0,Math.sin(ph-1.1)),k1:40*Math.max(0,Math.sin(ph-1.1+Math.PI)),z:4,ln:7,tw:7*s};
   }
