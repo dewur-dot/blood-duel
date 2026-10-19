@@ -182,9 +182,27 @@
     const id=ui.duelId;
     if(!id||!S.hero){ say('먼저 전사를 만들어 주세요.'); return; }
     const button=document.querySelector('[data-act="acceptin"]');
-    if(button) button.disabled=true;
+    if(button){ button.disabled=true; button.textContent='결투 준비 중…'; }
     try{
-      const db=await ready, ref=db.collection('duels').doc(id);
+      const db=await ready;
+      const outgoingId=S.pendingDuel;
+      if(outgoingId&&outgoingId!==id){
+        const outgoingRef=db.collection('duels').doc(outgoingId);
+        const outgoingShot=await outgoingRef.get();
+        if(outgoingShot.exists){
+          const outgoing=outgoingShot.data();
+          if(outgoing.status==='accepted'){
+            applyResult(outgoingId,outgoing,true);
+            throw new Error('outgoing-decided');
+          }
+          if(outgoing.status==='pending'&&outgoing.ownerUid===firebase.auth().currentUser.uid){
+            await outgoingRef.update({status:'cancelled',decidedAt:firebase.firestore.FieldValue.serverTimestamp()});
+          }
+        }
+        if(!S.handledDuels.includes(outgoingId)) S.handledDuels.push(outgoingId);
+        S.pendingDuel=null; saveState();
+      }
+      const ref=db.collection('duels').doc(id);
       const shot=await ref.get();
       if(!shot.exists||shot.data().status!=='pending') throw new Error('already-decided');
       const data=shot.data();
@@ -206,8 +224,9 @@
       applyResult(id,{...data,status:'accepted',recipientUid:firebase.auth().currentUser.uid,
         recipientHeroId:me.id,recipient,result},true);
     }catch(error){
-      say(error.message==='already-decided'?'이 결투장은 이미 처리됐습니다.':reason(error));
-      if(button) button.disabled=false;
+      if(error.message==='outgoing-decided') say('먼저 도착한 결투 결과를 확인해 주세요.');
+      else say(error.message==='already-decided'?'이 결투장은 이미 처리됐습니다.':reason(error));
+      if(button){ button.disabled=false; button.textContent='덤벼라'; }
     }
   }
 
@@ -268,7 +287,7 @@
       else say(reason(error));
     }
   }
-  const isLocked=action=>!!S.pendingDuel&&['roll','reset','accept','acceptin','buy','wear','strip','unequip','rename'].includes(action);
+  const isLocked=action=>!!S.pendingDuel&&['roll','reset','accept','buy','wear','strip','unequip','rename'].includes(action);
   window.DuelOnline={send,open,accept,decline,cancel,checkDuels,isLocked};
   const match=/#(?:[^#]*&)?duel-id=([A-Za-z0-9]{20})/.exec(location.hash);
   if(match) open(match[1]);
