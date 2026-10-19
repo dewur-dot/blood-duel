@@ -76,18 +76,41 @@
       const db=await ready;
       const uid=firebase.auth().currentUser.uid;
       const collection=db.collection('duels');
-      const ref=S.pendingDuel?collection.doc(S.pendingDuel):collection.doc();
-      if(!S.pendingDuel){
-        await ref.set({version:1,status:'pending',ownerUid:uid,ownerHeroId:S.hero.id,
-          challenger:packDuel(S.hero,ui.letter||''),createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-        S.pendingDuel=ref.id; saveState(); render();
-      }else{
-        const current=await ref.get();
+      const letter=ui.letter||'';
+      // 아직 답이 없는 결투장이 있을 때: 문구가 같으면 그 결투장을 다시 공유하고,
+      // 문구를 바꿨으면 이전 결투장을 취소하고 새 문구로 새 결투장을 만든다.
+      if(S.pendingDuel){
+        const oldRef=collection.doc(S.pendingDuel);
+        const current=await oldRef.get();
         if(!current.exists||current.data().status!=='pending'){
           S.pendingDuel=null; saveState(); await checkDuels();
           say('이전 결투가 처리되었습니다. 결과를 확인한 뒤 다시 보내세요.'); return;
         }
-        ui.letter=unpackDuel(current.data().challenger)?.letter||'';
+        const oldLetter=unpackDuel(current.data().challenger)?.letter||'';
+        if(oldLetter!==letter){
+          const oldId=S.pendingDuel;
+          try{
+            await db.runTransaction(async transaction=>{
+              const shot=await transaction.get(oldRef);
+              if(!shot.exists||shot.data().status!=='pending') throw new Error('already-decided');
+              transaction.update(oldRef,{status:'cancelled',decidedAt:firebase.firestore.FieldValue.serverTimestamp()});
+            });
+          }catch(error){
+            if(error&&error.message==='already-decided'){
+              S.pendingDuel=null; saveState(); await checkDuels();
+              say('이전 결투가 처리되었습니다. 결과를 확인한 뒤 다시 보내세요.'); return;
+            }
+            throw error;
+          }
+          if(!S.handledDuels.includes(oldId)) S.handledDuels.push(oldId);
+          S.pendingDuel=null; saveState();
+        }
+      }
+      const ref=S.pendingDuel?collection.doc(S.pendingDuel):collection.doc();
+      if(!S.pendingDuel){
+        await ref.set({version:1,status:'pending',ownerUid:uid,ownerHeroId:S.hero.id,
+          challenger:packDuel(S.hero,letter),createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+        S.pendingDuel=ref.id; saveState(); render();
       }
       remember(ref.id);
       const link=baseUrl()+'?invite='+ref.id+'#duel-id='+ref.id;
