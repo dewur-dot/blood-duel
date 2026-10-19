@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /duels/{duelId} {
+      allow get: if request.auth != null;
+      allow list, delete: if false;
+
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly([
+          'version', 'status', 'ownerUid', 'ownerHeroId', 'challenger', 'createdAt'
+        ])
+        && request.resource.data.version == 1
+        && request.resource.data.status == 'pending'
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerHeroId is string
+        && request.resource.data.challenger is string
+        && request.resource.data.challenger.size() < 15000;
+
+      allow update: if request.auth != null
+        && request.auth.uid == resource.data.ownerUid
+        && resource.data.status == 'pending'
+        && request.resource.data.status == 'cancelled'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','decidedAt']);
+
+      allow update: if request.auth != null
+        && request.auth.uid != resource.data.ownerUid
+        && resource.data.status == 'pending'
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.ownerHeroId == resource.data.ownerHeroId
+        && request.resource.data.challenger == resource.data.challenger
+        && request.resource.data.recipientUid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status', 'recipientUid', 'recipientHeroId', 'recipient', 'result', 'decidedAt'
+        ])
+        && (
+          (request.resource.data.status == 'declined'
+            && request.resource.data.keys().hasOnly([
+              'version', 'status', 'ownerUid', 'ownerHeroId', 'challenger',
+              'createdAt', 'recipientUid', 'decidedAt'
+            ]))
+          ||
+          (request.resource.data.status == 'accepted'
+            && request.resource.data.recipientHeroId is string
+            && request.resource.data.recipient is string
+            && request.resource.data.recipient.size() < 15000
+            && request.resource.data.result.winner in ['A', 'B']
+            && request.resource.data.result.log is list
+            && request.resource.data.result.log.size() <= 1000)
+        );
+    }
+  }
+}
