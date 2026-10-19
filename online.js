@@ -120,7 +120,7 @@
       const data=shot.data();
       if(data.status!=='pending'){
         clearLink();
-        say(data.status==='declined'?'이미 도주한 결투장입니다.':'이미 끝난 결투장입니다.');
+        say('이미 종료된 결투장입니다.');
         return;
       }
       if(data.ownerUid===firebase.auth().currentUser.uid){ say('내가 보낸 결투장입니다. 친구에게 링크를 보내세요.'); return; }
@@ -225,7 +225,7 @@
         recipientHeroId:me.id,recipient,result},true);
     }catch(error){
       if(error.message==='outgoing-decided') say('먼저 도착한 결투 결과를 확인해 주세요.');
-      else say(error.message==='already-decided'?'이 결투장은 이미 처리됐습니다.':reason(error));
+      else say(error.message==='already-decided'?'이미 종료된 결투장입니다.':reason(error));
       if(button){ button.disabled=false; button.textContent='덤벼라'; }
     }
   }
@@ -246,7 +246,7 @@
       ui.duelId=null; ui.incoming=null; clearLink();
       ui.notice='결투를 거절하고 도주했습니다.';
       view=S.hero?'card':'home'; render();
-    }catch(error){ say(error.message==='already-decided'?'이 결투장은 이미 처리됐습니다.':reason(error)); }
+    }catch(error){ say(error.message==='already-decided'?'이미 종료된 결투장입니다.':reason(error)); }
   }
 
   async function checkDuels(){

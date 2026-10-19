@@ -1232,7 +1232,9 @@ function drawChar(h,dead,hpx){
   g.legOk.forEach((ok,i)=>{
     const sd=i?1:-1, hx=cx+sd*hipW*0.27, ax=hx+sd*g.legPose[i], ay=GY-8;
     const kx=hx+sd*g.legPose[i]*0.5, ky=hipY+(ay-hipY)*0.5;
-    o+=`<g class="limb leg l${i}" data-px="${fx2(hx)}" data-py="${fx2(hipY)}">`;
+    o+=ok
+      ?`<g class="limb leg l${i}" data-px="${fx2(hx)}" data-py="${fx2(hipY)}">`
+      :`<g class="leg missing-leg">`;
     if(ok){
       const m=Math.min(MT,3);
       const thigh=prof(hx,hipY,kx,ky,t0,[[0,.6],[.22,.64+.1*m],[.5,.58+.05*m],[.82,.42],[1,.34]],[[0,.56],[.3,.54],[.62,.5+.03*m],[.84,.44+.06*m],[1,.34]],sd);
@@ -1868,11 +1870,14 @@ function g3render(figs,cam,w,h){
 function pose3(J,A,breath){
   const R=d=>(d||0)*Math.PI/180; A=A||{};
   J.arm.forEach((a,i)=>{ const sd=i?1:-1; a.sh.R=[R(A['a'+i]),0,sd*R(A['z'+i]||A.z||0)]; if(a.el) a.el.R=[R(A['e'+i]),0,0]; });
-  J.leg.forEach((l,i)=>{ l.hip.R=[R(A['l'+i]),0,0]; if(l.kn) l.kn.R=[R(A['k'+i]),0,0]; });
+  J.leg.forEach((l,i)=>{
+    const hipAngle=l.ok?R(A['l'+i]):0, kneeAngle=l.ok?R(A['k'+i]):0;
+    l.hip.R=[hipAngle,0,0]; if(l.kn) l.kn.R=[kneeAngle,0,0];
+  });
   J.waist.R=[R(A.ln),R(A.tw),0];
   // 발 붙이기: 무릎·골반을 굽힌 만큼 몸을 내려서 더 펴진 쪽 발이 항상 땅에 닿게
   let plant=0; if(!A.free&&J.D&&J.leg.length){ const L1=J.D.legL*0.5, L2=J.D.legL*0.5; let hmax=0;
-    J.leg.forEach((l,i)=>{ const a=R(A['l'+i]), k=R(A['k'+i]); const hh=L1*Math.cos(a)+(l.kn&&J.h.g.legOk[i]?L2*Math.cos(a+k):L2*Math.cos(a)); hmax=Math.max(hmax,hh); });
+    J.leg.forEach((l,i)=>{ const a=l.ok?R(A['l'+i]):0, k=l.ok?R(A['k'+i]):0; const hh=L1*Math.cos(a)+(l.ok&&l.kn?L2*Math.cos(a+k):L2); hmax=Math.max(hmax,hh); });
     plant=-(J.D.legL-hmax); }
   J.root.T=[0,(A.by||0)+plant,0];
   const b=breath||0; J.spine.S=[1+b*0.018,1+b*0.022,1+b*0.035];
