@@ -32,7 +32,8 @@
   })[char]);
   async function profileShareFile(hero){
     if(typeof File==='undefined'||typeof drawPortrait!=='function') return null;
-    const portrait=drawPortrait(hero,false).replace('<svg ','<svg x="54" y="88" width="340" height="425" ');
+    const bust=typeof bustCanvas==='function'?await bustCanvas(hero,680,850).catch(()=>null):null;
+    const portrait=bust?'':drawPortrait(hero,false).replace('<svg ','<svg x="54" y="88" width="340" height="425" ');
     const stats=hero.st||{};
     const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
       <defs>
@@ -62,6 +63,7 @@
       await new Promise((resolve,reject)=>{ image.onload=resolve; image.onerror=reject; image.src=source; });
       const canvas=document.createElement('canvas'); canvas.width=1200; canvas.height=630;
       canvas.getContext('2d').drawImage(image,0,0);
+      if(bust) canvas.getContext('2d').drawImage(bust,56,90,336,421);
       const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png',.92));
       return blob?new File([blob],`${String(hero.name||'blood-duel').replace(/[^\w가-힣-]+/g,'-')}-결투장.png`,{type:'image/png'}):null;
     }catch(_){ return null; }
@@ -184,7 +186,7 @@
     const won=isOwner?result.winner==='B':result.winner==='A';
     const rep={me:clone(me),foe:opponent,log:isOwner?flipLog(result.log):result.log,
       win:won,broke:null,gain:null};
-    if(won){ rep.gain=grow(me); rep.wins=me.wins; sync(me,true); }
+    if(won){ rep.gain=grow(me); rep.plunder=typeof plunderHelm==='function'?plunderHelm(me,opponent):null; rep.wins=me.wins; sync(me,true); }
     else{
       const last=result.log[result.log.length-1];
       sync(me,false);

@@ -210,7 +210,7 @@ svg.dead{filter:saturate(.35) brightness(.78)}
 .log .stun{color:var(--soft)}
 .log .counter,.log .guts{font-weight:800;color:var(--ember)}
 .verdict{border:1px solid;padding:14px 16px;display:flex;flex-direction:column;gap:2px;box-shadow:0 0 0 1px #000}
-.verdict b{font-family:var(--serif);font-weight:800;font-size:32px;line-height:1.2;letter-spacing:.08em}
+.verdict b{font-family:var(--serif);font-weight:800;font-size:25px;line-height:1.25;letter-spacing:.04em;word-break:keep-all}
 .verdict.win{background:linear-gradient(180deg,#e38a3c,#c4651f);border-color:#f0a35c;color:var(--ember-ink)}
 .verdict.lose{background:linear-gradient(180deg,#7a1f19,var(--blood-d));border-color:var(--blood);color:var(--bone)}
 .verdict span{font-size:14px;font-weight:500}
@@ -384,6 +384,26 @@ canvas.v3d{display:block}
   .stage{height:min(54vh,430px)}
   .invp .portrait{width:min(82%,320px)}
 }
+.tierb{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;border-radius:4px;margin-right:5px;font-size:11px;font-style:normal;font-weight:800;color:#111;vertical-align:1px}
+.own{color:#7bd17b;font-weight:700}
+.plunder{display:flex;gap:10px;align-items:center;margin:8px 0;padding:10px;border:1px solid #6a4a2a;background:rgba(120,60,20,.18)}
+.plunder svg{width:44px;height:44px;flex:none}.plunder b{display:block;color:#f0b070}.plunder span{font-size:13px;color:var(--soft)}
+.gacha{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(5,4,3,.86);padding:16px;animation:gfade .3s ease-out}
+@keyframes gfade{from{opacity:0}to{opacity:1}}
+.gbox{width:min(100%,420px);background:#1a1512;border:1px solid #6a594a;padding:18px 14px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+.gbox h3{margin:0 0 12px;font-size:18px;color:#f0e6d2}
+.gwin{position:relative;overflow:hidden;height:112px;border:2px solid #3a3029;background:#0e0b09}
+.gmark{position:absolute;left:50%;top:0;bottom:0;width:3px;margin-left:-1.5px;background:#ff5a35;z-index:2;box-shadow:0 0 10px #ff5a35}
+.greel{display:flex;height:100%;will-change:transform}
+.gcell{flex:none;width:92px;margin:0 2px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#221b16,#14100d);border-bottom:4px solid var(--tc)}
+.gcell svg{width:60px;height:60px}.gcell i{font-style:normal;font-weight:800;font-size:12px;color:var(--tc)}
+.gcell.hit{background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--tc) 45%,transparent),#14100d);animation:ghit .6s ease-out}
+@keyframes ghit{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
+.gres{min-height:52px;margin:12px 0 6px}.gres b{display:block;font-size:20px}.gres span{font-size:13px;color:var(--soft)}
+.godds{font-size:10.5px;line-height:1.6;color:#8a7f72;margin-bottom:12px}
+.gacha.epic .gbox{box-shadow:0 0 50px rgba(163,92,240,.55)}
+.gacha.legend .gbox{box-shadow:0 0 70px rgba(244,180,0,.8);animation:glegend 1.2s ease-in-out infinite alternate}
+@keyframes glegend{from{box-shadow:0 0 40px rgba(244,180,0,.5)}to{box-shadow:0 0 90px rgba(244,180,0,.95)}}
 </style>
 </head>
 <body>
@@ -436,6 +456,11 @@ const CRITS={
     {w:1,t:(a,v)=>`${a}가 ${v}의 팔뚝을 물어뜯었다! 살점이 뜯겨 나갔다.`,bleed:3,mul:1.8,part:'팔뚝'}]
 };
 function wpickC(list){ const t=list.reduce((a,x)=>a+x.w,0); let r=Math.random()*t; for(const x of list){ r-=x.w; if(r<0) return x; } return list[0]; }
+// 결투 시작 문구 (매번 다르게)
+const START_LINES=['{a} · {b}, 결투 개시','{a}와 {b}, 서로의 목을 노린다','까마귀들이 모여든다. {a}와 {b}의 결투','{a}가 침을 뱉었다. {b}가 웃는다. 시작이다','오딘이 지켜본다. {a} 대 {b}','둘 중 하나는 오늘 묘지로 간다. {a} 대 {b}','{b}의 눈에 핏발이 섰다. {a}도 마찬가지다','피 냄새가 진동한다. {a}와 {b}, 맞붙는다','{a}가 주먹을 쥐었다. {b}가 이를 갈았다','전장의 북이 울린다. {a} 대 {b}','{a}, 오늘 {b}의 이름을 묘비에 새기겠다고 맹세했다','{b}가 먼저 으르렁댔다. {a}는 대답 대신 다가간다','발할라의 문이 열렸다. 누가 먼저 들어갈 것인가. {a} 대 {b}','자비 없는 결투. {a}와 {b}','{a}와 {b}, 말은 필요 없다'];
+// 이겼을 때 / 죽었을 때 문구
+const WIN_LINES=['살아남았다. 오늘은.','적의 피로 목을 축였다.','까마귀들이 너에게 감사한다.','발할라는 오늘도 너를 거절했다.','놈의 묘비에 네 이름이 새겨질 것이다.','오딘이 고개를 끄덕였다.','또 하나의 해골을 술잔으로.','네 도끼는 아직 배고프다.','무릎 꿇은 건 놈이었다.','전장은 강한 자의 것이다.','적의 가문이 오늘 밤 울 것이다.','피 묻은 손으로 승리를 쥐었다.'];
+const LOSE_LINES=['묘지에 이름이 새겨졌다. 까마귀들이 감사해한다.','발할라의 문이 열렸다. 들어가라.','오늘 까마귀가 배부르다. 네 덕분이다.','땅이 네 피를 마셨다.','전사는 쓰러졌다. 전설은… 글쎄.','적의 술잔이 될 운명이었다.','눈을 감아라. 싸움은 끝났다.','오딘이 고개를 돌렸다.','네 이름은 묘비에만 남는다.','무릎 꿇은 채 숨이 멎었다.','뼈는 늑대가, 이름은 묘지가 가져갔다.','다음 생엔 더 굶주려 태어나라.'];
 function fight(A,B){
   const log=[];
   const inj=x=>x.inj||(x.inj={stun:0,acc:0,dmg:1,leg:0,bleed:0});
@@ -455,7 +480,7 @@ function fight(A,B){
     push(Object.assign({text,kind:'kill',by,target:idOf(v),word:word||'쿵'},by&&cur?cur:{}));
     return true;
   };
-  push({text:`${A.name} · ${B.name}, 결투 개시`,kind:'info'});
+  push({text:pick(START_LINES).replace(/\{a\}/g,A.name).replace(/\{b\}/g,B.name),kind:'info'});
   const calc=(att,def,mv,useW,forceCrit)=>{
     const sk={punch:att.st.punch,kick:att.st.kick,head:att.st.head,slam:att.st.slam,bite:70}[mv.k];
     const fat=Math.max(0.5,1-Math.max(0,rounds-8)*0.04*(1-att.st.sta/130));
@@ -632,17 +657,45 @@ const WEAPONS=[
   {kind:'maul',name:'오함마',atk:26,price:1000},
   {kind:'tank',name:'탱크',atk:240,price:100000}
 ];
-const CLOTHES=[
-  {slot:'top',id:1,name:'튜닉',def:0,price:1900},
-  {slot:'top',id:2,name:'가죽 조끼',def:10,price:1900},
-  {slot:'top',id:3,name:'사슬 갑옷',def:24,price:2900},
-  {slot:'bottom',id:1,name:'천 바지',def:0,price:990},
-  {slot:'bottom',id:2,name:'가죽 바지',def:6,price:1900},
-  {slot:'boots',id:1,name:'가죽 장화',def:4,price:990},
-  {slot:'top',id:4,name:'판금 갑옷',def:42,price:4900},
-  {slot:'helm',id:1,name:'강철 투구',def:14,price:2900},
-  {slot:'fur',id:1,name:'모피 어깨 장식',def:6,price:1900}
-];
+// 장비: 투구·상의·하의 각 10단계 (나무→철투구, 짐승가죽→철갑옷). id는 예전 저장/링크와 호환되게 유지하고 tier로 순서를 정함
+const TIER_W=[28,20,15,11,8,6,4.5,3.5,3,1]; // 보상 뽑기 확률(%) 1단계→10단계, 10단계는 1%
+const TOP_P=[300,600,900,1400,2000,3000,4500,6500,9000,13000], TOP_D=[3,5,8,12,16,21,26,32,40,50];
+const BOT_P=[200,400,600,900,1300,1900,2800,4000,5500,8000], BOT_D=[1,2,4,6,8,10,13,16,20,25];
+const HELM_P=[200,400,650,1000,1500,2200,3200,4600,6500,9900], HELM_D=[2,3,5,7,9,11,13,15,18,22];
+const GEAR_DEF={
+  top:[[5,'짐승 가죽 걸침','vest','#6B4E33'],[1,'튜닉','cloth','tunic'],[2,'가죽 조끼','vest','#4A3322'],[6,'누빈 솜옷','cloth','#B9AA88'],[7,'경화 가죽 갑옷','cloth','#5A3A22'],
+       [8,'청동 비늘 갑옷','mail','#9C7A3C',1],[3,'사슬 갑옷','mail','#8B9298',1],[9,'철 비늘 갑옷','mail','#6F767C',1],[4,'판금 갑옷','plate','#A3AAB0',1],[10,'철갑옷','plate','#5B6166',1]],
+  bottom:[[3,'짐승 가죽 허리옷','loin','#6B4E33'],[1,'천 바지','pants','pants'],[4,'털 바지','pants','#7A6450'],[2,'가죽 바지','pants','#4A3322'],[5,'누빈 바지','pants','#A89878'],
+       [6,'경화 가죽 바지','pants','#5A3A22'],[7,'청동 정강이 바지','greave','#4A3322',0,'#9C7A3C'],[8,'사슬 바지','pants','#8B9298',1],[9,'철 비늘 바지','greave','#6F767C',1,'#5B6166'],[10,'철 다리 갑옷','greave','#A3AAB0',1,'#C2C8CC']],
+  helm:[[2,'나무 투구','bowl','#8A6238'],[3,'가죽 두건','hood','#5A4030'],[4,'곰 가죽 두건','bear','#4E3A2A'],[5,'경화 가죽 투구','cap','#6A4428'],[6,'청동 투구','dome','#A8813E',1],
+       [7,'철테 투구','spangen','#7E868C',1],[8,'코가리개 투구','nasal','#8E959B',1],[9,'눈가리개 투구','spect','#8E959B',1],[10,'뿔 달린 철투구','horn','#868D93',1],[1,'강철 투구','steel','#B8BFC4',1]]
+};
+const CLOTHES=[];
+['top','bottom','helm'].forEach(sl=>GEAR_DEF[sl].forEach(([id,name,style,col,met,col2],i)=>CLOTHES.push({slot:sl,id,tier:i+1,name,style,col,met:!!met,col2:col2||null,
+  def:(sl==='top'?TOP_D:sl==='bottom'?BOT_D:HELM_D)[i],price:(sl==='top'?TOP_P:sl==='bottom'?BOT_P:HELM_P)[i]})));
+// 무료 장난 장비 (뽑기에는 안 나옴)
+CLOTHES.push({slot:'bottom',id:11,tier:0,fun:1,name:'풀잎 팬티',style:'grass',col:'#4E7A2E',def:0,price:0},{slot:'bottom',id:12,tier:0,fun:1,name:'미역 팬티',style:'grass',col:'#2E3A1C',met:false,def:0,price:0},{slot:'helm',id:11,tier:0,fun:1,name:'꽃 머리띠',style:'flower',col:'#5E8A3A',def:0,price:0});
+CLOTHES.push({slot:'boots',id:1,tier:1,name:'가죽 장화',def:4,price:990},{slot:'fur',id:1,tier:1,name:'모피 어깨 장식',def:6,price:1900});
+const gearOf=(slot,id)=>id?CLOTHES.find(c=>c.slot===slot&&c.id===id)||null:null;
+const TIER_C=t=>t<1?'#E07AA8':t>=10?'#F4B400':t>=8?'#A35CF0':t>=6?'#3D8BFD':t>=4?'#4CAF50':'#8A8A8A';
+// 그림용 옷차림: 예전 그림 코드(상의 1천옷·2조끼·3사슬·4판금)에 맞춘 값 + 색
+const TOPSTYLE={cloth:1,vest:2,mail:3,plate:4};
+function visOut(h){
+  const o=h.outfit||{}, g=h.g||{}, t=gearOf('top',o.top), b=gearOf('bottom',o.bottom), hm=gearOf('helm',o.helm);
+  return {top:t?TOPSTYLE[t.style]:0,bottom:b&&b.style!=='loin'&&b.style!=='grass'?2:0,boots:o.boots|0,fur:o.fur|0,helm:hm?hm.id:0,
+    _tc:t?(t.col==='tunic'?(g.tunic||'#7A6A50'):t.col):null,_tmet:!!(t&&t.met),
+    _lc:b&&b.style!=='loin'&&b.style!=='grass'?(b.col==='pants'?(g.pants||'#4A3A2A'):b.col):null,_lmet:!!(b&&b.met),
+    _loin:b&&b.style==='loin'?b.col:null,_fringe:b&&b.style==='grass'?b.col:null,_greave:b&&b.style==='greave'?b.col2:null,_gmet:!!(b&&b.style==='greave'&&b.met),
+    _hk:hm?hm.style:'',_hc:hm?hm.col:'',_hmet:!!(hm&&hm.met)};
+}
+// 보상 뽑기: 좋은 장비일수록 확률이 낮음
+function rollGear(slot){ const list=CLOTHES.filter(c=>c.slot===slot&&!c.fun).sort((a,b)=>a.tier-b.tier); let r=Math.random()*100; for(const c of list){ r-=TIER_W[c.tier-1]; if(r<0) return c; } return list[0]; }
+// 얻은 장비: 지금 것보다 좋으면 바로 착용, 아니면 창고(보유 목록)에
+function giveGear(h,it){ h.loot=h.loot||[]; const key=it.slot+':'+it.id; if(!h.loot.includes(key)) h.loot.push(key); h.outfit=h.outfit||{}; const cur=gearOf(it.slot,h.outfit[it.slot]); const better=!cur||it.tier>cur.tier; if(better) h.outfit[it.slot]=it.id; return better; }
+const LOOT_AT={1:'helm',5:'top',10:'bottom'};
+// 죽인 상대의 투구 빼앗기
+function plunderHelm(me,foe){ const it=gearOf('helm',foe&&foe.outfit&&foe.outfit.helm); if(!it) return null; const worn=giveGear(me,it); return {slot:'helm',id:it.id,tier:it.tier,worn}; }
+
 const SLOTN={top:'상의',bottom:'하의',boots:'신발',fur:'어깨',helm:'머리'};
 const SGROUPS=[
   ['기본',[['hp','체력'],['sta','지구력'],['spd','속도']]],
@@ -791,10 +844,11 @@ function grow(h){
   if(streak%5===0) SKEYS.filter(k=>k!=='luck'&&k!=='hp').forEach(k=>add(k,5));
   if(h.g){ const add2=0.14+Math.min(0.12,bonus*0.02); h.g.bulk=Math.min(8,Math.round(((h.g.bulk||0)+add2)*100)/100); gain.bulk=add2; if(h.g.bulk>=3&&h.tags&&!h.tags.some(t=>t[0]==='레어 · 근육 괴물')) h.tags.unshift(['레어 · 근육 괴물',1]); }
   h.st.hp=Math.min(99999,h.st.hp); h.maxhp=h.st.hp; h.hp=h.maxhp; h.wins++;
+  const ls=LOOT_AT[h.wins]; if(ls){ const it=rollGear(ls), worn=giveGear(h,it); gain.loot={slot:it.slot,id:it.id,tier:it.tier,worn,at:h.wins}; }
   return gain;
 }
 function randOutfit(){
-  const o={top:pick([0,0,1,2,3,3,4]),bottom:pick([0,1,1,2]),boots:pick([0,0,1]),fur:pick([0,0,0,1]),helm:pick([0,0,0,1])};
+  const o={top:Math.random()<0.3?0:rollGear('top').id,bottom:Math.random()<0.3?0:rollGear('bottom').id,boots:pick([0,0,1]),fur:pick([0,0,0,1]),helm:Math.random()<0.55?0:rollGear('helm').id};
   return o;
 }
 function makeFoe(avoid){
@@ -846,14 +900,53 @@ function weaponIcon(kind){
   return `<svg viewBox="-26 -76 52 90" aria-hidden="true"><g transform="rotate(14)">${weaponShape(kind)}</g></svg>`;
 }
 // 바이킹 강철 투구 (코 가리개 포함)
-function helmShape(cx,yT,hH,fW,u){
-  const k='hm'+u, w=fW*0.58;
-  return `<defs><linearGradient id="${k}" x1="0" x2="1"><stop offset="0" stop-color="#5E656B"/><stop offset=".35" stop-color="#C9CED2"/><stop offset=".55" stop-color="#8E959B"/><stop offset="1" stop-color="#4A5056"/></linearGradient></defs>`+
-    `<path class="o" fill="url(#${k})" d="M${cx-w} ${yT+hH*0.36} C${cx-w-2} ${yT+hH*0.02} ${cx-fW*0.34} ${yT-hH*0.15} ${cx} ${yT-hH*0.15} C${cx+fW*0.34} ${yT-hH*0.15} ${cx+w+2} ${yT+hH*0.02} ${cx+w} ${yT+hH*0.36} Z"/>`+
-    `<path d="M${cx} ${yT-hH*0.15} L${cx} ${yT+hH*0.3}" stroke="#4A5056" stroke-width="${hH*0.03}"/><path d="M${cx-w*0.7} ${yT+hH*0.02} Q${cx} ${yT-hH*0.1} ${cx+w*0.7} ${yT+hH*0.02}" stroke="#4A5056" stroke-width="${hH*0.02}" fill="none" opacity=".7"/>`+
-    `<rect class="o" x="${cx-w-1}" y="${yT+hH*0.29}" width="${w*2+2}" height="${hH*0.075}" rx="${hH*0.02}" fill="#6B7278"/>`+
-    [-0.8,-0.4,0.4,0.8].map(t=>`<circle cx="${cx+w*t}" cy="${yT+hH*0.327}" r="${hH*0.012}" fill="#2E3237"/>`).join('')+
-    `<path class="o" fill="url(#${k})" d="M${cx-fW*0.05} ${yT+hH*0.36} L${cx+fW*0.05} ${yT+hH*0.36} L${cx+fW*0.035} ${yT+hH*0.62} L${cx-fW*0.035} ${yT+hH*0.62} Z"/>`;
+function helmShape(cx,yT,hH,fW,u,kind,col,met){
+  kind=kind||'nasal'; col=col||'#8E959B'; if(met===undefined) met=true;
+  const k='hm'+u, w=fW*0.58, dk=mix(col,'#000000',0.4), dk2=mix(col,'#000000',0.55), lt=mix(col,'#ffffff',met?0.45:0.18);
+  const grad=`<defs><linearGradient id="${k}" x1="0" x2="1"><stop offset="0" stop-color="${dk}"/><stop offset=".35" stop-color="${lt}"/><stop offset=".55" stop-color="${col}"/><stop offset="1" stop-color="${dk2}"/></linearGradient></defs>`;
+  const dome=`M${cx-w} ${yT+hH*0.36} C${cx-w-2} ${yT+hH*0.02} ${cx-fW*0.34} ${yT-hH*0.15} ${cx} ${yT-hH*0.15} C${cx+fW*0.34} ${yT-hH*0.15} ${cx+w+2} ${yT+hH*0.02} ${cx+w} ${yT+hH*0.36} Z`;
+  const rim=(c)=>`<rect class="o" x="${cx-w-1}" y="${yT+hH*0.29}" width="${w*2+2}" height="${hH*0.075}" rx="${hH*0.02}" fill="${c||mix(col,'#000000',0.25)}"/>`;
+  const rivets=(c)=>[-0.8,-0.4,0.4,0.8].map(t=>`<circle cx="${cx+w*t}" cy="${yT+hH*0.327}" r="${hH*0.012}" fill="${c||'#2E3237'}"/>`).join('');
+  const nasal=`<path class="o" fill="url(#${k})" d="M${cx-fW*0.05} ${yT+hH*0.36} L${cx+fW*0.05} ${yT+hH*0.36} L${cx+fW*0.035} ${yT+hH*0.62} L${cx-fW*0.035} ${yT+hH*0.62} Z"/>`;
+  const ridge=`<path d="M${cx} ${yT-hH*0.15} L${cx} ${yT+hH*0.3}" stroke="${dk2}" stroke-width="${hH*0.03}"/>`;
+  let o=grad;
+  if(kind==='flower'){ // 꽃 머리띠: 이마 위를 두른 덩굴 + 꽃
+    const ry=hH*0.1, yb=yT+hH*0.06; let f=`<path d="M${cx-w*1.02} ${yb+ry*0.6} Q${cx} ${yb-ry*1.4} ${cx+w*1.02} ${yb+ry*0.6}" stroke="#4E7A2E" stroke-width="${hH*0.035}" fill="none" stroke-linecap="round"/>`;
+    const cols=['#F28CB1','#FFD84D','#FFFFFF','#C69CF2','#F28CB1','#FF9A5C','#FFFFFF','#FFD84D','#F28CB1'];
+    cols.forEach((pc,i)=>{ const t=i/(cols.length-1), x=cx-w*0.98+t*w*1.96, y=yb+ry*0.6-Math.sin(t*Math.PI)*ry*1.0, r=hH*(0.045+0.012*(i%2));
+      if(i%2) f+=`<ellipse cx="${n1(x+r*0.9)}" cy="${n1(y+r*0.5)}" rx="${n1(r*0.8)}" ry="${n1(r*0.35)}" fill="#5E8A3A" transform="rotate(25 ${n1(x)} ${n1(y)})"/>`;
+      for(let k=0;k<5;k++){ const a=k/5*Math.PI*2; f+=`<circle cx="${n1(x+Math.cos(a)*r*0.6)}" cy="${n1(y+Math.sin(a)*r*0.6)}" r="${n1(r*0.55)}" fill="${pc}" stroke="rgba(0,0,0,.25)" stroke-width="${n1(hH*0.004)}"/>`; }
+      f+=`<circle cx="${n1(x)}" cy="${n1(y)}" r="${n1(r*0.35)}" fill="#E8A31C"/>`; });
+    return f; }
+  if(kind==='hood'||kind==='bear'){
+    // 두건: 머리와 귀, 옆머리를 덮고 얼굴만 드러냄
+    const W2=fW*0.66, top=yT-hH*0.2, bot=yT+hH*1.05;
+    const outer=`M${cx-W2} ${bot} C${cx-W2*1.12} ${yT+hH*0.4} ${cx-W2*0.95} ${top} ${cx} ${top} C${cx+W2*0.95} ${top} ${cx+W2*1.12} ${yT+hH*0.4} ${cx+W2} ${bot} Z`;
+    const inner=`M${cx-fW*0.44} ${yT+hH*0.62} C${cx-fW*0.46} ${yT+hH*0.12} ${cx-fW*0.2} ${yT+hH*0.06} ${cx} ${yT+hH*0.06} C${cx+fW*0.2} ${yT+hH*0.06} ${cx+fW*0.46} ${yT+hH*0.12} ${cx+fW*0.44} ${yT+hH*0.62} C${cx+fW*0.4} ${yT+hH*1.02} ${cx-fW*0.4} ${yT+hH*1.02} ${cx-fW*0.44} ${yT+hH*0.62} Z`;
+    if(kind==='bear') [-1,1].forEach(sd=>{ o+=`<circle class="o" cx="${cx+sd*W2*0.62}" cy="${top+hH*0.04}" r="${hH*0.11}" fill="${col}"/><circle cx="${cx+sd*W2*0.62}" cy="${top+hH*0.05}" r="${hH*0.055}" fill="${dk2}"/>`; });
+    o+=`<path class="o" fill="url(#${k})" fill-rule="evenodd" d="${outer} ${inner}"/>`;
+    o+=`<path d="${inner}" fill="none" stroke="${dk2}" stroke-width="${hH*0.025}"/>`;
+    if(kind==='bear'){ let f=''; for(let i=0;i<14;i++){ const a=Math.PI*(0.08+0.84*i/13), x=cx-Math.cos(a)*W2*0.98, y=yT+hH*0.42-Math.sin(a)*hH*0.6; f+=`M${n1(x)} ${n1(y)} l${n1(-Math.cos(a)*hH*0.04)} ${n1(-Math.sin(a)*hH*0.05)} `; } o+=`<path d="${f}" stroke="${lt}" stroke-width="${hH*0.012}" opacity=".6"/>`; }
+    return o;
+  }
+  o+=`<path class="o" fill="url(#${k})" d="${dome}"/>`;
+  if(kind==='bowl'){ // 나무: 나뭇결
+    o+=`<path d="M${cx-w*0.8} ${yT+hH*0.12} Q${cx} ${yT-hH*0.02} ${cx+w*0.8} ${yT+hH*0.12} M${cx-w*0.6} ${yT-hH*0.02} Q${cx} ${yT-hH*0.12} ${cx+w*0.6} ${yT-hH*0.02} M${cx-w*0.9} ${yT+hH*0.24} Q${cx} ${yT+hH*0.12} ${cx+w*0.9} ${yT+hH*0.24}" stroke="${dk2}" stroke-width="${hH*0.012}" fill="none" opacity=".7"/>`+rim(dk);
+    return o; }
+  if(kind==='cap'){ // 경화 가죽: 십자 띠 + 징
+    o+=`<path d="M${cx} ${yT-hH*0.15} L${cx} ${yT+hH*0.3} M${cx-w*0.95} ${yT+hH*0.1} Q${cx} ${yT-hH*0.02} ${cx+w*0.95} ${yT+hH*0.1}" stroke="${dk2}" stroke-width="${hH*0.035}" fill="none"/>`+rim(dk)+rivets('#d8d2c4');
+    return o; }
+  if(kind==='dome'){ o+=`<path d="M${cx-w*0.15} ${yT-hH*0.12} Q${cx-w*0.5} ${yT} ${cx-w*0.6} ${yT+hH*0.22}" stroke="#fff" stroke-width="${hH*0.02}" fill="none" opacity=".45"/>`+ridge+rim()+rivets(); return o; }
+  if(kind==='spangen'){ o+=`<path d="M${cx} ${yT-hH*0.15} L${cx} ${yT+hH*0.3} M${cx-w*0.55} ${yT-hH*0.08} L${cx-w*0.8} ${yT+hH*0.3} M${cx+w*0.55} ${yT-hH*0.08} L${cx+w*0.8} ${yT+hH*0.3}" stroke="${dk2}" stroke-width="${hH*0.04}"/>`+rim(dk)+rivets()+nasal; return o; }
+  o+=ridge+`<path d="M${cx-w*0.7} ${yT+hH*0.02} Q${cx} ${yT-hH*0.1} ${cx+w*0.7} ${yT+hH*0.02}" stroke="${dk2}" stroke-width="${hH*0.02}" fill="none" opacity=".7"/>`+rim()+rivets();
+  if(kind==='spect'){ // 눈가리개
+    [-1,1].forEach(sd=>{ const ex=cx+sd*fW*0.2, ey=yT+hH*0.47; o+=`<path class="o" fill="url(#${k})" fill-rule="evenodd" d="M${ex-fW*0.17} ${yT+hH*0.36} L${ex+fW*0.17} ${yT+hH*0.36} L${ex+fW*0.17} ${ey+hH*0.05} Q${ex} ${ey+hH*0.11} ${ex-fW*0.17} ${ey+hH*0.05} Z M${ex-fW*0.11} ${ey} a${fW*0.11} ${hH*0.05} 0 1 0 ${fW*0.22} 0 a${fW*0.11} ${hH*0.05} 0 1 0 ${-fW*0.22} 0 Z"/>`; });
+    o+=nasal; return o; }
+  o+=nasal;
+  if(kind==='horn') [-1,1].forEach(sd=>{ const bx=cx+sd*w*0.92, by=yT+hH*0.1; o+=`<path class="o" fill="#E8DCC0" d="M${bx} ${by-hH*0.06} C${bx+sd*hH*0.16} ${by-hH*0.06} ${bx+sd*hH*0.26} ${by-hH*0.2} ${bx+sd*hH*0.22} ${by-hH*0.36} C${bx+sd*hH*0.17} ${by-hH*0.2} ${bx+sd*hH*0.1} ${by+hH*0.02} ${bx} ${by+hH*0.07} Z"/><path d="M${bx+sd*hH*0.1} ${by-hH*0.03} l${sd*hH*0.03} ${-hH*0.07} M${bx+sd*hH*0.2} ${by-hH*0.1} l${sd*hH*0.04} ${-hH*0.06}" stroke="#a8987a" stroke-width="${hH*0.012}"/>`; });
+  if(kind==='steel') [-1,1].forEach(sd=>{ const x0=cx+sd*w*0.98; o+=`<path class="o" fill="url(#${k})" d="M${x0} ${yT+hH*0.34} L${x0-sd*fW*0.2} ${yT+hH*0.36} L${x0-sd*fW*0.16} ${yT+hH*0.78} Q${x0-sd*fW*0.06} ${yT+hH*0.84} ${x0+sd*fW*0.02} ${yT+hH*0.72} Z"/>`; })+'';
+  if(kind==='steel') o+=`<path d="M${cx-w*0.15} ${yT-hH*0.12} Q${cx-w*0.5} ${yT} ${cx-w*0.6} ${yT+hH*0.22}" stroke="#fff" stroke-width="${hH*0.022}" fill="none" opacity=".55"/>`;
+  return o;
 }
 
 
@@ -1205,7 +1298,7 @@ function solid(ds,fill,u,shade){
 
 function drawChar(h,dead,hpx){
   const g=h.g, p=g.p, u=++UID, cx=100, GY=290, H=232, F=g.sex==='f';
-  const ou=h.outfit||{top:0,bottom:0,boots:0,fur:0};
+  const ou=visOut(h);
   const skin=SKIN[g.skin-1], skinS=mix(skin,'#000000',0.14), sk=mix(skin,'#2a1408',0.32), hiC=mix(skin,'#ffffff',0.22);
   const bM=M.build(p.build), aM=M.arm(p.armLen), lM=M.leg(p.legLen), hM=M.head(p.headSize), sM=M.sh(p.shoulder), nM=M.neck(p.neck);
   const rawL=0.48*lM, rawT=0.29, rawN=0.04*nM, rawH=0.13*hM*(0.92+p.faceLen*0.016), S=rawL+rawT+rawN+rawH;
@@ -1220,8 +1313,8 @@ function drawChar(h,dead,hpx){
   const bl=Math.max(0,bM-1.1)*H*0.07, pelvY=hipY+H*0.045, beltY=shY+torso*0.62, hem=H*0.1;
   const hd=drawHead(g,u,cx,yT,hH,dead,shY);
   const vb=Math.floor(Math.min(yT-hd.topExtra,yT-6)-6);
-  const topCol=ou.top===1?g.tunic:ou.top===3?MAIL:ou.top===4?PLATE:JERKIN;
-  const legCol=ou.bottom===1?g.pants:ou.bottom===2?JERKIN:skin;
+  const topCol=ou._tc||JERKIN;
+  const legCol=ou._lc||skin;
   const nW=(H*0.06*(0.35+0.65*bM)+4)*(F?0.8:1);
   const uw=g.uw||'#1E1E22', uwD=mix(uw,'#000000',0.35), uwL=mix(uw,'#ffffff',0.25);
   LDEFS='';
@@ -1353,7 +1446,7 @@ function drawChar(h,dead,hpx){
     if(F) o+=`<path d="M${fx2(cx-cw*0.4)} ${fx2(shY+torso*0.36)} Q${fx2(cx-cw*0.2)} ${fx2(shY+torso*0.42)} ${fx2(cx-1)} ${fx2(shY+torso*0.34)} M${fx2(cx+cw*0.4)} ${fx2(shY+torso*0.36)} Q${fx2(cx+cw*0.2)} ${fx2(shY+torso*0.42)} ${fx2(cx+1)} ${fx2(shY+torso*0.34)}" stroke="#000" stroke-width="1.1" fill="none" opacity=".25"/>`;
   } else if(ou.top===2){
     const jp=`M${fx2(cx-SW*0.6)} ${fx2(shY+3)} L${fx2(cx-nW*0.9)} ${fx2(shY+1)} L${cx} ${fx2(shY+torso*0.2)} L${fx2(cx+nW*0.9)} ${fx2(shY+1)} L${fx2(cx+SW*0.6)} ${fx2(shY+3)} C${fx2(cx+chestW/2)} ${fx2(shY+torso*0.15)} ${fx2(cx+waistW/2+bl)} ${fx2(shY+torso*0.5)} ${fx2(cx+waistW/2+bl*0.8)} ${fx2(beltY+H*0.04)} L${fx2(cx-waistW/2-bl*0.8)} ${fx2(beltY+H*0.04)} C${fx2(cx-waistW/2-bl)} ${fx2(shY+torso*0.5)} ${fx2(cx-chestW/2)} ${fx2(shY+torso*0.15)} ${fx2(cx-SW*0.6)} ${fx2(shY+3)} Z`;
-    o+=`<path class="o" fill="${JERKIN}" d="${jp}"/><path fill="url(#tg${u})" d="${jp}"/><path d="M${cx} ${fx2(shY+torso*0.2)} L${cx} ${fx2(beltY)}" stroke="#2a1c10" stroke-width="1.6" stroke-dasharray="2 3"/>`;
+    o+=`<path class="o" fill="${topCol}" d="${jp}"/><path fill="url(#tg${u})" d="${jp}"/><path d="M${cx} ${fx2(shY+torso*0.2)} L${cx} ${fx2(beltY)}" stroke="#2a1c10" stroke-width="1.6" stroke-dasharray="2 3"/>`;
   }
   if(ou.top||ou.bottom) o+=`<rect class="o" x="${fx2(cx-waistW/2-bl-2)}" y="${fx2(beltY)}" width="${fx2(waistW+bl*2+4)}" height="${fx2(H*0.024)}" fill="${LEATHER}"/><rect class="o" x="${cx-4}" y="${fx2(beltY-1)}" width="8" height="${fx2(H*0.024+2)}" fill="${IRON}"/>`;
 
@@ -1403,7 +1496,7 @@ function drawChar(h,dead,hpx){
   if(ou.fur) o+=`<ellipse class="o" cx="${cx}" cy="${fx2(shY+4)}" rx="${fx2(SW*0.98)}" ry="${fx2(H*0.03)}" fill="${g.furC}"/><path d="M${fx2(cx-SW*0.8)} ${fx2(shY+2)} l3 5 M${fx2(cx-SW*0.4)} ${fx2(shY+1)} l3 6 M${cx} ${fx2(shY)} l2 6 M${fx2(cx+SW*0.4)} ${fx2(shY+1)} l-3 6 M${fx2(cx+SW*0.8)} ${fx2(shY+2)} l-3 5" stroke="${mix(g.furC,'#ffffff',0.3)}" stroke-width="1.2" opacity=".7"/>`;
   if(ou.top===1||ou.top===3) o+=`<path d="M${fx2(cx-nW*0.75)} ${fx2(shY+1)} L${cx} ${fx2(shY+H*0.05)} L${fx2(cx+nW*0.75)} ${fx2(shY+1)} Z" fill="${skinS}" stroke="${OUT}" stroke-width="1"/>`;
   o+=hd.front;
-  if(ou.helm) o+=helmShape(cx,yT,hH,hd.fW,u);
+  if(ou.helm) o+=helmShape(cx,yT,hH,hd.fW,u,ou._hk,ou._hc,ou._hmet);
   const st=hpx?` style="height:${hpx}px;width:auto"`:'';
   defs+=LDEFS;
   const vx=TANK?-90:0, vw=TANK?450:200;
@@ -1412,13 +1505,13 @@ function drawChar(h,dead,hpx){
 
 function drawPortrait(h,dead){
   const g=h.g, p=g.p, u=++UID, cx=100, F=g.sex==='f';
-  const ou=h.outfit||{top:0,bottom:0,boots:0,fur:0};
+  const ou=visOut(h);
   const skin=SKIN[g.skin-1], skinS=mix(skin,'#000000',0.14), sk=mix(skin,'#2a1408',0.32);
   const hH=112*(0.92+p.faceLen*0.016), yT=42, chinY=yT+hH, shY=chinY+hH*0.26;
   const hd=drawHead(g,u,cx,yT,hH,dead,shY);
   const nW=hH*0.36*(0.72+0.28*Math.min(1.6,M.build(p.build)))*(F?0.76:1), SW=(80+(p.shoulder-5.5)*5)*(F?0.86:1);
   const bust=`M${cx-nW*0.62} ${shY-6} C${cx-nW*0.9} ${shY+2} ${cx-SW*0.55} ${shY+2} ${cx-SW*0.86} ${shY+12} C${cx-SW*1.02} ${shY+18} ${cx-SW*1.08} ${shY+34} ${cx-SW*1.1} ${shY+52} L${cx-SW-14} 252 L${cx+SW+14} 252 L${cx+SW*1.1} ${shY+52} C${cx+SW*1.08} ${shY+34} ${cx+SW*1.02} ${shY+18} ${cx+SW*0.86} ${shY+12} C${cx+SW*0.55} ${shY+2} ${cx+nW*0.9} ${shY+2} ${cx+nW*0.62} ${shY-6} Z`;
-  const topCol=ou.top===1?g.tunic:ou.top===3?MAIL:ou.top===4?PLATE:ou.top===2?JERKIN:skin;
+  const topCol=ou._tc||skin;
   const uw=g.uw||'#1E1E22';
   let o=hd.back, defs0='';
   defs0=`<linearGradient id="nk${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".45"/><stop offset=".45" stop-color="#000" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient>`;
@@ -1442,7 +1535,7 @@ function drawPortrait(h,dead){
   if(ou.top===1||ou.top===3) o+=`<path d="M${cx-nW*0.75} ${shY-2} L${cx} ${shY+hH*0.18} L${cx+nW*0.75} ${shY-2} Z" fill="${skinS}" stroke="${OUT}"/>`;
   if(ou.top===4){ [-1,1].forEach(sd=>{ o+=`<path class="o" fill="${PLATE}" d="M${cx+sd*SW*0.45} ${shY+4} Q${cx+sd*SW*0.95} ${shY-10} ${cx+sd*SW*1.18} ${shY+40} L${cx+sd*SW*0.7} ${shY+46} Q${cx+sd*SW*0.62} ${shY+16} ${cx+sd*SW*0.45} ${shY+4} Z"/>`; }); o+=`<path d="M${cx-SW*0.4} ${shY+30} Q${cx} ${shY+64} ${cx+SW*0.4} ${shY+30}" stroke="#E6EAEE" stroke-width="3" fill="none" opacity=".5"/>`; }
   o+=hd.front;
-  if(ou.helm) o+=helmShape(cx,yT,hH,hd.fW,u);
+  if(ou.helm) o+=helmShape(cx,yT,hH,hd.fW,u,ou._hk,ou._hc,ou._hmet);
   const defs=hd.defs+tgrad(u)+defs0;
   if(h.flag&&flagInner(h.flag)) o+=`<g transform="translate(8 8) scale(1.3)"><rect x="-.8" y="-.8" width="31.6" height="21.6" rx="2" fill="rgba(0,0,0,.5)"/>${flagInner(h.flag)}</g>`;
   return `<svg viewBox="0 0 200 250" class="${dead?'dead':''}" role="img" aria-label="${esc(h.name)}의 얼굴"><defs>${defs}</defs>${o}</svg>`;
@@ -1505,7 +1598,7 @@ const VS=`attribute vec3 aP;attribute vec3 aN;uniform mat4 uM;uniform mat4 uPV;u
 const FS=`precision mediump float;varying vec3 vN;varying vec3 vP;uniform vec3 uC;uniform float uMet;uniform float uDes;uniform float uAl;
 void main(){vec3 n=normalize(vN);vec3 V=vec3(0.0,0.0,1.0);
 vec3 L1=normalize(vec3(-0.5,0.62,0.6));vec3 L2=normalize(vec3(0.75,0.1,0.35));
-float nl=dot(n,L1);float wrap=max((nl+0.35)/1.35,0.0);float d2=max(dot(n,L2),0.0);
+float nl=dot(n,L1);float wrap=max((nl+0.22)/1.22,0.0);float d2=max(dot(n,L2),0.0);
 vec3 base=pow(uC,vec3(2.2));
 float sss=uMet>0.5?0.0:smoothstep(0.0,0.45,wrap)*(1.0-smoothstep(0.45,0.9,wrap));
 vec3 amb=mix(vec3(0.07,0.06,0.06),vec3(0.17,0.18,0.22),n.y*0.5+0.5);
@@ -1562,7 +1655,7 @@ function cyl(col,x,y,z,r,h,opt){ const n=N3(MS.cyl(),col,opt); n.T=[x,y,z]; n.S=
 function headTexKey(h,dead){ const g=h.g; return JSON.stringify([g.p,g.skin,g.hairStyle,g.hairColor,g.eyeColor,g.beard,g.scar,g.tattoo,g.sex,g.mono,g.expr,g.oddEye,g.eye2,g.eth,g.blessed,(h.outfit||{}).helm||0,!!dead]); }
 function headSVG(h,dead,part){
   const g=h.g, u=++UID, hd=drawHead(g,u,100,62,100,dead,62+100+26);
-  const helm=(h.outfit&&h.outfit.helm)?helmShape(100,62,100,hd.fW,u):'';
+  const vo=visOut(h), helm=vo.helm?helmShape(100,62,100,hd.fW,u,vo._hk,vo._hc,vo._hmet):'';
   const body=part==='back'?hd.back:hd.front+helm;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="416" viewBox="0 0 200 260"><defs>${hd.defs}</defs>${body}</svg>`;
 }
@@ -1589,10 +1682,12 @@ function dims3(h){
   const SWf=0.255*sM*(F?0.86:1)*(1+0.12*musc+0.16*MX);
   const chestW=Math.min(SWf*0.97,SWf*Math.min(1.1+0.06*MX,0.82*(0.45+0.55*bM)*(1+(F?0:0.1)*musc+0.08*MX))*(F?0.92:1));
   const chestW2=Math.min(chestW,SWf*(F?0.8:0.8+0.03*Math.min(MX,1)));
-  const hipW=(F?0.19:0.172)*(0.72+0.28*bM)*(1+0.05*Math.min(MT,2)), waistW=F?Math.min(chestW2*0.92,hipW*(0.66+0.08*bM)):Math.min(chestW2*0.8,hipW*(0.84+0.06*bM)*(1+0.04*MX));
-  const wa=0.05*(0.35+0.65*bM)*(F?0.84:1)*(1+0.22*musc+0.17*MX), ua=0.17*aM, fa=0.15*aM;
-  const t0=0.075*(0.35+0.65*bM)*(F?0.98:1)*(1+0.14*musc+0.11*MX);
-  const nW=(0.06*(0.35+0.65*bM)+0.017)*(F?0.8:1)*(1+0.25*MX);
+  const hipW0=(F?0.19:0.172)*(0.72+0.28*bM)*(1+0.05*Math.min(MT,2)), waistW=F?Math.min(chestW2*0.92,hipW0*(0.66+0.08*bM)):Math.min(chestW2*0.8,hipW0*(0.84+0.06*bM)*(1+0.04*MX));
+  const bL=0.62+0.38*Math.min(bM,1.7); // 체격이 커도 팔다리가 풍선처럼 부풀지 않게
+  const wa=Math.min(0.085,0.05*bL*(F?0.84:1)*(1+0.24*musc+0.14*MX)), ua=0.17*aM, fa=0.15*aM;
+  const t0=Math.min(0.105,0.075*bL*(F?0.98:1)*(1+0.12*musc+0.08*MX));
+  const nW=Math.min(0.1,(0.06*bL+0.017)*(F?0.8:1)*(1+0.22*MX));
+  const hipW=Math.max(hipW0,t0*2.45); // 골반은 허벅지 두 개를 담을 만큼은 넓게
   return {F,bM,legL,torso,neckL,hH,musc,MT,MX,m,mb,SWf,SW:SWf/2,chestW:chestW2,waistW,hipW,wa,ua,fa,t0,nW};
 }
 /* ---- 로프트(단면을 이어 붙인 몸 형태): 앞뒤 납작한 타원 단면 + 근육 굴곡 ---- */
@@ -1622,7 +1717,7 @@ function geoLoft(ctrl,L,opt){
       if(sn>0){ z+=r.pk*Math.pow(sn,1.5)*Math.exp(-Math.pow((xn-0.47)/0.3,2)); z-=r.gv*sn*Math.exp(-Math.pow(xn/0.13,2)); }
       else z-=r.pg*Math.pow(-sn,1.5)*Math.exp(-Math.pow((xn-0.45)/0.33,2));
       if(AB&&sn>0&&r.tt>AB.t0&&r.tt<AB.t1){ const u=(r.tt-AB.t0)/(AB.t1-AB.t0), q=Math.pow(Math.sin(Math.PI*AB.n*u),2)*Math.sin(Math.PI*u); z+=AB.a*q*Math.exp(-Math.pow((xn-AB.x)/AB.s,2))*sn; }
-      if(DN&&sn>0){ const tt=r.tt; for(const d of DN){ const g=Math.exp(-Math.pow((tt-d.t)/d.w,2)); if(g<0.01) continue; z-=d.d*g*Math.exp(-Math.pow((xn-(d.x||0))/(d.s||0.35),2))*sn; } }
+      if(DN){ const tt=r.tt; for(const d of DN){ if(d.b?sn>=0:sn<=0) continue; const g=Math.exp(-Math.pow((tt-d.t)/d.w,2)); if(g<0.01) continue; const v=d.d*g*Math.exp(-Math.pow((xn-(d.x||0))/(d.s||0.35),2))*Math.abs(sn); z+=d.b?v:-v; } }
       P.push(x*r.s,r.y,(r.z+z*r.s)); } });
   const nr=R.length, I=[], N=new Float32Array(P.length);
   for(let j=0;j<nr-1;j++) for(let i=0;i<seg;i++){ const a=j*seg+i, b=j*seg+(i+1)%seg, c=a+seg, d=b+seg; I.push(a,b,c, b,d,c); }
@@ -1694,7 +1789,7 @@ function foreArmCtrl(D){ const w=D.wa*0.5, m=D.m; return [
 function handCtrl(D){ const w=D.wa*0.5; return [   // x=두께, z=손바닥 폭
   {t:0,w:w*0.42,f:w*0.48,b:w*0.48},{t:0.3,w:w*0.4,f:w*0.66,b:w*0.62},{t:0.68,w:w*0.42,f:w*0.66,b:w*0.6},{t:1,w:w*0.34,f:w*0.5,b:w*0.5}]; }
 function thighCtrl(D){ const r=D.t0, m=D.m, F=D.F; return [
-  {t:0,w:r*0.6,f:r*0.6,b:r*0.62},{t:0.2,w:r*(0.6+(F?0.04:0.03*m)),f:r*(0.6+0.08*m),b:r*0.58},
+  {t:0,w:r*0.54,f:r*0.52,b:r*0.56},{t:0.2,w:r*(0.6+(F?0.04:0.03*m)),f:r*(0.6+0.08*m),b:r*0.58},
   {t:0.5,w:r*0.52,f:r*(0.55+0.04*m),b:r*0.5},{t:0.85,w:r*0.41,f:r*0.42,b:r*0.38},{t:1,w:r*0.37,f:r*0.38,b:r*0.36}]; }
 function calfCtrl(D){ const r=D.t0, m=D.m; return [
   {t:0,w:r*0.37,f:r*0.38,b:r*0.36},{t:0.24,w:r*(0.37+0.05*m),f:r*0.33,b:r*(0.44+0.1*m)},
@@ -1704,17 +1799,25 @@ function footCtrl(D){ const r=D.t0; return [   // f=위(발등), b=아래(발바
   {t:0.75,w:r*0.36,f:r*0.24,b:r*0.15},{t:1,w:r*0.35,f:r*0.18,b:r*0.13}]; }
 /* ---- 몸 만들기 ---- */
 function build3(h,dead){
-  const g=h.g, D=dims3(h), ou=h.outfit||{}, F=D.F, m=D.m, T=D.torso;
-  const skin=SKIN[g.skin-1], uw=g.uw||'#1E1E22';
-  const topCol=ou.top===1?g.tunic:ou.top===3?'#8B9298':ou.top===4?'#A3AAB0':ou.top===2?'#4A3322':null, metal=ou.top===4||ou.top===3?1:0;
-  const legCol=ou.bottom===1?g.pants:ou.bottom===2?'#4A3322':null;
+  const g=h.g, D=dims3(h), ou=visOut(h), F=D.F, m=D.m, T=D.torso;
+  const skin=SKIN[g.skin-1], uw=ou._fringe?mix(ou._fringe,'#000000',0.25):(g.uw||'#1E1E22');
+  const topCol=ou._tc, metal=ou._tmet?1:0;
+  const legCol=ou._lc, legMet=ou._lmet?1:0;
   const root=N3(null), J={root};
   const pel=add3(root,N3(null)); pel.T=[0,D.legL,0]; J.pel=pel;
   const waist=add3(pel,N3(null)); J.waist=waist;
   const spine=add3(waist,N3(null)); spine.T=[0,T,0]; J.spine=spine;
   const TC=torsoCtrl(D,g), TL=T*1.0;
-  const dents=F?[]:(m>0.2?[{t:0.5,w:0.14,d:T*0.006*m,x:0,s:0.06}]:[]), abs=(!F&&m>0.35)?{t0:0.39,t1:0.67,n:3,a:T*0.006*m,x:0.2,s:0.12}:null;
-  add3(spine,loft(skin,TC,TL,{steps:56,cap1:0.6,dents,abs}));
+  // 몸의 굴곡: 쇄골, 배꼽, 등 척추 골, 날개뼈 / 남자 근육: 가슴 아래 경계, 복근, 옆구리 톱니근, 골반 V라인, 광배근
+  const dents=[{t:0.075,w:0.018,d:-T*0.007,x:0.42,s:0.3},{t:0.66,w:0.012,d:T*0.012,x:0,s:0.05},
+    {b:1,t:0.42,w:0.28,d:T*0.009,x:0,s:0.07},{b:1,t:0.2,w:0.07,d:-T*(0.006+0.006*m),x:0.5,s:0.24}].concat(F?[]:(m>0.2?[
+    {t:0.5,w:0.14,d:T*0.006*m,x:0,s:0.06},{t:0.24,w:0.08,d:T*0.004*m,x:0,s:0.05},
+    {t:0.345,w:0.014,d:T*(0.003+0.005*m),x:0.42,s:0.24},
+    {t:0.38,w:0.012,d:-T*0.004*m,x:0.86,s:0.08},{t:0.43,w:0.012,d:-T*0.004*m,x:0.88,s:0.08},{t:0.48,w:0.012,d:-T*0.0035*m,x:0.88,s:0.08},
+    {t:0.82,w:0.05,d:T*0.005*m,x:0.48,s:0.14},
+    {b:1,t:0.32,w:0.1,d:-T*0.005*m,x:0.62,s:0.2}]:[])), abs=(!F&&m>0.3)?{t0:0.39,t1:0.67,n:3,a:T*0.01*m,x:0.2,s:0.11}:null;
+  add3(spine,loft(skin,TC,TL,{steps:64,seg:40,cap1:0.6,dents,abs}));
+  if(!F&&!topCol){ const cw=D.chestW/2, nz=T*(0.172+0.008*m)+T*(0.01+0.018*m)*0.85; [-1,1].forEach(sd=>{ add3(spine,sph(mix(skin,'#5a2a1a',0.3),sd*cw*0.5,-T*0.305,nz,T*0.014,T*0.012,T*0.006)); }); }
   // 속옷 (몸통 표면을 살짝 부풀린 껍데기)
   if(!legCol) add3(spine,loft(uw,TC,TL,{ta:F?0.86:0.82,tb:1.06,cap1:0.6,inf:0.0035,steps:8}));
   if(F&&!topCol) add3(spine,loft(uw,TC,TL,{ta:0.225,tb:0.37,inf:0.003,steps:8}));
@@ -1723,30 +1826,37 @@ function build3(h,dead){
     const shirt=TC.filter(c=>c.t<=0.9).map(c=>Object.assign({},c,{pg:0}));
     if(ou.top!==2) shirt.push({t:1.02,w:D.hipW*0.53,f:T*0.19,b:T*0.19},{t:1.14,w:D.hipW*0.58,f:T*0.21,b:T*0.21});
     add3(spine,loft(topCol,shirt,TL,{ta:0.02,tb:ou.top===2?0.8:1.14,inf:0.011,steps:22},{met:metal}));
-    if(ou.top===4) [-1,1].forEach(sd=>{ add3(spine,sph('#A3AAB0',sd*(D.SW-D.wa*0.3),-T*0.05,0,D.wa*0.75,D.wa*0.5,D.wa*0.72,{met:1})); });
+    if(ou.top===4) [-1,1].forEach(sd=>{ add3(spine,sph(topCol,sd*(D.SW-D.wa*0.3),-T*0.05,0,D.wa*0.75,D.wa*0.5,D.wa*0.72,{met:1})); });
   }
-  if(legCol) add3(spine,loft(legCol,TC,TL,{ta:0.6,tb:1.06,cap1:0.6,inf:0.005,steps:12}));
+  if(legCol) add3(spine,loft(legCol,TC,TL,{ta:0.6,tb:1.06,cap1:0.6,inf:0.005,steps:12},{met:legMet}));
+  if(ou._fringe){ // 풀잎/미역: 허리에 두른 띠 + 사방으로 늘어진 잎
+    add3(spine,loft(mix(ou._fringe,'#000000',0.2),TC,TL,{ta:0.8,tb:0.86,inf:0.008,steps:2}));
+    const hr=D.hipW*0.52; for(let k=0;k<28;k++){ const a=k/28*Math.PI*2, x=Math.cos(a)*hr, z=Math.sin(a)*hr*0.85, lf=add3(spine,box(k%2?ou._fringe:mix(ou._fringe,'#ffffff',0.15),x,-T*1.0,z,D.hipW*0.085,T*(0.34+0.06*(k%3)),0.004)); lf.R=[0,-a+Math.PI/2,0]; } }
+  if(ou._loin){ add3(spine,loft(ou._loin,TC,TL,{ta:0.8,tb:1.0,inf:0.007,steps:6})); [1,-1].forEach(fz=>{ add3(spine,box(ou._loin,0,-T*1.1,fz*T*0.16,D.hipW*0.34,T*0.26,0.006)); }); }
   if(ou.fur){ const fr=add3(spine,N3(MS.raw((()=>{ const a=[]; for(let i=0;i<=10;i++){ const t=i/10*Math.PI*2; a.push([Math.sin(t)*T*0.07,D.SW*0.55+Math.cos(t)*T*0.07]); } return a; })(),18),g.furC)); fr.S=[1,1,0.85]; }
   // 목 (턱 밑에서 몸통 속으로)
   const nw=D.nW/2, NL=D.neckL+D.hH*0.2+T*0.02;
-  const nk=add3(spine,loft(skin,[{t:0,w:nw*0.92,f:nw*0.95,b:nw*0.9},{t:0.55,w:nw,f:nw*0.95,b:nw},{t:1,w:nw*1.15,f:nw,b:nw*1.15}],NL,{steps:6}));
+  const nk=add3(spine,loft(skin,[{t:0,w:nw*0.92,f:nw*0.95,b:nw*0.9},{t:0.55,w:nw,f:nw*0.92,b:nw},{t:1,w:nw*1.05,f:nw*0.8,b:nw*1.05}],NL,{steps:6,cap1:0.5}));
   nk.T=[0,D.neckL+D.hH*0.2,-nw*0.12];
   J.chin=add3(spine,N3(null)); J.chin.T=[0,D.neckL,0]; J.chin.cap=1;
   // 다리
   J.leg=[]; const lp=g.legPose||[4,4];
   [-1,1].forEach((sd,i)=>{
-    const hip=add3(pel,N3(null)); hip.T=[sd*D.hipW*(F?0.24:0.22),0,0]; hip.base=[0,0,sd*(lp[i]||4)*0.01];
+    const hip=add3(pel,N3(null)); hip.T=[sd*Math.max(D.hipW*(F?0.24:0.22),D.t0*0.6),-D.torso*0.03,0]; hip.base=[0,0,sd*(lp[i]||4)*0.01];
     const L1=D.legL*0.5, L2=D.legL*0.5-0.022, lc=legCol||skin;
     if(g.legOk[i]){
       const THC=thighCtrl(D);
-      add3(hip,loft(lc,THC,L1,{cap0:1,cap1:1,steps:14}));
+      add3(hip,loft(lc,THC,L1,{cap0:0.55,cap1:1,steps:22,seg:32,dents:legCol?null:[{t:0.8,w:0.08,d:-D.t0*0.05*(0.5+m),x:0.55,s:0.3},{t:0.45,w:0.25,d:D.t0*0.03*m,x:0.35,s:0.12}]},{met:legCol?legMet:0}));
+      if(!legCol&&!ou._loin) add3(hip,loft(uw,THC,L1,{ta:0,tb:F?0.06:0.1,inf:0.004,steps:3,cap0:0.55}));
+      add3(hip,sph(lc,0,-L1*0.96,D.t0*0.2,D.t0*0.17,D.t0*0.19,D.t0*0.1)); // 무릎뼈
       const kn=add3(hip,N3(null)); kn.T=[0,-L1,0];
       const CC=calfCtrl(D);
-      add3(kn,loft(lc,CC,L2,{cap0:1,cap1:1,steps:14}));
+      add3(kn,loft(lc,CC,L2,{cap0:1,cap1:1,steps:20,seg:28,dents:legCol?null:[{b:1,t:0.26,w:0.1,d:-D.t0*0.05*(0.5+m),x:0.42,s:0.3},{b:1,t:0.3,w:0.12,d:D.t0*0.02,x:0,s:0.08}]},{met:legCol?legMet:0}));
+      if(ou._greave) add3(kn,loft(ou._greave,CC,L2,{ta:0.12,tb:0.92,inf:0.009,steps:8},{met:1}));
       const fc=ou.boots?'#2B2118':skin, FL=D.t0*1.75;
-      const ft=add3(kn,N3(null)); ft.T=[0,-(L2+0.022)+D.t0*0.15,-D.t0*0.32]; ft.R=[-Math.PI/2,0,0]; add3(ft,loft(fc,footCtrl(D),FL*0.8,{cap0:1,cap1:0.4,steps:10})); if(ou.boots) add3(ft,sph(fc,0,-FL*0.92,-D.t0*0.02,D.t0*0.3,D.t0*0.16,D.t0*0.12)); else toes3(ft,fc,D,sd,FL);
+      const an=add3(kn,N3(null)); an.T=[0,-L2+D.t0*0.06,0]; const ft=add3(an,N3(null)); ft.T=[0,-0.022+D.t0*0.09,-D.t0*0.32]; ft.R=[-Math.PI/2,0,0]; add3(ft,loft(fc,footCtrl(D),FL*0.8,{cap0:1,cap1:0.4,steps:10})); if(ou.boots) add3(ft,sph(fc,0,-FL*0.92,-D.t0*0.02,D.t0*0.3,D.t0*0.16,D.t0*0.12)); else toes3(ft,fc,D,sd,FL);
       if(ou.boots) add3(kn,loft('#2B2118',CC,L2,{ta:0.5,tb:1,inf:0.006,steps:6}));
-      J.leg.push({hip,kn,ok:1});
+      J.leg.push({hip,kn,ok:1,ft,an});
     } else {
       add3(hip,loft(lc,thighCtrl(D),L1*0.55,{cap0:1,cap1:1,steps:8}));
       const kn=add3(hip,N3(null)); kn.T=[0,-L1,0];
@@ -1760,19 +1870,19 @@ function build3(h,dead){
     const sh=add3(spine,N3(null)); sh.T=[sd*Math.max(D.SW-D.wa*0.5,D.chestW*0.5+D.wa*0.22),-T*0.15,0]; sh.base=[0,0,sd*((ap[i]||8)*0.7+D.MX*7)*Math.PI/180];
     const armCol=(ou.top===1||ou.top===3)?topCol:skin, wr=D.wa*0.5;
     // 어깨 살: 몸통 어깨선과 팔 윗부분을 둥글게 이어 줌 (몸통에 붙어 있음)
-    { const px=sh.T[0], py=sh.T[1], bc=topCol?(ou.top===4?'#A3AAB0':topCol):skin, inf=topCol?0.008:0;
-      const kc=topCol?0.85:1; add3(spine,sph(bc,px-sd*wr*0.6,py+wr*0.2*kc,-wr*0.05,wr*(1.35+0.25*m)*kc+inf,wr*(0.95+0.12*m)*kc+inf,wr*(1.0+0.15*m)*kc+inf,{met:ou.top===4?1:0})); }
+    { const px=sh.T[0], py=sh.T[1], bc=topCol||skin, inf=topCol?0.008:0;
+      const kc=topCol?0.85:1; add3(spine,sph(bc,px-sd*wr*0.6,py+wr*0.2*kc,-wr*0.05,wr*(1.35+0.25*m)*kc+inf,wr*(0.95+0.12*m)*kc+inf,wr*(1.0+0.15*m)*kc+inf,{met:metal&&ou.top===4?1:0})); }
     // 삼각근: 어깨를 덮는 둥근 뚜껑
-    add3(sh,loft(ou.top===4?'#A3AAB0':armCol,[{t:0,w:wr*(1.0+0.14*m),f:wr*(1.0+0.1*m),b:wr*(1.02+0.1*m)},{t:0.6,w:wr*(1.0+0.12*m),f:wr*(0.98+0.05*m),b:wr*(1.0+0.05*m)},{t:1,w:wr*0.8,f:wr*0.78,b:wr*0.8}],D.ua*0.5,{cap0:1,cap1:1,steps:6},{met:ou.top===4?1:0})).T=[sd*wr*0.06,-wr*0.3,0];
+    add3(sh,loft(ou.top===4?topCol:armCol,[{t:0,w:wr*(1.0+0.14*m),f:wr*(1.0+0.1*m),b:wr*(1.02+0.1*m)},{t:0.6,w:wr*(1.0+0.12*m),f:wr*(0.98+0.05*m),b:wr*(1.0+0.05*m)},{t:1,w:wr*0.8,f:wr*0.78,b:wr*0.8}],D.ua*0.5,{cap0:1,cap1:1,steps:6},{met:ou.top===4?1:0})).T=[sd*wr*0.06,-wr*0.3,0];
     if(g.armOk[i]){
-      add3(sh,loft(armCol,upArmCtrl(D),D.ua,{cap0:1,cap1:1,steps:12},{met:ou.top===3?1:0}));
+      add3(sh,loft(armCol,upArmCtrl(D),D.ua,{cap0:1,cap1:1,steps:12},{met:ou.top===3&&metal?1:0}));
       const el=add3(sh,N3(null)); el.T=[0,-D.ua,0];
       add3(el,loft(skin,foreArmCtrl(D),D.fa,{cap0:1,cap1:0.6,steps:12}));
-      if(ou.top===4||ou.top===1||ou.top===3) add3(el,loft(ou.top===4?'#A3AAB0':'#2B2118',foreArmCtrl(D),D.fa,{ta:0.45,tb:0.95,inf:0.005,steps:4},{met:ou.top===4?1:0}));
+      if(ou.top===4||ou.top===1||ou.top===3) add3(el,loft(ou.top===4?topCol:'#2B2118',foreArmCtrl(D),D.fa,{ta:0.45,tb:0.95,inf:0.005,steps:4},{met:ou.top===4&&metal?1:0}));
       const hd=add3(el,N3(null)); hd.T=[0,-D.fa+wr*0.25,0];
       fist3(hd,skin,D,sd);
       if(i===1&&h.weapon&&h.weapon.kind!=='tank') add3(hd,weapon3(h.weapon.kind,D));
-      J.arm.push({sh,el,ok:1});
+      J.arm.push({sh,el,ok:1,wr:hd});
     } else {
       add3(sh,loft(armCol,upArmCtrl(D),D.ua*0.38,{cap0:1,steps:4}));
       add3(sh,cyl('#b8aa90',0,-D.ua*0.38,0,D.wa*0.42,0.01));
@@ -1797,11 +1907,13 @@ function breakLimb3(J,t,i){ const L=(t==='arm'?J.arm:J.leg)[i]; if(!L||!L.ok) re
   const dark=n=>{ if(n.c&&!n.met){ n.c=[n.c[0]*0.12+0.04,n.c[1]*0.08+0.02,n.c[2]*0.1+0.04]; } n.ch.forEach(dark); };
   if(t==='arm') dark(root); else root.ch.forEach(c=>{ if(c!==root) dark(c); }); }
 // 떨어져 나가는 소품: 투구, 무기 (중심이 원점)
-function helm3(D){ const r=D.hH*0.5, t=N3(null);
-  add3(t,loft('#8F969C',[{t:0,w:r*0.8,f:r*0.8,b:r*0.85},{t:0.5,w:r*0.98,f:r*0.95,b:r*1.0},{t:1,w:r,f:r*0.97,b:r*1.02}],r*0.75,{cap0:1,steps:8},{met:1})).T=[0,r*0.45,0];
-  add3(t,loft('#6B7278',[{t:0,w:r*1.04,f:r*1.01,b:r*1.06},{t:1,w:r*1.04,f:r*1.01,b:r*1.06}],r*0.14,{steps:1},{met:1})).T=[0,-r*0.2,0];
-  add3(t,box('#4A5056',0,-r*0.4,r*0.98,r*0.12,r*0.5,r*0.06,{met:1}));
+function helm3(D,col,met){ const r=D.hH*0.5, t=N3(null); col=col||'#8F969C'; const mt=met===false?0:1;
+  add3(t,loft(col,[{t:0,w:r*0.8,f:r*0.8,b:r*0.85},{t:0.5,w:r*0.98,f:r*0.95,b:r*1.0},{t:1,w:r,f:r*0.97,b:r*1.02}],r*0.75,{cap0:1,steps:8},{met:mt})).T=[0,r*0.45,0];
+  add3(t,loft(mix(col,'#000000',0.25),[{t:0,w:r*1.04,f:r*1.01,b:r*1.06},{t:1,w:r*1.04,f:r*1.01,b:r*1.06}],r*0.14,{steps:1},{met:mt})).T=[0,-r*0.2,0];
+  if(mt) add3(t,box('#4A5056',0,-r*0.4,r*0.98,r*0.12,r*0.5,r*0.06,{met:1}));
   return t; }
+function flower3(D){ const t=N3(null), R0=D.hH*0.48, th=D.hH*0.04; const ring=add3(t,N3(MS.raw((()=>{ const a=[]; for(let i=0;i<=10;i++){ const q=i/10*Math.PI*2; a.push([Math.sin(q)*th,R0+Math.cos(q)*th]); } return a; })(),24),'#4E7A2E')); ring.S=[1,1,0.9];
+  ['#F28CB1','#FFD84D','#FFFFFF','#C69CF2','#F28CB1','#FF9A5C','#FFFFFF','#FFD84D'].forEach((c,i)=>{ const q=i/8*Math.PI*2; add3(t,sph(c,Math.cos(q)*R0,th,Math.sin(q)*R0*0.9,D.hH*0.06,D.hH*0.035,D.hH*0.06)); }); return t; }
 function prop3(kind,D){ const t=N3(null); const w=add3(t,weapon3(kind,D)); w.T=[0,0.12,0]; w.R=[0,0,0]; return t; }
 // 탱크 (몸 앞쪽에 놓임, 진행 방향 +z)
 function tank3(D){
@@ -1870,10 +1982,20 @@ function g3render(figs,cam,w,h){
 // 자세: 각도(도). a=어깨 e=팔꿈치 l=골반 k=무릎 z=팔 벌림 ln=상체 숙임 tw=상체 비틀기 by=몸 들썩임
 function pose3(J,A,breath){
   const R=d=>(d||0)*Math.PI/180; A=A||{};
-  J.arm.forEach((a,i)=>{ const sd=i?1:-1; a.sh.R=[R(A['a'+i]),0,sd*R(A['z'+i]||A.z||0)]; if(a.el) a.el.R=[R(A['e'+i]),0,0]; });
+  // 관절: 어깨(a 앞뒤, z 벌림, s 으쓱), 팔꿈치(e), 손목(w), 골반(l), 무릎(k), 발목(f)
+  J.arm.forEach((a,i)=>{ const sd=i?1:-1; if(!a.sh.T0) a.sh.T0=a.sh.T.slice();
+    a.sh.T=[a.sh.T0[0],a.sh.T0[1]+(A['s'+i]||A.s||0)*0.0011,a.sh.T0[2]];
+    a.sh.R=[R(A['a'+i]),0,sd*R(A['z'+i]||A.z||0)]; if(a.el) a.el.R=[R(A['e'+i]),0,0];
+    if(a.wr) a.wr.R=[R(A['w'+i]===undefined?-8:A['w'+i]),0,0]; });
+  // 두 발 모두 디딘 자세(both): 더 긴 쪽 다리의 무릎을 더 굽혀 두 발바닥이 함께 땅에 닿게 (간단한 2관절 IK)
+  if(A.both&&!A.free&&J.D&&J.leg.length===2&&J.leg.every(l=>l.ok)){ const L1=J.D.legL*0.5, L2=J.D.legL*0.5;
+    const hh=[0,1].map(i=>L1*Math.cos(R(A['l'+i]))+L2*Math.cos(R(A['l'+i])+R(A['k'+i]))), lo=Math.min(hh[0],hh[1]);
+    [0,1].forEach(i=>{ if(hh[i]>lo+1e-4){ const a=R(A['l'+i]), c=Math.max(-1,Math.min(1,(lo-L1*Math.cos(a))/L2)); A=Object.assign({},A); A['k'+i]=(Math.acos(c)-a)*180/Math.PI; } }); }
   J.leg.forEach((l,i)=>{
     const hipAngle=l.ok?R(A['l'+i]):0, kneeAngle=l.ok?R(A['k'+i]):0;
     l.hip.R=[hipAngle,0,0]; if(l.kn) l.kn.R=[kneeAngle,0,0];
+    // 발목: 무릎을 굽혀도 발바닥이 땅과 평평하게 (다리를 크게 차올릴 땐 덜 맞춤)
+    if(l.an){ const sh=hipAngle+kneeAngle, keep=A.free?0.3:(Math.abs(hipAngle)>1.0?0.35:1); l.an.R=[-sh*keep+R(A['f'+i]),0,0]; }
   });
   J.waist.R=[R(A.ln),R(A.tw),0];
   // 발 붙이기: 무릎·골반을 굽힌 만큼 몸을 내려서 더 펴진 쪽 발이 항상 땅에 닿게
@@ -1988,18 +2110,37 @@ function keeperHtml(){
 function itemIcon(c){
   const S2=(d,f)=>`<path d="${d}" fill="${f}" stroke="rgba(0,0,0,.6)" stroke-width="1" stroke-linejoin="round"/>`;
   let o='';
+  const ic=c.col==='tunic'?'#A99C80':c.col==='pants'?'#4A3A2A':(c.col||'#888');
   if(c.slot==='top'){
-    const col=c.id===1?'#A99C80':c.id===2?JERKIN:c.id===3?MAIL:PLATE;
-    if(c.id===2) o=S2('M12 6L17 6L20 14L23 6L28 6L31 12L29 34L11 34L9 12Z',col)+'<path d="M20 14V33" stroke="#2a1c10" stroke-dasharray="2 2"/>';
-    else if(c.id===4) o=S2('M11 7Q20 3 29 7L32 13L30 34L10 34L8 13Z',col)+'<path d="M12 18Q20 26 28 18M11 25Q20 29 29 25M11 30Q20 33 29 30" stroke="#555B61" fill="none"/><path d="M14 11Q20 15 26 11" stroke="#E6EAEE" stroke-width="1.5" fill="none" opacity=".7"/>';
-    else o=S2('M13 6L17 8L20 12L23 8L27 6L36 12L33 18L29 16L29 34L11 34L11 16L7 18L4 12Z',col)+(c.id===3?'<path d="M11 14H29M11 19H29M11 24H29M11 29H29" stroke="#4e5559" stroke-dasharray="2 1.5"/>':'');
-  } else if(c.slot==='bottom') o=S2('M11 5H29L31 35H23L20 16L17 35H9Z',c.id===1?'#4A3A2A':JERKIN);
+    if(c.style==='vest') o=S2('M12 6L17 6L20 14L23 6L28 6L31 12L29 34L11 34L9 12Z',ic)+'<path d="M20 14V33" stroke="#2a1c10" stroke-dasharray="2 2"/>'+(c.tier===1?'<path d="M11 33l2-3 2 3 2-3 2 3 2-3 2 3 2-3 2 3 2-3 2 3" stroke="#3a2a1a" fill="none"/>':'');
+    else if(c.style==='plate') o=S2('M11 7Q20 3 29 7L32 13L30 34L10 34L8 13Z',ic)+'<path d="M12 18Q20 26 28 18M11 25Q20 29 29 25M11 30Q20 33 29 30" stroke="rgba(0,0,0,.45)" fill="none"/><path d="M14 11Q20 15 26 11" stroke="#fff" stroke-width="1.5" fill="none" opacity=".5"/>';
+    else o=S2('M13 6L17 8L20 12L23 8L27 6L36 12L33 18L29 16L29 34L11 34L11 16L7 18L4 12Z',ic)+(c.style==='mail'?'<path d="M11 14H29M11 19H29M11 24H29M11 29H29" stroke="rgba(0,0,0,.45)" stroke-dasharray="2 1.5"/>':c.tier===4?'<path d="M14 12V33M20 13V33M26 12V33" stroke="rgba(0,0,0,.25)"/>':'');
+  } else if(c.slot==='bottom'){
+    if(c.style==='loin') o=S2('M9 8H31V13H9Z',ic)+S2('M14 13H26L24 30H16Z',ic);
+    else if(c.style==='grass'){ o=S2('M8 8H32V12H8Z',mix(ic,'#000000',0.2)); for(let k=0;k<8;k++){ const x=9+k*3; o+=S2(`M${x} 11L${x+3} 11L${x+2+(k%2)} ${28+(k%3)*3}Z`,k%2?ic:mix(ic,'#ffffff',0.2)); } }
+    else o=S2('M11 5H29L31 35H23L20 16L17 35H9Z',ic)+(c.style==='greave'?S2('M9.5 22H16.5L17 34H9Z',c.col2)+S2('M23 22H30.5L31 34H23.5Z',c.col2):'')+(c.met&&c.style!=='greave'?'<path d="M11 12H29M10.5 18H18M22 18H30M10 24H17M23 24H30.5M9.5 30H17M23.5 30H31" stroke="rgba(0,0,0,.4)" stroke-dasharray="2 1.5"/>':'');
+  }
+  else if(c.slot==='helm'){
+    const dome='M7 26C7 10 14 5 20 5C26 5 33 10 33 26Z', k=c.style;
+    if(k==='flower'){ o='<path d="M6 22Q20 14 34 22" stroke="#4E7A2E" stroke-width="3" fill="none"/>'; [[8,21,'#F28CB1'],[13,18,'#FFD84D'],[20,17,'#FFFFFF'],[27,18,'#F28CB1'],[32,21,'#C69CF2']].forEach(([x,y,f])=>{ o+=`<circle cx="${x}" cy="${y}" r="3.4" fill="${f}" stroke="rgba(0,0,0,.4)"/><circle cx="${x}" cy="${y}" r="1.2" fill="#E8A31C"/>`; }); }
+    else if(k==='hood'||k==='bear') o=(k==='bear'?S2('M7 10a4 4 0 1 1 7-4Z',ic)+S2('M26 6a4 4 0 1 1 7 4Z',ic):'')+S2('M5 36C4 14 11 5 20 5C29 5 36 14 35 36Z',ic)+'<ellipse cx="20" cy="24" rx="9" ry="10" fill="#1a120c"/>';
+    else{ o=S2(dome,ic);
+      if(k==='bowl') o+='<path d="M10 20Q20 14 30 20M9 14Q20 8 31 14" stroke="#5a3a1a" fill="none"/>'+S2('M6 24H34V28H6Z',mix(ic,'#000000',0.3));
+      else if(k==='cap') o+=S2('M6 24H34V28H6Z',mix(ic,'#000000',0.3))+'<path d="M20 5V24M8 16H32" stroke="#3a2412" stroke-width="1.5"/><circle cx="12" cy="26" r="1" fill="#ddd"/><circle cx="20" cy="26" r="1" fill="#ddd"/><circle cx="28" cy="26" r="1" fill="#ddd"/>';
+      else{ o+=S2('M6 24H34V28H6Z',mix(ic,'#000000',0.3));
+        if(k==='spangen') o+='<path d="M20 5V24M12 8L10 24M28 8L30 24" stroke="#3a3e42" stroke-width="2"/>';
+        if(k==='nasal'||k==='horn'||k==='steel') o+=S2('M18.5 27H21.5L21 36H19Z',ic)+'<path d="M20 5V24" stroke="rgba(0,0,0,.45)" stroke-width="1.5"/>';
+        if(k==='spect') o+='<path d="M10 28a4.5 4 0 1 0 9 0M21 28a4.5 4 0 1 0 9 0" stroke="'+ic+'" stroke-width="2.4" fill="none"/>';
+        if(k==='horn') o+=S2('M7 18C2 14 1 8 3 3C5 8 7 11 10 13Z','#E8DCC0')+S2('M33 18C38 14 39 8 37 3C35 8 33 11 30 13Z','#E8DCC0');
+        if(k==='steel') o+=S2('M6 27H12L11 37H8Z',ic)+S2('M28 27H34L32 37H29Z',ic)+'<path d="M13 10Q20 6 27 10" stroke="#fff" stroke-width="1.6" fill="none" opacity=".7"/>';
+        if(k==='dome') o+='<path d="M20 5V22" stroke="#fff" stroke-width="1.6" opacity=".45"/>';
+      } }
+  }
   else if(c.slot==='boots') o=S2('M10 6H18V24L30 27Q33 28 33 33V35H10Z',LEATHER)+'<path d="M10 12H18" stroke="#4a3a2a" stroke-width="2"/>';
   else if(c.slot==='fur') o='<ellipse cx="20" cy="22" rx="16" ry="8" fill="#6E6256" stroke="rgba(0,0,0,.6)"/><path d="M8 20l2 5M13 18l2 6M20 17l1 6M27 18l-2 6M32 20l-2 5" stroke="#a89c8e" stroke-width="1.4"/>';
-  else if(c.slot==='helm') o=S2('M7 26C7 10 14 5 20 5C26 5 33 10 33 26Z','#9AA1A7')+S2('M6 24H34V28H6Z','#6B7278')+S2('M18.5 27H21.5L21 36H19Z','#9AA1A7')+'<path d="M20 5V24" stroke="#4A5056" stroke-width="1.5"/>';
   return `<svg viewBox="0 0 40 40" aria-hidden="true">${o}</svg>`;
 }
-const SHOPCATS=[['cloth','옷'],['armor','갑옷'],['weapon','무기'],['name','이름']];
+const SHOPCATS=[['weapon','무기'],['helm','투구'],['top','상의'],['bottom','하의'],['etc','기타'],['name','이름']];
 const isArmor=c=>c.slot==='helm'||(c.slot==='top'&&c.id>=2);
 function shopHtml(){
   const h=S.hero, o=h.outfit||{}, cat=ui.scat||'weapon';
@@ -2009,9 +2150,10 @@ function shopHtml(){
   const tabs=`<div class="scats">${SHOPCATS.map(([k,l])=>`<button class="sct${cat===k?' on':''}" data-act="scat" data-c="${k}">${l}</button>`).join('')}</div>`;
   const card=(icon,name,sub,price,btn,on)=>`<div class="scard${on?' on':''}">${icon}<b>${name}</b><span>${sub}</span><em>${price}</em>${btn}</div>`;
   let grid='';
-  if(cat==='cloth'||cat==='armor'){
-    grid=CLOTHES.map((c,i)=>[c,i]).filter(([c])=>cat==='armor'?isArmor(c):!isArmor(c)).map(([c,i])=>{ const worn=o[c.slot]===c.id;
-      return card(itemIcon(c),c.name,`${SLOTN[c.slot]}${c.def?` · 맷집 +${c.def}`:''}`,`${c.price.toLocaleString('ko-KR')}원`,`<button class="btn small${worn?'':' primary'}" data-act="${worn?'strip':'wear'}" data-i="${i}">${worn?'벗기':'입기'}</button>`,worn); }).join('');
+  if(['helm','top','bottom','etc'].includes(cat)){
+    const own=h.loot||[];
+    grid=CLOTHES.map((c,i)=>[c,i]).filter(([c])=>cat==='etc'?(c.slot==='boots'||c.slot==='fur'):c.slot===cat).sort((x,y)=>x[0].tier-y[0].tier).map(([c,i])=>{ const worn=o[c.slot]===c.id;
+      return card(itemIcon(c),`${c.fun?'':`<i class="tierb" style="background:${TIER_C(c.tier)}">${c.tier}</i>`}${c.name}`,`${c.fun?'장난감':cat==='etc'?SLOTN[c.slot]:c.tier+'단계'}${c.def?` · 맷집 +${c.def}`:''}${own.includes(c.slot+':'+c.id)?' · <b class="own">획득</b>':''}`,c.price?`${c.price.toLocaleString('ko-KR')}원`:'무료',`<button class="btn small${worn?'':' primary'}" data-act="${worn?'strip':'wear'}" data-i="${i}">${worn?'벗기':'입기'}</button>`,worn); }).join('');
   } else if(cat==='weapon'){
     grid=WEAPONS.map((w,i)=>{ const eqd=h.weapon&&h.weapon.kind===w.kind;
       return card(weaponIcon(w.kind),w.name,`공격 +${w.atk}${w.kind==='tank'?' · 받는 피해 -40%':''}`,`${w.price.toLocaleString('ko-KR')}원`,eqd?`<button class="btn small" data-act="unequip">해제</button>`:`<button class="btn small primary" data-act="buy" data-i="${i}">장착</button>`,eqd); }).join('');
@@ -2031,7 +2173,7 @@ function outfitLine(h){
 function profile(h,opts){
   const alive=opts.alive!==false;
   const slot=opts.mine?`<label class="flagslot${h.flag?' has':''}" title="내 국기 설정"><span>${h.flag?flagSvg(h.flag,'flgbig'):'국기'}</span><select id="flagSel" aria-label="내 국기">${'<option value="">국기 없음</option>'+FLAGS.map(f=>`<option value="${f}"${h.flag===f?' selected':''}>${f} ${FLAGN[f]||''}</option>`).join('')}</select></label>`:'';
-  return `<section class="card hero"><div class="pics">${figBox(h,!alive)}<div class="portrait">${drawPortrait(opts.mine?Object.assign({},h,{flag:''}):h,!alive)}${slot}</div></div>`+
+  return `<section class="card hero"><div class="pics">${figBox(h,!alive)}<div class="portrait">${USE3D?fig3d(h,!alive,0,'bust'):drawPortrait(opts.mine?Object.assign({},h,{flag:''}):h,!alive)}${slot}</div></div>`+
     `<h1 class="name">${flg(h)}${esc(h.name)}</h1><div class="nick">${esc(h.nick)}</div>`+
     `<div class="meas">${fmtH(h.cm)} · ${fmtKg(h.kg)} · <b>${opts.kills}킬</b>${opts.status?` · ${opts.status}`:''}</div>`+
     (h.tags&&h.tags.length?`<div class="tags">${h.tags.map(t=>`<span class="tag${t[1]?' rare':''}">${t[0]}</span>`).join('')}</div>`:'')+
@@ -2098,7 +2240,7 @@ function packDuel(h,letter){
     g.skin,hx(g.eyeColor),hx(g.hairColor),g.hairStyle,g.beard,g.scar?1:0,g.tattoo||0,hx(g.tunic),hx(g.pants),hx(g.furC),
     g.armPose.join('.'),g.legPose.join('.'),
     (g.armOk[0]?1:0)+''+(g.armOk[1]?1:0)+(g.legOk[0]?1:0)+(g.legOk[1]?1:0),g.blessed?1:0,
-    [ou.top,ou.bottom,ou.boots,ou.fur,ou.helm].map(x=>x|0).join(''),wk,
+    [ou.top,ou.bottom,ou.boots,ou.fur,ou.helm].map(x=>Math.max(0,Math.min(35,x|0)).toString(36)).join(''),wk,
     STK.map(k=>h.st[k]).join('.'),h.maxhp,letter||'',h.flag||'',g.sex==='f'?1:0,g.mono?1:0,hx(g.uw||'1E1E22'),Math.round((g.bust||0)*100),g.eth||'eu',g.expr||'stern',g.oddEye||0,hx(g.eye2||''),g.bulk||0];
   return b64(JSON.stringify(o));
 }
@@ -2114,7 +2256,8 @@ function unpackDuel(str){
       tunic:col(tun),pants:col(pan),furC:col(fur),armPose:pose(ap,7,20),legPose:pose(lp,2,7),armOk:[ok[0]==='1',ok[1]==='1'],legOk:[ok[2]==='1',ok[3]==='1'],
       sex:o[26]?'f':'m',mono:!!o[27],uw:col(o[28]||'1E1E22'),bust:o[26]?Math.min(1.3,Math.max(0.8,(+o[29]||100)/100)):0,eth:ETH[o[30]]?o[30]:'eu',expr:['stern','angry','snarl','smirk','calm'].includes(o[31])?o[31]:'stern',oddEye:cl(+o[32]||0,0,2),eye2:/^[0-9a-fA-F]{6}$/.test(o[33]||'')?'#'+o[33]:'',bulk:Math.max(0,Math.min(8,+o[34]||0))};
     if(g.sex==='f') g.beard=0;
-    const outfit={top:cl(+of[0]||0,0,4),bottom:cl(+of[1]||0,0,2),boots:cl(+of[2]||0,0,1),fur:cl(+of[3]||0,0,1),helm:cl(+of[4]||0,0,1)};
+    const o36=i=>parseInt(String(of)[i]||'0',36)||0, gid=(sl,i)=>{ const v=o36(i); return gearOf(sl,v)?v:0; };
+    const outfit={top:gid('top',0),bottom:gid('bottom',1),boots:cl(o36(2),0,1),fur:cl(o36(3),0,1),helm:gid('helm',4)};
     const wp=+wk>0?WEAPONS[(+wk)-1]:null, hp=cl(+hp0||st.hp,1,4000);
     return {id:'in'+Date.now(),name:String(n||'도전자').replace(/[\u0000-\u001f<>]/g,'').slice(0,12),nick:String(k||'').slice(0,20),g,st,cm:g.cm,kg:+kg||70,outfit,
       flag:isFlag(o[25])?o[25]:'',weapon:wp?{...wp}:null,wins:cl(+wins||0,0,9999),maxhp:hp,hp,tags:makeTags(g),letter:String(letter||'').slice(0,200)};
@@ -2123,7 +2266,7 @@ function unpackDuel(str){
 function inviteView(){
   const h=S.hero;
   return topbar()+`<section class="card panel inv"><h2>결투장 던지기</h2>`+
-    `<div class="invp"><div class="portrait">${drawPortrait(h,false)}</div></div>`+
+    `<div class="invp"><div class="portrait">${USE3D?fig3d(h,false,0,'bust'):drawPortrait(h,false)}</div></div>`+
     `<h1 class="name">${flg(h)}${esc(h.name)}</h1><div class="nick">${esc(h.nick)}</div>`+
     `<label class="lbl" for="letter">편지</label>`+
     `<textarea id="letter" maxlength="200" rows="4" placeholder="적에게 던질 한마디 (최대 200자)">${esc(ui.letter||'')}</textarea>`+
@@ -2134,7 +2277,7 @@ function inviteView(){
 function incomingView(){
   const f=ui.incoming;
   return topbar()+`<section class="card panel inv"><h2>피의 결투장이 날아왔다</h2>`+
-    `<div class="invp"><div class="portrait">${drawPortrait(f,false)}</div></div>`+
+    `<div class="invp"><div class="portrait">${USE3D?fig3d(f,false,0,'bust'):drawPortrait(f,false)}</div></div>`+
     `<h1 class="name">${flg(f)}${esc(f.name)}</h1><div class="nick">${esc(f.nick)} · ${fmtH(f.cm)} · ${f.wins}킬</div>`+
     (f.letter?`<div class="letter">${esc(f.letter).replace(/\n/g,'<br>')}</div>`:'')+`</section>`+
     (S.hero?`<div class="actions"><button class="btn primary" data-act="acceptin">덤벼라</button><button class="btn" data-act="declinein">등을 보인다 (겁쟁이)</button></div>`
@@ -2252,7 +2395,7 @@ function startFight(foeIn){
   const res=fight(A,B);
   const win=res.winner==='A';
   const rep={me:snapMe,foe,log:res.log,win,broke:null,gain:null};
-  if(win){ rep.gain=grow(me); rep.wins=me.wins; sync(me,true); }
+  if(win){ rep.gain=grow(me); rep.plunder=plunderHelm(me,foe); rep.wins=me.wins; sync(me,true); }
   else {
     const last=res.log[res.log.length-1];
     sync(me,false);
@@ -2403,16 +2546,40 @@ function finish(){
   const wf=$('#f'+w); if(wf){ wf.dataset.ct=performance.now(); wf.classList.add('cheer'); }
   let h='';
   if(r.win){
-    const top=Object.entries(r.gain).filter(([k])=>k!=='bulk').sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>{
+    const top=Object.entries(r.gain).filter(([k])=>k!=='bulk'&&k!=='loot').sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>{
       const nm=SGROUPS.flatMap(g=>g[1]).find(x=>x[0]===k)[1]; return `${nm} +${v}`; });
-    h+=`<div class="verdict win"><b>살아남았다. 오늘은.</b><span>${r.wins}킬 · ${top.join(' · ')}</span></div>`;
+    h+=`<div class="verdict win"><b>${r.vline||(r.vline=pick(WIN_LINES))}</b><span>${r.wins}킬 · ${top.join(' · ')}</span></div>`;
+    if(r.plunder){ const it=gearOf(r.plunder.slot,r.plunder.id); if(it) h+=`<div class="plunder">${itemIcon(it)}<div><b>놈의 투구를 빼앗았다</b><span><i class="tierb" style="background:${TIER_C(it.tier)}">${it.tier}</i>${esc(it.name)} · ${r.plunder.worn?'바로 썼다':'창고에 넣었다 (지금 것이 더 좋다)'}</span></div></div>`; }
   } else {
-    h+=`<div class="verdict lose"><b>전사</b><span>${esc(r.me.name)}, ${r.me.wins}킬을 남기고 쓰러졌다. 묘지에 이름이 새겨졌다. 까마귀들이 감사해한다.</span></div>`;
+    h+=`<div class="verdict lose"><b>전사</b><span>${esc(r.me.name)}, ${r.me.wins}킬을 남기고 쓰러졌다. ${r.vline||(r.vline=pick(LOSE_LINES))}</span></div>`;
   }
   if(r.broke) h+=`<p class="note">${esc(r.broke)}이(가) 부서졌어요.</p>`;
   h+=r.win?`<button class="btn primary" data-act="back">피가 부족하다</button>`:`<button class="btn primary" data-act="roll">다시 태어난다</button>`;
   after.innerHTML=h;
+  if(r.win&&r.gain&&r.gain.loot&&!r.gachaShown){ r.gachaShown=1; if(S.pendingReplay===r) saveState(); setTimeout(()=>gacha(r.gain.loot),700); }
 }
+
+/* ---- 보상 뽑기 룰렛 ---- */
+function gacha(loot){
+  const it=gearOf(loot.slot,loot.id); if(!it) return;
+  const pool=CLOTHES.filter(c=>c.slot===loot.slot), N=34, cellW=96;
+  const reel=[]; for(let i=0;i<N+4;i++) reel.push(i===N?it:rollGear(loot.slot));
+  const title=loot.at===1?'첫 승리 보상 · 투구 뽑기':loot.at===5?'5승 보상 · 갑옷 상의 뽑기':'10승 보상 · 하의 뽑기';
+  const ov=document.createElement('div'); ov.className='gacha';
+  ov.innerHTML=`<div class="gbox"><h3>${title}</h3><div class="gwin"><div class="gmark"></div><div class="greel">${reel.map(c=>`<div class="gcell" style="--tc:${TIER_C(c.tier)}">${itemIcon(c)}<i>${c.tier}</i></div>`).join('')}</div></div>`+
+    `<div class="gres"></div><div class="godds">${pool.sort((a,b)=>a.tier-b.tier).map(c=>`<span style="color:${TIER_C(c.tier)}">${c.tier}단계 ${TIER_W[c.tier-1]}%</span>`).join(' · ')}</div><button class="btn primary gok" disabled>뽑는 중…</button></div>`;
+  document.body.appendChild(ov);
+  const strip=ov.querySelector('.greel'), win=ov.querySelector('.gwin');
+  const W=win.clientWidth, target=N*cellW+cellW/2-W/2+(Math.random()-0.5)*cellW*0.6, D=4200, t0=performance.now();
+  const ease=x=>1-Math.pow(1-x,4);
+  (function step(now){ const x=Math.min(1,(now-t0)/D); strip.style.transform=`translateX(${-target*ease(x)}px)`;
+    if(x<1) requestAnimationFrame(step);
+    else { const cell=strip.children[N]; cell.classList.add('hit'); ov.classList.add(it.tier>=10?'legend':it.tier>=8?'epic':'done');
+      ov.querySelector('.gres').innerHTML=`<b style="color:${TIER_C(it.tier)}">${it.tier}단계 · ${esc(it.name)}</b><span>맷집 +${it.def} · ${loot.worn?'바로 착용했다':'지금 것이 더 좋아서 창고에 넣었다'}</span>`;
+      const b=ov.querySelector('.gok'); b.disabled=false; b.textContent='받는다'; } })(t0);
+  ov.addEventListener('click',e=>{ if(e.target.classList.contains('gok')&&!e.target.disabled){ ov.remove(); if(view!=='battle') render(); } });
+}
+
 
 function copyText(text,okMsg){
   const say=m=>{ ui.msg=m; const e=$('#sendmsg'); if(e) e.textContent=m; };
@@ -2484,7 +2651,8 @@ function fig3d(h,dead,px,mode){
   if(!USE3D) return drawChar(h,dead,px);
   const id='v'+(++V3ID); V3P.set(id,{h,dead,px,mode});
   const w=mode==='static'?Math.round(px*0.75):mode==='keeper'?Math.round(px*0.9):0;
-  return `<canvas class="v3d v3${mode}" data-v="${id}" style="height:${px}px;${w?`width:${w}px`:'width:100%'}" aria-label="${esc(h.name||'전사')}"></canvas>`;
+  const st=mode==='bust'?'width:100%;aspect-ratio:4/5;display:block':`height:${px}px;${w?`width:${w}px`:'width:100%'}`;
+  return `<canvas class="v3d v3${mode}" data-v="${id}" style="${st}" aria-label="${esc(h.name||'전사')}"></canvas>`;
 }
 function mount3d(){ if(!USE3D) return; document.querySelectorAll('canvas.v3d').forEach(cv=>{ if(cv._v) return; const d=V3P.get(cv.dataset.v); if(!d) return; V3P.delete(cv.dataset.v); cv._v=Object.assign({J:null,done:false},d); }); }
 function layout2D(h){ // 2D 그림 안에서 발~머리끝 높이 비율과 바닥 여백 (전투 배치용)
@@ -2497,6 +2665,8 @@ function layout2D(h){ // 2D 그림 안에서 발~머리끝 높이 비율과 바�
   return {fig:(GY-2-yT)/V, ground:12/V, cxr:(100-vx)/vw};
 }
 const DPR=Math.min(2,window.devicePixelRatio||1);
+// 편하게 선 자세: 한쪽 다리에 체중, 무릎·팔꿈치 살짝 굽힘, 팔은 몸에서 조금 떨어짐
+const REST3={a0:-4,a1:3,e0:-16,e1:-10,z0:7,z1:5,l0:-6,l1:5,k0:9,k1:3,tw:4,ln:2,both:1};
 function viewRender(v,now){
   const cv=v.cv||v; const vv=cv._v; const cw=Math.max(2,Math.round(cv.clientWidth*DPR)), ch=Math.max(2,Math.round(cv.clientHeight*DPR));
   if(cv.width!==cw||cv.height!==ch){ cv.width=cw; cv.height=ch; }
@@ -2505,15 +2675,28 @@ function viewRender(v,now){
   if(vv.mode==='keeper'||vv.mode==='idle'){
     const sAt=vv.mode==='keeper'?(()=>{ const k=cv.closest('.keeper'); return k&&k.classList.contains('shout')?(+k.dataset.st||0):0; })():(vv.shoutAt&&now-vv.shoutAt<1600?vv.shoutAt:0);
     if(sAt){ A=shout3(sAt,now); br=1; }
-    else { const s=Math.sin(now/1000*2*Math.PI/3.4); A={a0:4+2*s,a1:4+2*s,e0:-8-3*s,e1:-8-3*s,z:2+2*s,ln:1.5*s,by:0.002*s,k0:2,k1:2}; br=s; }
+    else { const s=Math.sin(now/1000*2*Math.PI/3.4); A=Object.assign({},REST3); A.a0+=2*s; A.a1+=2*s; A.e0-=3*s; A.e1-=3*s; A.z0+=2*s; A.z1+=2*s; A.ln+=1.5*s; br=s; }
   }
-  else if(vv.mode==='static') br=0;
+  else if(vv.mode==='static'){ br=0; A=REST3; }
+  else if(vv.mode==='bust'){ const s=Math.sin(now/1000*2*Math.PI/3.4); A=Object.assign({},REST3); br=s; }
   pose3(J,A,br);
-  J.root.R=[0,vv.mode==='static'?0.25:0.42,0];
+  J.root.R=[0,vv.mode==='static'?0.25:vv.mode==='bust'?0.12:0.42,0];
+  if(vv.mode==='bust'){ // 초상화: 실제 3D 몸의 가슴 위쪽을 크게
+    const y0=0.6, y1=1.09, k2=ch/(y1-y0), cam2={l:-cw/(2*k2),r:cw/(2*k2),b:y0,t:y1};
+    g3render([{J,M:M4.I(),des:vv.dead}],cam2,cw,ch); const c2=cv.getContext('2d'); c2.clearRect(0,0,cw,ch); c2.drawImage(G3.cv,0,0); return; }
   const tank=!!J.tank, k=ch/(tank?1.25:1.1), sh=tank?0.35:0;
   const cam={l:-cw/(2*k)+sh,r:cw/(2*k)+sh,b:-0.03,t:ch/k-0.03};
   g3render([{J,M:M4.I(),des:vv.dead}],cam,cw,ch);
   const ctx=cv.getContext('2d'); ctx.clearRect(0,0,cw,ch); ctx.drawImage(G3.cv,0,0);
+}
+// 공유 카드용: 실제 3D 몸 상반신을 그린 캔버스 (얼굴 텍스처가 준비될 때까지 잠깐 기다림)
+async function bustCanvas(h,w,hh){
+  if(!USE3D||!g3init()) return null;
+  for(let i=0;i<40;i++){ if(headTex(h,false,'front').ready&&headTex(h,false,'back').ready) break; await new Promise(r=>setTimeout(r,50)); }
+  const J=build3(h,false); pose3(J,REST3,0); J.root.R=[0,0.12,0];
+  const y0=0.6, y1=1.09, k=hh/(y1-y0);
+  g3render([{J,M:M4.I(),des:false}],{l:-w/(2*k),r:w/(2*k),b:y0,t:y1},w,hh);
+  const c=document.createElement('canvas'); c.width=w; c.height=hh; c.getContext('2d').drawImage(G3.cv,0,0); return c;
 }
 function battle3d(now){
   const cv=$('#st3d'), st=$('#stage'); if(!cv||!st||!ui.rep) return;
@@ -2529,7 +2712,7 @@ function battle3d(now){
       J=ui.b3[id]=build3(Object.assign({},h0,{outfit:Object.assign({},ou,{helm:0}),weapon:wk?null:h0.weapon}),true);
       const D=J.D, dir=id==='A'?-1:1, props=[];
       if(wk) props.push({n:prop3(wk,D),hy:0.5,vx:dir*(0.35+Math.random()*0.35),vy:1.5+Math.random()*0.4,w:-dir*(13+Math.random()*6),rest:Math.random()<0.5?Math.PI/2:-Math.PI/2,r0:0.012,rot:-dir*0.6});
-      if(ou.helm) props.push({n:helm3(D),hy:0.93,vx:dir*(0.1+Math.random()*0.35)*(Math.random()<0.25?-1:1),vy:1.8+Math.random()*0.4,w:(Math.random()<0.5?-1:1)*(9+Math.random()*6),rest:Math.random()<0.6?0:Math.PI,r0:D.hH*0.35,rot:0});
+      if(ou.helm){ const hv=visOut(h0); props.push({n:hv._hk==='flower'?flower3(D):helm3(D,hv._hc,hv._hmet),hy:0.93,vx:dir*(0.1+Math.random()*0.35)*(Math.random()<0.25?-1:1),vy:1.8+Math.random()*0.4,w:(Math.random()<0.5?-1:1)*(9+Math.random()*6),rest:Math.random()<0.6?0:Math.PI,r0:D.hH*0.35,rot:0}); }
       ui.b3['k'+id]={t0:now,last:now,dir,props}; }
     const K=ui.b3['k'+id];
     const BR=(ui.brk&&ui.brk[id])||[]; if((J._brk||0)!==BR.length){ BR.forEach(b=>breakLimb3(J,b.t,b.i)); J._brk=BR.length; }
@@ -2648,12 +2831,12 @@ function fighterAngles3(f,now){
   if(c.contains('brawl')){
     const s=Math.sin(t*2*Math.PI/1.3), wpn=!!f.dataset.w;
     const b=Math.sin(t*2*Math.PI/0.62);
-    const A={a1:wpn?-36:-52,e1:wpn?-80:-118,a0:-34,e0:-138,z0:-14,z1:-10,l1:-24,k1:30,l0:14,k0:24,ln:12,tw:12};
+    const A={a1:wpn?-36:-52,e1:wpn?-80:-118,a0:-34,e0:-138,z0:-14,z1:-10,l1:-24,k1:30,l0:14,k0:24,ln:12,tw:12,both:1};
     A.a1+=3*s; A.e1-=4*s; A.a0+=3*b; A.e0+=3*s; A.k0+=6*Math.abs(b); A.k1+=6*Math.abs(b);
     const kt=+f.dataset.kt||0, kk=f.dataset.kk;
     if(kk&&kk!=='tank'&&now-kt<950){
       const name=kk==='w'?'chop':kk==='kick'?'kick':kk==='head'?'head':kk==='bite'?'grab':kk==='slam'?'slam':(f.dataset.kh==='a0'?'cross':'jab');
-      const set=KF3[name], tt=(now-kt)/950; for(const L in set) A[L]=kfv(set[L],tt);
+      const set=KF3[name], tt=(now-kt)/950; for(const L in set) A[L]=kfv(set[L],tt); if(name==='kick') delete A.both;
     }
     // 맞았을 때 몸이 꺾이고 휘청임
     const ac=f.querySelector('.act'), at=ac&&+ac.dataset.at, acl=ac&&ac.dataset.ac;
@@ -2667,7 +2850,7 @@ function fighterAngles3(f,now){
 }
 function shout3(start,now){ // 누르면 소리 지르는 동작
   const x=Math.min(1,(now-start)/220), e=1-Math.pow(1-x,3), sh=Math.sin(now/40)*e;
-  return {a0:-165*e,a1:-165*e,e0:-30*e+6*sh,e1:-30*e-6*sh,z:-34*e,ln:-12*e,tw:3*sh,k0:12*e,k1:12*e,l0:-6*e,l1:-6*e,by:0.004*sh};
+  return {a0:-165*e,a1:-165*e,e0:-30*e+6*sh,e1:-30*e-6*sh,z:-34*e,ln:-12*e,tw:3*sh,k0:12*e,k1:12*e,l0:-6*e,l1:-6*e,by:0.004*sh,s:14*e,w0:-30*e,w1:-30*e,both:1};
 }
 const JK=['a0','a1','l0','l1','e0','e1','k0','k1'];
 function animTick(now){
