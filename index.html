@@ -404,6 +404,12 @@ canvas.v3d{display:block}
 .gacha.epic .gbox{box-shadow:0 0 50px rgba(163,92,240,.55)}
 .gacha.legend .gbox{box-shadow:0 0 70px rgba(244,180,0,.8);animation:glegend 1.2s ease-in-out infinite alternate}
 @keyframes glegend{from{box-shadow:0 0 40px rgba(244,180,0,.5)}to{box-shadow:0 0 90px rgba(244,180,0,.95)}}
+.act.lungeC{animation:lungeC 1.05s cubic-bezier(.3,.1,.3,1)}
+@keyframes lungeC{0%{transform:translateX(0)}20%{transform:translateX(calc(var(--d)*-6px))}55%{transform:translateX(calc(var(--d)*var(--step,50px)*1.35))}100%{transform:translateX(0)}}
+.sandp{position:absolute;width:6px;height:6px;border-radius:50%;background:#d9bb7a;box-shadow:0 0 2px #7a5a2a;pointer-events:none;animation:proj .6s ease-out forwards;opacity:0}
+.stonep{position:absolute;width:11px;height:9px;border-radius:45% 55% 40% 60%;background:radial-gradient(circle at 35% 30%,#bfb8ad,#5f5952);box-shadow:0 1px 2px #000;pointer-events:none;animation:projArc .5s linear forwards}
+@keyframes proj{0%{transform:translate(0,0);opacity:1}100%{transform:translate(var(--dx),var(--dy));opacity:.15}}
+@keyframes projArc{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(calc(var(--dx)*.5),calc(var(--dy)*.5 - 40px)) rotate(300deg)}100%{transform:translate(var(--dx),var(--dy)) rotate(620deg)}}
 </style>
 </head>
 <body>
@@ -489,6 +495,7 @@ function fight(A,B){
     if(def.weapon&&def.weapon.kind==='tank') d*=0.6;
     const crit=!!forceCrit||Math.random()*100<Math.min(55,4+att.st.crit*0.12+(sc(att)-50)*0.03);
     if(!mv.pierce) d*=170/(170+def.st.def);
+    if(inj(def).blind>0) d*=0.65; // 눈이 안 보여 웅크리고 막기만 함
     return {d:Math.max(1,Math.round(d)),crit};
   };
   const strike=(att,def)=>{
@@ -496,6 +503,27 @@ function fight(A,B){
     if(ia.stun>0){ ia.stun--;
       if(ia.groin>0){ ia.groin--; att.stam=Math.min(att.maxSta,att.stam+4); push({text:pick([`${att.name}, 낭심을 부여잡고 꼼짝도 못 한다.`,`${att.name}, 바닥에 웅크린 채 신음만 낸다.`,`${att.name}, 아직도 일어나지 못하고 있다.`]),kind:'stun',groin:1,by,target:by,word:'끄으윽'}); return; }
       push({text:`${att.name}, 비틀거리며 제대로 공격하지 못했다.`,kind:'stun',by,target:by,word:'휘청'}); return; }
+    // 체력이 바닥나면(최대의 5% 또는 5 이하) 도망치기도 함
+    if(att.hp<=Math.max(5,att.maxhp*0.05)&&!att.fleeTried){ att.fleeTried=true;
+      if(Math.random()<0.35){ fled=by; push({text:pick([`${att.name}, 피투성이가 되자 등을 보이고 걸음아 나 살려라 도망쳤다!`,`${att.name}, 무기도 자존심도 버리고 꽁무니를 뺐다!`,`${att.name}, 비명을 지르며 숲으로 달아났다!`]),kind:'flee',by,target:by,word:'도망!'}); return; } }
+    // 모래가 눈에 들어가면 2턴 동안 막기만 함
+    if(ia.blind>0){ ia.blind--; push({text:pick([`${att.name}, 눈에 모래가 들어가 앞이 안 보인다. 팔로 얼굴만 가린다.`,`${att.name}, 눈을 비비며 허우적댄다.`,`${att.name}, 아무것도 안 보여 웅크린 채 버틴다.`]),kind:'blind',by,target:by,word:'눈이!'}); return; }
+    // 머리가 좋으면 비겁하게 모래를 뿌리거나 돌을 던짐
+    const smart=att.st.int||50;
+    if(smart>=60&&Math.random()<(smart-55)/45*0.22){
+      if(Math.random()<0.55){
+        const ok=Math.random()*100<55+(sc(att)-def.st.luck)*0.2+(att.st.acc-def.st.reflex)*0.15;
+        if(ok){ idf.blind=2; push({text:`${att.name}, 비겁하게 바닥의 모래를 한 움큼 쥐어 ${def.name}의 눈에 뿌렸다! ${def.name}, 앞이 안 보인다!`,kind:'sand',hit:true,by,target:tg,word:'촤악'}); }
+        else push({text:`${att.name}, 모래를 집어 뿌렸지만 ${def.name}가 고개를 돌렸다.`,kind:'sand',hit:false,by,target:tg,word:'휙'});
+      } else {
+        if(Math.random()*100<65+(att.st.acc-def.st.dodge)*0.25){
+          const d=Math.max(2,Math.round((6+att.st.str*0.12)*R(0.6,1.6))), head=Math.random()<0.25; def.hp-=d; if(head) idf.stun=1;
+          push({text:head?`${att.name}, 돌멩이를 주워 던졌다! ${def.name}의 이마에 정통으로 맞았다! (-${d})`:`${att.name}, 돌멩이를 주워 ${def.name}에게 던졌다! (-${d})`,kind:'stone',hit:true,by,target:tg,word:head?'딱!':'퍽',dmg:d,stun:head});
+          if(def.hp<=0){ cur=null; lethal(def,`${def.name}, 돌에 맞고 그대로 쓰러졌다.`,by,'쿵'); }
+        } else push({text:`${att.name}, 돌멩이를 던졌지만 빗나갔다.`,kind:'stone',hit:false,by,target:tg,word:'휙'});
+      }
+      att.stam-=6; return;
+    }
     // 숨이 완전히 바닥나면 헐떡이기만 함
     if(att.stam<=att.maxSta*0.06){ att.stam=Math.min(att.maxSta,att.stam+att.maxSta*0.25); push({text:`${att.name}, 숨이 턱까지 차서 헐떡인다.`,kind:'tired',by,target:by,word:'헉헉'}); return; }
     // 숨이 차면 비겁하게 머리채를 잡고 엉겨 붙음
@@ -566,20 +594,50 @@ function fight(A,B){
       else push({text:base,kind:'hit',by,target:tg,word,dmg:c.d,move:mv.k,weapon:useW});
     }
   };
-  while(alive()&&rounds<30){
+  // ---- 개시: 멈춰 서지 않고 달려오던 기세 그대로 뛰어듦 (날아차기 / 몸통 돌진 / 태클 후 올라타서 내려치기) ----
+  let fled=null;
+  (()=>{
+    const sa=A.st.spd*R(0.8,1.2), sb=B.st.spd*R(0.8,1.2), att=sa>=sb?A:B, def=att===A?B:A, by=idOf(att), tg=idOf(def), idf=inj(def);
+    const kind=wpick([['fly',3+att.st.kick/40],['tackle',3+att.st.slam/40],['takedown',3+(att.st.str+att.st.bal)/80]]);
+    const nm={fly:'날아차기',tackle:'몸통 돌진',takedown:'태클'}[kind];
+    const hitP=Math.max(25,Math.min(88,62+(att.st.acc-def.st.dodge)*0.3+(att.st.spd-def.st.spd)*0.15));
+    if(Math.random()*100>=hitP){
+      if(kind==='takedown') push({text:`${att.name}, 허리를 낮춰 파고들었지만 ${def.name}가 버텨 밀어냈다!`,kind:'charge',move:kind,hit:false,by,target:tg,word:'버팀'});
+      else { const d=RI(3,9); att.hp-=d; push({text:`${att.name}의 ${nm}! ${def.name}가 몸을 틀어 피했고 ${att.name}는 땅에 처박혔다. (-${d})`,kind:'charge',move:kind,hit:false,by,target:tg,word:'철퍼덕',self:d}); }
+      return;
+    }
+    if(kind==='takedown'){
+      push({text:`${att.name}, 달려들며 ${def.name}의 허리를 감아 땅에 메다꽂았다! 그대로 올라탔다!`,kind:'charge',move:kind,hit:true,by,target:tg,word:'쿠당'});
+      const n=RI(2,4);
+      for(let q=0;q<n&&alive();q++){
+        if(q>0&&Math.random()<0.12+(def.st.bal+def.st.str-att.st.str)*0.002){ push({text:`${def.name}, 몸을 비틀어 빠져나왔다!`,kind:'escape',by:tg,target:by,word:'탈출'}); return; }
+        const c=calc(att,def,MOVES[0],false), d=Math.max(1,Math.round(c.d*R(0.8,1.25))); def.hp-=d;
+        const t=pick([`${att.name}, 깔린 ${def.name}의 얼굴에 주먹을 내리꽂는다.`,`${att.name}의 주먹이 위에서 쏟아진다.`,`${def.name}, 팔로 막아보지만 ${att.name}의 주먹이 틈으로 들어온다.`,`${att.name}, 팔꿈치로 ${def.name}의 머리를 찍었다.`]);
+        push({text:`${t} (-${d})`,kind:'gp',by,target:tg,word:pick(['퍽','퍽퍽','쾅']),dmg:d});
+        if(def.hp<=0){ cur=null; lethal(def,`${def.name}, 깔린 채 더 이상 움직이지 않는다.`,by,'쿵'); return; }
+      }
+      push({text:`${def.name}, 겨우 밀쳐내고 일어섰다.`,kind:'escape',by:tg,target:by,word:'탈출'});
+      return;
+    }
+    const c=calc(att,def,kind==='fly'?MOVES[1]:MOVES[3],false), d=Math.round(c.d*(kind==='fly'?1.5:1.35)); def.hp-=d; if(kind==='tackle') idf.stun=1;
+    push({text:kind==='fly'?`${att.name}, 달려오던 기세로 날아올라 ${def.name}의 가슴팍에 두 발을 꽂았다! (-${d})`:`${att.name}, 어깨부터 ${def.name}에게 들이받아 날려버렸다! (-${d})`,kind:'charge',move:kind,hit:true,by,target:tg,word:kind==='fly'?'퍽!':'쿠웅',dmg:d,stun:kind==='tackle'});
+    if(def.hp<=0){ cur=null; lethal(def,`${def.name}, 그대로 일어나지 못했다.`,by,'쿵'); }
+  })();
+  while(alive()&&rounds<30&&!fled){
     rounds++;
     for(const v of [A,B]){ const iv=inj(v); if(iv.bleed>0&&alive()){ v.hp-=iv.bleed; push({text:`${v.name}의 상처에서 피가 뚝뚝 떨어진다. (-${iv.bleed})`,kind:'self',by:null,target:idOf(v),word:'뚝',dmg:iv.bleed}); if(v.hp<=0) lethal(v,`${v.name}, 피를 너무 많이 흘리고 쓰러졌다.`,null,'쿵'); } }
     if(!alive()) break;
     [A,B].forEach(x=>{ x.stam=Math.min(x.maxSta,x.stam+3+x.st.sta*0.03); });
     const sa=A.st.spd*R(0.75,1.25)+R(0,30), sb=B.st.spd*R(0.75,1.25)+R(0,30);
     const order=sa>=sb?[A,B]:[B,A];
-    for(const att of order){ if(!alive()) break; strike(att,att===A?B:A); }
+    for(const att of order){ if(!alive()||fled) break; strike(att,att===A?B:A); }
   }
   let winner;
-  if(A.hp>0&&B.hp<=0) winner='A';
+  if(fled) winner=fled==='A'?'B':'A';
+  else if(A.hp>0&&B.hp<=0) winner='A';
   else if(B.hp>0&&A.hp<=0) winner='B';
   else { winner=(A.hp/A.maxhp)>=(B.hp/B.maxhp)?'A':'B'; push({text:'해가 저물었다. 남은 체력으로 승부가 갈렸다.',kind:'info'}); }
-  return {log,winner};
+  return {log,winner,fled};
 }
 //ENGINE-END
 
@@ -2387,6 +2445,8 @@ function doneRoll(){
   clearTimeout(ui.rollT);
   S.hero=ui.rollFin; ui.rollFin=null; sync(S.hero,true); saveState(); ui.rolling=false; view=ui.incoming?'incoming':'card'; render(); window.scrollTo(0,0);
 }
+// 도망쳐서 살아남은 전사: 이름이 '비겁한 겁쟁이'로 바뀜
+function cowardize(h){ if(!h) return; h.name='비겁한 겁쟁이'; h.tags=h.tags||[]; if(!h.tags.some(t=>t[0]==='도망친 겁쟁이')) h.tags.unshift(['도망친 겁쟁이',1]); h.hp=h.maxhp; }
 function startFight(foeIn){
   const me=S.hero, foe=foeIn||makeFoe(me.name);
   const snapMe=JSON.parse(JSON.stringify(me));
@@ -2394,8 +2454,9 @@ function startFight(foeIn){
   const B=JSON.parse(JSON.stringify(foe)); B.hp=B.maxhp; B.st.def+=outfitDef(foe);
   const res=fight(A,B);
   const win=res.winner==='A';
-  const rep={me:snapMe,foe,log:res.log,win,broke:null,gain:null};
-  if(win){ rep.gain=grow(me); rep.plunder=plunderHelm(me,foe); rep.wins=me.wins; sync(me,true); }
+  const rep={me:snapMe,foe,log:res.log,win,broke:null,gain:null,fled:res.fled||null};
+  if(win){ rep.gain=grow(me); rep.plunder=res.fled?null:plunderHelm(me,foe); rep.wins=me.wins; sync(me,true); }
+  else if(res.fled==='A'){ cowardize(me); sync(me,true); }
   else {
     const last=res.log[res.log.length-1];
     sync(me,false);
@@ -2468,6 +2529,7 @@ function impact(e){
 function tangle(on){ ['A','B'].forEach(id=>{ const f=$('#f'+id); if(f) f.classList.toggle('tangle',!!on); }); }
 function fx(e){
   if(e.kind!=='tangle'&&e.kind!=='hair') tangle(false);
+  if(e.kind!=='info'&&e.kind!=='charge') ['A','B'].forEach(id=>{ const f=$('#f'+id); if(f&&f.classList.contains('run')){ f.classList.remove('run'); f.classList.add('brawl'); const st=$('#stage'); if(st) st.classList.add('fighting'); } });
   if(e.kind==='info'){ setHp(e.hpA,e.hpB); return; }
   const atk=e.by&&(e.kind==='hit'||e.kind==='crit'||e.kind==='counter'||e.kind==='miss'||(e.kind==='kill'&&e.move));
   if(atk){
@@ -2487,9 +2549,44 @@ function fx(e){
     setHp(e.hpA,e.hpB); act(e.target,'recoil',700); pop(e.word,e.target,'word'); if(e.dmg) pop('-'+e.dmg,e.target,'dmgn',24);
   } else if(e.kind==='guts'){
     setHp(e.hpA,e.hpB); act(e.target,'dodge',800); pop(e.word,e.target,'word');
+  } else if(e.kind==='charge'){ chargeAnim(e);
+  } else if(e.kind==='gp'){
+    const f=$('#f'+e.by); if(f) f.dataset.gp=performance.now();
+    later(()=>{ setHp(e.hpA,e.hpB); pop(e.word,e.target,'word'); if(e.dmg) pop('-'+e.dmg,e.target,'dmgn',24); stageShake(); },300);
+  } else if(e.kind==='escape'){
+    ui.mount=null; setHp(e.hpA,e.hpB); pop(e.word,e.by,'word');
+  } else if(e.kind==='sand'||e.kind==='stone'){ throwAnim(e);
+  } else if(e.kind==='blind'){
+    const f=$('#f'+e.by); if(f) f.dataset.bl=performance.now()+1600; pop(e.word,e.by,'word');
+  } else if(e.kind==='flee'){
+    ui.mount=null; ui.flee={id:e.by,t0:performance.now()}; pop(e.word,e.by,'word');
   } else if(e.kind==='kill'){
-    impact(e);
+    ui.mount=null; impact(e);
   }
+}
+// 개시 돌진: 달려오던 그대로 날아차기 / 몸통 돌진 / 태클
+function chargeAnim(e){
+  const st=$('#stage'); if(st) st.classList.add('fighting');
+  ['A','B'].forEach(id=>{ const f=$('#f'+id); if(f){ f.classList.remove('run'); f.classList.add('brawl'); } });
+  const fa=$('#f'+e.by); if(fa){ fa.dataset.kk='c-'+e.move; fa.dataset.kt=performance.now(); }
+  act(e.by,'lungeC',1100);
+  later(()=>{ setHp(e.hpA,e.hpB); pop(e.word,e.hit?e.target:e.by,'word');
+    if(e.hit){ if(e.move==='takedown'){ ui.mount={top:e.by,bottom:e.target,t0:performance.now()}; stageShake(); }
+      else { act(e.target,'big',1100); if(e.dmg) pop('-'+e.dmg,e.target,'dmgn',24); stageShake(); } }
+    else if(e.self){ act(e.by,'trip',1100); pop('-'+e.self,e.by,'dmgn',24); } },560);
+}
+// 모래 뿌리기 / 돌 던지기
+function throwAnim(e){
+  const fa=$('#f'+e.by); if(fa){ fa.dataset.kk=e.kind; fa.dataset.kt=performance.now(); }
+  later(()=>{ const box=$('#fx'); if(!box||!ui.cx) return; const x0=ui.cx[e.by], x1=ui.cx[e.target], h0=ui.hh[e.by]||150, h1=ui.hh[e.target]||150, sand=e.kind==='sand', n=sand?26:1;
+    const y0=h0*(sand?0.6:0.95);
+    for(let i=0;i<n;i++){ const d=document.createElement('i'); d.className=sand?'sandp':'stonep';
+      const dx=x1-x0+(e.hit?0:(e.by==='A'?50:-50))+(sand?R(-12,12):0), dy=(e.hit?h1*0.86:h1*R(1.0,1.25))-y0+(sand?R(-16,16):0);
+      d.style.left=Math.round(x0)+'px'; d.style.bottom=Math.round(14+y0)+'px'; d.style.setProperty('--dx',Math.round(dx)+'px'); d.style.setProperty('--dy',Math.round(-dy)+'px'); d.style.animationDelay=(i*14)+'ms';
+      box.appendChild(d); setTimeout(()=>d.remove(),1300); } },e.kind==='sand'?430:480);
+  later(()=>{ setHp(e.hpA,e.hpB); pop(e.word,e.hit?e.target:e.by,'word');
+    if(e.hit){ if(e.kind==='sand'){ const ft=$('#f'+e.target); if(ft) ft.dataset.bl=performance.now()+1700; pop('실명!',e.target,'word part',-6); }
+      else { act(e.target,e.stun?'big':'recoil',900); if(e.dmg) pop('-'+e.dmg,e.target,'dmgn',24); } } },960);
 }
 let shown=0;
 function layoutStage(){
@@ -2519,18 +2616,18 @@ function play(){
     if(shown>=r.log.length){ ui.timer=setTimeout(finish,1200); return; }
     const e=r.log[shown++];
     addLine(e); fx(e);
-    ui.timer=setTimeout(step,e.kind==='kill'?3000:e.kind==='crit'?3100:e.kind==='info'?900:e.kind==='hair'?2400:e.kind==='tangle'?1500:e.kind==='stun'?1700:2300);
+    const T={kill:3000,crit:3100,info:900,hair:2400,tangle:1500,stun:1700,charge:e.move==='takedown'&&e.hit?1500:2500,gp:1150,escape:1400,sand:2300,stone:2300,blind:1600,flee:3400};
+    ui.timer=setTimeout(step,T[e.kind]||2300);
   };
-  ui.timer=setTimeout(()=>{
-    [fA,fB].forEach(f=>{ f.classList.remove('run'); f.classList.add('brawl'); });
-    st.classList.add('fighting'); step();
-  },reduce?300:3100);
+  ui.reset3=1; ui.mount=null; ui.flee=null;
+  // 달리다 멈추지 않고 그대로 부딪치도록 기록 재생을 달리는 도중에 시작
+  ui.timer=setTimeout(step,reduce?300:1900);
 }
 function skip(){
   clearTimeout(ui.timer); (ui.tms||[]).forEach(clearTimeout);
   const r=ui.rep;
   place(); [$('#fA'),$('#fB')].forEach(f=>{ f.classList.remove('run','k-punch','k-kick','k-head','k-slam','k-bite','k-w'); });
-  while(shown<r.log.length){ const e=r.log[shown++]; addLine(e); setHp(e.hpA,e.hpB); if(e.kind==='kill') impact(e); }
+  ui.mount=null; while(shown<r.log.length){ const e=r.log[shown++]; addLine(e); setHp(e.hpA,e.hpB); if(e.kind==='kill') impact(e); if(e.kind==='flee') ui.flee={id:e.by,t0:performance.now()-3000}; }
   finish();
 }
 function finish(){
@@ -2539,7 +2636,7 @@ function finish(){
   const st=$('#stage'); if(st) st.classList.remove('fighting');
   ['A','B'].forEach(id=>{ const f=$('#f'+id); if(f) f.classList.remove('brawl','run','tangle'); });
   const w=r.win?'A':'B', loser=r.win?'B':'A';
-  if($('#a'+loser)&&!$('#a'+loser).dataset.ko){
+  if(r.fled!==loser&&$('#a'+loser)&&!$('#a'+loser).dataset.ko){
     const lh=loser==='A'?r.me:r.foe, f=$('#fig'+loser); if(f) f.innerHTML=drawChar(lh,true,Math.round(hfrac(lh.cm)*((ui.stageH||340)-40)));
     act(loser,'fall',0); $('#a'+loser).dataset.ko='1';
   }
@@ -2548,13 +2645,15 @@ function finish(){
   if(r.win){
     const top=Object.entries(r.gain).filter(([k])=>k!=='bulk'&&k!=='loot').sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>{
       const nm=SGROUPS.flatMap(g=>g[1]).find(x=>x[0]===k)[1]; return `${nm} +${v}`; });
-    h+=`<div class="verdict win"><b>${r.vline||(r.vline=pick(WIN_LINES))}</b><span>${r.wins}킬 · ${top.join(' · ')}</span></div>`;
+    h+=`<div class="verdict win"><b>${r.fled?'놈이 꽁무니를 뺐다.':r.vline||(r.vline=pick(WIN_LINES))}</b><span>${r.wins}킬 · ${top.join(' · ')}</span></div>`;
     if(r.plunder){ const it=gearOf(r.plunder.slot,r.plunder.id); if(it) h+=`<div class="plunder">${itemIcon(it)}<div><b>놈의 투구를 빼앗았다</b><span><i class="tierb" style="background:${TIER_C(it.tier)}">${it.tier}</i>${esc(it.name)} · ${r.plunder.worn?'바로 썼다':'창고에 넣었다 (지금 것이 더 좋다)'}</span></div></div>`; }
+  } else if(r.fled==='A'){
+    h+=`<div class="verdict lose"><b>도망쳤다. 살긴 살았다.</b><span>이제부터 너의 이름은 '비겁한 겁쟁이'다. 전사들이 손가락질한다.</span></div>`;
   } else {
     h+=`<div class="verdict lose"><b>전사</b><span>${esc(r.me.name)}, ${r.me.wins}킬을 남기고 쓰러졌다. ${r.vline||(r.vline=pick(LOSE_LINES))}</span></div>`;
   }
   if(r.broke) h+=`<p class="note">${esc(r.broke)}이(가) 부서졌어요.</p>`;
-  h+=r.win?`<button class="btn primary" data-act="back">피가 부족하다</button>`:`<button class="btn primary" data-act="roll">다시 태어난다</button>`;
+  h+=r.win||r.fled==='A'?`<button class="btn primary" data-act="back">${r.win?'피가 부족하다':'고개를 숙이고 돌아간다'}</button>`:`<button class="btn primary" data-act="roll">다시 태어난다</button>`;
   after.innerHTML=h;
   if(r.win&&r.gain&&r.gain.loot&&!r.gachaShown){ r.gachaShown=1; if(S.pendingReplay===r) saveState(); setTimeout(()=>gacha(r.gain.loot),700); }
 }
@@ -2743,6 +2842,22 @@ function battle3d(now){
         figs.push({J:{root:P.n,noHead:true},M:M4.mul(M4.mul(M4.T(P.x,y0+P.y,0),M4.RZ(P.rot)),M4.S(s,s,s)),des:false}); });
       return;
     }
+    { const x0=f.offsetLeft+sw*cxr+fm.e, y0=Hs-(f.offsetTop+f.offsetHeight)+L.ground*hpx-fm.f; ui.b3['x'+id]=x0; ui.b3['y'+id]=y0; ui.b3['s'+id]=s;
+      // 도망: 등을 돌려 화면 밖으로 달아남
+      if(ui.flee&&ui.flee.id===id){ const u=(now-ui.flee.t0)/1000, dA=id==='A'?-1:1, ph=now/1000*2*Math.PI/0.55, sn=Math.sin(ph);
+        J.root.R=[0,id==='A'?-2.3:2.3,0];
+        pose3(J,{a0:35*sn,a1:-35*sn,e0:-70,e1:-70,l0:-38*sn,l1:38*sn,k0:55*Math.max(0,Math.sin(ph-1.1)),k1:55*Math.max(0,Math.sin(ph-1.1+Math.PI)),ln:20,s:8},0);
+        figs.push({J,M:M4.mul(M4.T(x0+dA*s*1.9*Math.max(0,u-0.35),y0,0),M4.S(s,s,s)),des:false,roll:0}); return; }
+      // 깔고 앉기: 아래는 등을 대고 누워 막고, 위는 올라타 주먹을 내리꽂음
+      if(ui.mount&&(ui.mount.top===id||ui.mount.bottom===id)){ const bot=ui.mount.bottom, dB=bot==='A'?-1:1, sb=ui.b3['s'+bot]||s, xb=W/2-dB*sb*0.5, yb=ui.b3['y'+bot]||y0; // 바닥 싸움은 무대 가운데에서
+        if(ui.mount.bottom===id){ const k=Math.min(1,(now-ui.mount.t0)/350), th=Math.PI/2*k;
+          J.root.R=[0,id==='A'?0.85:-0.85,0]; pose3(J,{free:1,a0:-120,a1:-128,e0:-110,e1:-100,z0:-10,z1:-10,l0:-35,l1:-20,k0:70,k1:45,ln:-4,w0:-30,w1:-30},0);
+          figs.push({J,M:M4.mul(M4.mul(M4.T(xb,yb+s*0.055*Math.sin(th),0),M4.RZ(-dB*th)),M4.S(s,s,s)),des:false,roll:-dB*th}); return; }
+        const gp=+f.dataset.gp||0, pu=Math.max(0,1-(now-gp)/380), side=Math.floor(gp/7)%2, hitA=Math.sin(Math.min(1,(now-gp)/380)*Math.PI);
+        const P={free:1,l0:-8,l1:-8,k0:100,k1:100,ln:38,a0:-70,a1:-70,e0:-110,e1:-110,z0:-10,z1:-10,tw:0};
+        if(gp&&pu>0){ const ai=side?'1':'0'; P['a'+ai]=-70+hitA*30; P['e'+ai]=-110+hitA*100; P.tw=(side?-1:1)*12*hitA; P.ln=38+8*hitA; }
+        J.root.R=[0,id==='A'?0.85:-0.85,0]; pose3(J,P,0); J.root.T=[0,-J.D.legL*0.47,0];
+        figs.push({J,M:M4.mul(M4.T(xb+dB*sb*0.52,yb,0),M4.S(s,s,s)),des:false,roll:0}); return; } }
     const crawl3=f.classList.contains('feral')&&f.classList.contains('run');
     const x=f.offsetLeft+sw*cxr+fm.e+am.e, ybot=Hs-(f.offsetTop+f.offsetHeight)+L.ground*hpx-(fm.f+(crawl3?0:am.f));
     // 네발 기기(지능 10 이하)는 2D용 기울임 애니메이션을 3D 몸에 적용하지 않음: 3D 자세가 직접 엎드려 김
@@ -2814,6 +2929,14 @@ const KF3={
     ln:[[0,12],[.28,-14],[.5,40],[.66,40],[1,12]],tw:[[0,12],[.5,0],[1,12]],l1:[[0,-24],[.5,-42],[.7,-42],[1,-24]],k1:[[0,30],[.5,42],[1,30]],l0:[[0,14],[.5,32],[1,14]],k0:[[0,24],[.5,8],[1,24]]},
   slam:{a0:[[0,-34],[.3,-62],[.75,-62],[1,-34]],e0:[[0,-138],[.3,-142],[1,-138]],a1:[[0,-52],[.3,-66],[.75,-66],[1,-52]],e1:[[0,-118],[.3,-140],[.75,-140],[1,-118]],z0:[[0,-14],[.3,-26],[.75,-26],[1,-14]],z1:[[0,-10],[.3,-26],[.75,-26],[1,-10]],
     ln:[[0,12],[.25,-2],[.5,34],[.68,34],[1,12]],tw:[[0,12],[.25,32],[.5,38],[.7,30],[1,12]],l1:[[0,-24],[.5,-46],[.7,-46],[1,-24]],k1:[[0,30],[.5,36],[1,30]],l0:[[0,14],[.5,28],[1,14]],k0:[[0,24],[.5,6],[1,24]]},
+  fly:{l0:[[0,14],[.25,-60],[.5,-75],[.75,-30],[1,14]],l1:[[0,-24],[.25,-80],[.5,-88],[.75,-40],[1,-24]],k0:[[0,24],[.25,70],[.5,8],[.75,30],[1,24]],k1:[[0,30],[.25,60],[.5,4],[.75,30],[1,30]],
+    ln:[[0,12],[.3,-10],[.5,-28],[.8,0],[1,12]],a0:[[0,-34],[.5,-40],[1,-34]],a1:[[0,-52],[.5,-30],[1,-52]],z0:[[0,-14],[.5,40],[1,-14]],z1:[[0,-10],[.5,40],[1,-10]],e0:[[0,-138],[.5,-30],[1,-138]],e1:[[0,-118],[.5,-30],[1,-118]],by:[[0,0],[.3,0.13],[.5,0.17],[.75,0.06],[.9,0],[1,0]]},
+  tackle:{ln:[[0,12],[.25,30],[.5,62],[.7,55],[1,12]],a0:[[0,-34],[.4,-70],[.7,-70],[1,-34]],a1:[[0,-52],[.4,-60],[.7,-60],[1,-52]],e0:[[0,-138],[.4,-120],[1,-138]],e1:[[0,-118],[.4,-125],[1,-118]],z0:[[0,-14],[.5,-20],[1,-14]],z1:[[0,-10],[.5,-20],[1,-10]],
+    l1:[[0,-24],[.5,-50],[.7,-50],[1,-24]],k1:[[0,30],[.5,50],[1,30]],l0:[[0,14],[.5,40],[1,14]],k0:[[0,24],[.5,10],[1,24]],tw:[[0,12],[.4,30],[.7,25],[1,12]],by:[[0,0],[.45,0.05],[.6,0.02],[1,0]]},
+  takedown:{ln:[[0,12],[.3,40],[.55,60],[1,40]],a0:[[0,-34],[.4,-95],[1,-80]],a1:[[0,-52],[.4,-95],[1,-80]],e0:[[0,-138],[.4,-70],[1,-60]],e1:[[0,-118],[.4,-70],[1,-60]],z0:[[0,-14],[.4,-30],[1,-30]],z1:[[0,-10],[.4,-30],[1,-30]],
+    l1:[[0,-24],[.5,-55],[1,-40]],k1:[[0,30],[.5,75],[1,60]],l0:[[0,14],[.5,30],[1,20]],k0:[[0,24],[.5,45],[1,40]]},
+  sand:{ln:[[0,12],[.3,48],[.45,40],[.6,6],[1,12]],k0:[[0,24],[.3,70],[.6,24],[1,24]],k1:[[0,30],[.3,70],[.6,30],[1,30]],a1:[[0,-52],[.3,15],[.45,0],[.6,-115],[.75,-95],[1,-52]],e1:[[0,-118],[.3,-8],[.6,-15],[1,-118]],z1:[[0,-10],[.3,10],[.6,-5],[1,-10]],tw:[[0,12],[.3,20],[.6,-25],[1,12]]},
+  stone:{ln:[[0,12],[.15,30],[.3,-8],[.5,22],[1,12]],k0:[[0,24],[.15,60],[.3,24],[1,24]],a1:[[0,-52],[.15,10],[.32,-205],[.5,-75],[.7,-55],[1,-52]],e1:[[0,-118],[.15,-10],[.32,-110],[.5,-10],[1,-118]],tw:[[0,12],[.32,35],[.5,-25],[1,12]]},
   tuck:{a1:[[0,-42],[.4,-14],[.65,-14],[1,-42]],e1:[[0,-115],[.4,-150],[.65,-150],[1,-115]],a0:[[0,-20],[.4,-10],[.65,-10],[1,-20]],e0:[[0,-130],[.4,-150],[.65,-150],[1,-130]],ln:[[0,8],[.4,30],[.65,30],[1,8]]}
 };
 function fighterAngles3(f,now){
@@ -2835,9 +2958,11 @@ function fighterAngles3(f,now){
     A.a1+=3*s; A.e1-=4*s; A.a0+=3*b; A.e0+=3*s; A.k0+=6*Math.abs(b); A.k1+=6*Math.abs(b);
     const kt=+f.dataset.kt||0, kk=f.dataset.kk;
     if(kk&&kk!=='tank'&&now-kt<950){
-      const name=kk==='w'?'chop':kk==='kick'?'kick':kk==='head'?'head':kk==='bite'?'grab':kk==='slam'?'slam':(f.dataset.kh==='a0'?'cross':'jab');
-      const set=KF3[name], tt=(now-kt)/950; for(const L in set) A[L]=kfv(set[L],tt); if(name==='kick') delete A.both;
+      const name=kk.startsWith('c-')?kk.slice(2):kk==='sand'||kk==='stone'?kk:kk==='w'?'chop':kk==='kick'?'kick':kk==='head'?'head':kk==='bite'?'grab':kk==='slam'?'slam':(f.dataset.kh==='a0'?'cross':'jab');
+      const set=KF3[name], tt=(now-kt)/950; for(const L in set) A[L]=kfv(set[L],tt); if(name==='kick'||name==='fly'||name==='tackle'||name==='takedown'){ delete A.both; if(name==='fly'||name==='tackle') A.free=1; }
     }
+    // 모래에 눈이 멀면 팔로 얼굴을 가리고 웅크림
+    if((+f.dataset.bl||0)>now){ Object.assign(A,{a0:-112,a1:-118,e0:-145,e1:-140,z0:-26,z1:-26,ln:24,w0:-40,w1:-40}); A.k0=(A.k0||0)+10; A.k1=(A.k1||0)+10; }
     // 맞았을 때 몸이 꺾이고 휘청임
     const ac=f.querySelector('.act'), at=ac&&+ac.dataset.at, acl=ac&&ac.dataset.ac;
     if(at&&(acl==='recoil'||acl==='big')){ const dur=acl==='big'?900:600, r=(now-at)/dur;

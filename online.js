@@ -184,9 +184,11 @@
     const opponent=unpackDuel(isOwner?data.recipient:data.challenger);
     if(!opponent) return false;
     const won=isOwner?result.winner==='B':result.winner==='A';
+    const myId=isOwner?'B':'A', iFled=result.fled===myId, theyFled=!!result.fled&&!iFled;
     const rep={me:clone(me),foe:opponent,log:isOwner?flipLog(result.log):result.log,
-      win:won,broke:null,gain:null};
-    if(won){ rep.gain=grow(me); rep.plunder=typeof plunderHelm==='function'?plunderHelm(me,opponent):null; rep.wins=me.wins; sync(me,true); }
+      win:won,broke:null,gain:null,fled:result.fled?(isOwner?(result.fled==='A'?'B':'A'):result.fled):null};
+    if(won){ rep.gain=grow(me); rep.plunder=theyFled?null:(typeof plunderHelm==='function'?plunderHelm(me,opponent):null); rep.wins=me.wins; sync(me,true); }
+    else if(iFled&&typeof cowardize==='function'){ cowardize(me); sync(me,true); }
     else{
       const last=result.log[result.log.length-1];
       sync(me,false);
@@ -239,7 +241,7 @@
       a.st.def+=outfitDef(me); b.st.def+=outfitDef(opponent);
       const outcome=fight(a,b);
       const recipient=packDuel(me,'');
-      const result={winner:outcome.winner,log:outcome.log};
+      const result={winner:outcome.winner,log:outcome.log}; if(outcome.fled) result.fled=outcome.fled;
       await db.runTransaction(async transaction=>{
         const current=await transaction.get(ref);
         if(!current.exists||current.data().status!=='pending') throw new Error('already-decided');
