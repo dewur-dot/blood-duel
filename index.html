@@ -412,6 +412,24 @@ canvas.v3d{display:block}
 @keyframes projArc{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(calc(var(--dx)*.5),calc(var(--dy)*.5 - 40px)) rotate(300deg)}100%{transform:translate(var(--dx),var(--dy)) rotate(620deg)}}
 .dustc{position:absolute;border-radius:50%;pointer-events:none;background:radial-gradient(circle at 45% 45%,rgba(222,196,140,.95),rgba(186,152,96,.75) 40%,rgba(150,118,70,.35) 65%,rgba(120,95,60,0) 72%);filter:blur(1.5px);opacity:0;animation:dustc 1.25s ease-out forwards}
 @keyframes dustc{0%{transform:translate(0,0) scale(.25);opacity:.95}35%{opacity:.9}100%{transform:translate(var(--rx),-26px) scale(2.1);opacity:0}}
+.hpv{line-height:1.2}
+/* 결투 화면: 휴대폰 한 화면에 체력바~끝장내기 버튼까지 다 들어가게 */
+body.bview{padding-top:max(6px,env(safe-area-inset-top,0px));padding-bottom:max(8px,env(safe-area-inset-bottom,0px))}
+body.bview #app{gap:7px}
+body.bview .top{padding-bottom:4px}
+body.bview .brand{font-size:17px}
+body.bview .tabs .nav{padding:4px 10px;font-size:13px}
+body.bview .hud{gap:8px}
+body.bview .hud .nm{font-size:13px;line-height:1.2}
+body.bview .hud .lbl{font-size:10px}
+body.bview .hpbar{height:8px;margin-top:2px}
+body.bview .hpv{font-size:11px}
+body.bview .stage{height:clamp(210px,calc(100dvh - 335px),460px)}
+body.bview .log{height:clamp(84px,15dvh,150px);padding:6px 10px;font-size:13px;line-height:1.4}
+body.bview .log p{margin:0 0 3px}
+body.bview .after .btn{min-height:44px;font-size:15px;padding:8px}
+body.bview .after{gap:8px}
+@supports not (height:100dvh){ body.bview .stage{height:clamp(210px,calc(100vh - 420px),430px)} body.bview .log{height:clamp(84px,14vh,150px)} }
 </style>
 </head>
 <body>
@@ -2403,7 +2421,8 @@ function render(){
   app.innerHTML=views[view]();
   if(ui.notice&&view!=='battle') app.insertAdjacentHTML('afterbegin',`<section class="card note">${esc(ui.notice)} <button class="linkbtn" data-act="dismissnotice">닫기</button></section>`);
   mount3d();
-  if(view==='battle'){ ui.b3=null; ui.brk={}; play(); }
+  document.body.classList.toggle('bview',view==='battle');
+  if(view==='battle'){ ui.b3=null; ui.brk={}; try{ window.scrollTo(0,0); }catch(e){} play(); }
 }
 
 /* ---------- actions ---------- */
