@@ -909,7 +909,7 @@ function newGenes(sex,eth){
   else if(p.muscle>=9) bulk=R(0,1.4);
   return {sex,eth:eth||'eu',p,blessed,pretty,cm,skin:wpick(E.skin.map(x=>[x[0],x[1]])),eyeColor:wpick(E.eye),hairColor:grey?(age>=64?pick(['#E8E6E0','#D8D4CC','#E8E6E0']):pick(['#8C8C88','#A8A49C'])):wpick(E.hair),hairStyle,age,freck:eth==='eu'&&Math.random()<0.12?1:0,
     beard:F?0:(Math.random()<E.beard+(age>=58?(eth==='ea'||eth==='sea'?0.15:0.25):0)?((eth==='ea'||eth==='sea')?(age>=58?pick([6,7,7,4,5]):pick([1,1,2,5,6])):(age>=58?pick([3,4,4,5,7,2]):pick([1,2,3,4,5,1,2,7]))):0),mono:Math.random()<E.mono,bust:F?R(0.85,1.25):0,uw:pick(F?['#1C1A1D','#E7DCCF','#6E1F2A','#2B3550','#D9D3CA']:['#1E1E22','#2E3440','#D9D3CA','#4A4F55','#5B2A2A']),
-    bulk:Math.round(bulk*100)/100,expr:wpick([['stern',45],['angry',30],['snarl',7],['smirk',10],['calm',8]]),oddEye:Math.random()<0.04?RI(1,2):0,eye2:(eth!=='ea'&&eth!=='sea')&&Math.random()<0.015?pick(['#4A7AA8','#4E6E3E','#8A6A2F','#7F8B94','#6A4420'].filter(c=>c!==E.eye[0][0])):'',
+    bulk:Math.round(bulk*100)/100,expr:wpick([['stern',30],['angry',22],['snarl',13],['smirk',8],['calm',6],['grin',13],['sad',8]]),oddEye:Math.random()<0.04?RI(1,2):0,eye2:(eth!=='ea'&&eth!=='sea')&&Math.random()<0.015?pick(['#4A7AA8','#4E6E3E','#8A6A2F','#7F8B94','#6A4420'].filter(c=>c!==E.eye[0][0])):'',
     scar:Math.random()<(F?0.1:0.22),tattoo:Math.random()<0.07?RI(1,3):0,tunic:pick(TUNIC),pants:pick(PANTS),furC:pick(FURC),
     armPose:[RI(7,20),RI(7,20)],legPose:[RI(2,7),RI(2,7)],armOk:[Math.random()>0.025,Math.random()>0.025],legOk:[Math.random()>0.025,Math.random()>0.025]};
 }
@@ -972,6 +972,7 @@ function newHero(){
   const sex=Math.random()<0.45?'f':'m', eth=wpick(ETHW), g=newGenes(sex,eth), c=calcStats(g), nm=[makeName(sex,eth),''];
   if(eth==='ea') asiaLook(g,LASTNAT);
   tradHat(g,LASTNAT);
+  if(c.st.int<=25&&Math.random()<0.7) g.expr='gape';
   const tags=makeTags(g); if(c.st.int<=10) tags.push(['야수 지능 · 네발 보행',1]);
   return {id:uid(),name:nm[0],flag:nm[1],nick:makeNick(g),g,st:c.st,cm:c.cm,kg:c.kg,hp:c.st.hp,maxhp:c.st.hp,wins:0,weapon:null,outfit:{top:0,bottom:0,boots:0,fur:0,helm:0},tags};
 }
@@ -1536,6 +1537,35 @@ function eyeAge(c){
   });
   return o;
 }
+/* ---- 벌린 입: 이 드러내고 웃는 입(grin), 멍하니 벌린 O자 입(gape) ---- */
+function openMouth(c){
+  const {EX,cx,hH,mY,mw,lipT,lipC,skin,sk,u,AG}=c, dk='#3a0f0d', tooth='#EFE8D8', lk=mix(lipC,'#000000',0.12);
+  let o='';
+  if(EX==='grin'){
+    const L=cx-mw*1.1, R=cx+mw*1.1, yc=mY-hH*0.022, top=mY-lipT*0.35, bot=mY+lipT*1.6+hH*0.045;
+    const hole=`M${P2(L,yc)} Q${P2(cx,top-lipT*0.6)} ${P2(R,yc)} Q${P2(cx,bot+lipT*0.5)} ${P2(L,yc)} Z`;
+    o+=`<defs><clipPath id="om${u}"><path d="${hole}"/></clipPath></defs><path d="${hole}" fill="${dk}"/>`;
+    // 윗니 줄 + 아랫니 살짝
+    let tl=''; for(let i=-3;i<=3;i++){ const x=cx+i*mw*0.22; tl+=`M${P2(x,top-lipT)} L${P2(x,top+lipT*1.05)} `; }
+    o+=`<g clip-path="url(#om${u})"><path d="M${P2(L,yc-lipT)} L${P2(R,yc-lipT)} L${P2(R,top+lipT*0.9)} Q${P2(cx,top+lipT*1.3)} ${P2(L,top+lipT*0.9)} Z" fill="${tooth}"/><path d="${tl}" stroke="#b9ad98" stroke-width=".6"/>`+
+      (AG>0.55?`<rect x="${n1(cx+mw*0.24)}" y="${n1(top-lipT)}" width="${n1(mw*0.22)}" height="${n1(lipT*2)}" fill="${dk}"/>`:'')+
+      `<path d="M${P2(cx-mw*0.6,bot+lipT*0.2)} Q${P2(cx,bot-lipT*0.9)} ${P2(cx+mw*0.6,bot+lipT*0.2)}" stroke="${tooth}" stroke-width="${n1(lipT*0.9)}" fill="none" opacity=".85"/>`+
+      `<ellipse cx="${n1(cx)}" cy="${n1(bot)}" rx="${n1(mw*0.5)}" ry="${n1(lipT*0.8)}" fill="#a8434a" opacity=".7"/></g>`;
+    // 입술: 위는 얇게, 아래는 도톰하게
+    o+=`<path d="M${P2(L,yc)} Q${P2(cx,top-lipT*0.6)} ${P2(R,yc)} Q${P2(cx,top-lipT*1.5)} ${P2(L,yc)} Z" fill="${lk}"/>`;
+    o+=`<path d="M${P2(L,yc)} Q${P2(cx,bot+lipT*0.5)} ${P2(R,yc)} Q${P2(cx,bot+lipT*1.7)} ${P2(L,yc)} Z" fill="${lipC}"/>`;
+    // 웃음 주름
+    [-1,1].forEach(sd=>{ o+=`<path d="M${P2(cx+sd*mw*1.12,yc-hH*0.03)} q${n1(sd*mw*0.16)} ${n1(hH*0.025)} ${n1(sd*mw*0.06)} ${n1(hH*0.05)}" stroke="${sk}" stroke-width="${n1(Math.max(0.7,hH*0.006))}" fill="none" opacity=".5" stroke-linecap="round"/>`; });
+  } else { // gape: 멍한 O자
+    const ry=lipT*1.5+hH*0.016, rx=mw*0.44, y=mY+lipT*0.7;
+    o+=`<defs><clipPath id="om${u}"><ellipse cx="${n1(cx)}" cy="${n1(y)}" rx="${n1(rx)}" ry="${n1(ry)}"/></clipPath></defs>`;
+    o+=`<ellipse cx="${n1(cx)}" cy="${n1(y)}" rx="${n1(rx)}" ry="${n1(ry)}" fill="${dk}"/>`;
+    o+=`<g clip-path="url(#om${u})"><rect x="${n1(cx-rx)}" y="${n1(y-ry)}" width="${n1(rx*2)}" height="${n1(ry*0.32)}" fill="${tooth}"/><ellipse cx="${n1(cx)}" cy="${n1(y+ry*0.85)}" rx="${n1(rx*0.8)}" ry="${n1(ry*0.45)}" fill="#b24b55"/></g>`;
+    o+=`<ellipse cx="${n1(cx)}" cy="${n1(y)}" rx="${n1(rx+lipT*0.55)}" ry="${n1(ry+lipT*0.6)}" fill="none" stroke="${lipC}" stroke-width="${n1(lipT*0.8)}"/>`;
+    o+=`<ellipse cx="${n1(cx-rx*0.2)}" cy="${n1(y+ry+lipT*0.45)}" rx="${n1(rx*0.4)}" ry="${n1(lipT*0.25)}" fill="#fff" opacity=".25"/>`;
+  }
+  return o;
+}
 function bzp(a,b,c,d,t){ const u=1-t; return [u*u*u*a[0]+3*u*u*t*b[0]+3*u*t*t*c[0]+t*t*t*d[0],u*u*u*a[1]+3*u*u*t*b[1]+3*u*t*t*c[1]+t*t*t*d[1]]; }
 function beautyEyes(c){
   const {g,u,cx,hH,fW,yE,dx,F,BV,skin,hc,dead,EX,sk}=c, E=BV.eye;
@@ -1617,7 +1647,7 @@ function beautyNose(c){
 function beautyLips(c){
   const {cx,hH,fW,mY,mw,lipT,F,BV,skin,u,EX,dead}=c, Lp=BV.lip;
   const lc=F?mix(skin,['#d24a62','#c9465a','#d8607a'][Lp],0.62):mix(skin,'#a8584f',0.38);
-  const up=lipT*(Lp===1?1.25:1.12), dn=lipT*(Lp===1?1.5:1.3), sm=EX==='calm'||EX==='smirk'?hH*0.006:0;
+  const up=lipT*(Lp===1?1.25:1.12), dn=lipT*(Lp===1?1.5:1.3), sm=EX==='calm'||EX==='smirk'?hH*0.006:EX==='sad'?-hH*0.016:0;
   const x1=cx-mw, x2=cx+mw, yc=mY-sm, yR=yc-(EX==='smirk'?hH*0.006:0);
   let o=`<defs><linearGradient id="lp${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mix(lc,'#000000',0.12)}"/><stop offset=".6" stop-color="${lc}"/><stop offset="1" stop-color="${mix(lc,'#ffffff',0.06)}"/></linearGradient></defs>`;
   // 인중 그늘
@@ -1642,14 +1672,14 @@ function drawHead(g,u,cx,yT,hH,dead,shY){
   const AG=PR?0:Math.max(0,Math.min(1,((g.age||30)-38)/42)), bM0=M.build(p.build), FT=PR?0:Math.max(0,Math.min(1,(bM0-1.3)/0.75))*(1-0.45*Math.max(0,Math.min(1,((p.muscle||5)-6)/4))), TH=PR?0:Math.max(0,Math.min(1,(0.92-bM0)/0.36));
   const fW=PR?hH*(F?(g.eth==='ea'||g.eth==='sea'?0.68:0.655):0.69)*(0.97+p.faceW*0.006):hH*(0.56+p.faceW*0.022)*(1+0.2*FT-0.09*TH), yB=yT+hH; if(PR&&F) lipC=mix(skin,'#c8344a',dark?0.45:0.68);
   const yE=PR?yT+hH*0.5:yT+hH*(0.44+p.eyeHeight*0.013), yE0=yE;
-  const rx=Math.min(hH*(0.05+p.eyeSize*0.0055)*(PR?(F?1.18:1.08):1),fW*(PR?0.19:0.17)), ry=rx*(g.mono?(PR?0.48:0.38):(PR?(F?0.62:0.52):0.5))*(1-0.3*FT-0.14*AG);
+  const rx=Math.min(hH*(0.05+p.eyeSize*0.0055)*(PR?(F?1.18:1.08):1),fW*(PR?0.19:0.17)), ry=rx*(g.mono?(PR?0.48:0.38):(PR?(F?0.62:0.52):0.5))*(1-0.3*FT-0.14*AG)*(g.expr==='gape'&&!dead?1.3:g.expr==='grin'&&!dead?0.82:1);
   const RX=[rx,rx], RY=[ry,ry], EY=[0,0];
   if(g.oddEye){ const k=g.oddEye-1; RX[k]=rx*0.82; RY[k]=ry*0.7; EY[k]=ry*0.25; }
   const dx=PR?fW*0.235:Math.min(fW*(0.15+p.eyeSpace*0.016),fW*0.42-rx), tilt=(p.eyeTilt-5.5)*1.6;
   const noseLen=hH*(0.06+p.noseSize*0.02)*(1+0.12*AG+0.1*TH), noseW=hH*(0.08+p.noseWidth*0.02)*(1+0.1*AG+0.2*FT-0.05*TH);
   const nBase=PR?yT+hH*0.665:yE+hH*0.03+noseLen;
   const mY=PR?yT+hH*0.77:Math.min(nBase+hH*(0.055+p.mouthHeight*0.007),yB-hH*0.1);
-  const mw=PR?fW*(F?0.165:0.165)*BV.mwk:fW*(0.12+p.mouthW*0.016), lipT=PR?hH*(F?0.026:0.018)*BV.lk:hH*(0.01+p.lip*0.0045)*(ANG?0.8:1)*(1-0.4*AG), sm=(AG>0.3?-hH*0.01*AG:0)+EX==='calm'?(p.smile-5.5)*hH*0.003:EX==='smirk'?0:ANG?-hH*0.014:-hH*0.006;
+  const mw=PR?fW*(F?0.165:0.165)*BV.mwk:fW*(0.12+p.mouthW*0.016), lipT=PR?hH*(F?0.026:0.018)*BV.lk:hH*(0.01+p.lip*0.0045)*(ANG?0.8:1)*(1-0.4*AG), sm=(AG>0.3?-hH*0.01*AG:0)+(EX==='sad'?-hH*0.022:0)+EX==='calm'?(p.smile-5.5)*hH*0.003:EX==='smirk'?0:ANG?-hH*0.014:-hH*0.006;
   const jw=PR?fW*BV.jw:fW*(0.56+p.jaw*0.03)*(F?0.94:1)*(1+0.3*FT+0.1*AG-0.08*TH), cwd=PR?fW*BV.cw:fW*(0.2+p.jaw*0.02)*(F?0.85:1)*(1+0.55*FT-0.12*TH);
   const cbY=yT+hH*0.53, jY=PR?yT+hH*BV.jy:yT+hH*((F?0.8:0.78)+0.03*FT+0.025*AG);
   let defs=hairDefs(u,hc)+
@@ -1732,7 +1762,7 @@ function drawHead(g,u,cx,yT,hH,dead,shY){
     o+=`</g>`;
     // 눈썹: 안쪽은 굵고 바깥은 가늘어지는 면
     const bt=hH*(0.012+p.brow*0.0055)*(F?0.85:1)*(PR?1.3:1)*(1+0.45*AG), tl=(p.browTilt-5.5)*hH*0.004, by=yE0-hH*0.068-ry*0.8;
-    const eb=ANG?hH*0.034:EX==='stern'?hH*0.016:0, xi=cx+sd*(dx-rx*0.95-(ANG?rx*0.15:0)), xo=cx+sd*(dx+rx*1.45), xm=cx+sd*(dx+rx*0.55), yi=by+tl+eb+(EX==='smirk'&&sd>0?-hH*0.015:0), yo=by-tl*0.6+hH*0.008-eb*0.25, ym=Math.min(yi,yo)-hH*(F?0.024:0.016);
+    const eb=ANG?hH*0.034:EX==='stern'?hH*0.016:EX==='sad'?-hH*0.03:EX==='gape'?-hH*0.022:0, xi=cx+sd*(dx-rx*0.95-(ANG?rx*0.15:0)), xo=cx+sd*(dx+rx*1.45), xm=cx+sd*(dx+rx*0.55), yi=by+tl+eb+(EX==='smirk'&&sd>0?-hH*0.015:0), yo=by-tl*0.6+hH*0.008-eb*0.25, ym=Math.min(yi,yo)-hH*(F?0.024:0.016);
     const bc=g.hairStyle===0&&hc==='#D8D4CC'?'#9b968c':mix(hc,'#000000',0.12);
     o+=`<path d="M${P2(xi,yi-bt*0.55)} Q${P2(xm,ym-bt*0.55)} ${P2(xo,yo)} Q${P2(xm,ym+bt*0.45)} ${P2(xi,yi+bt*0.5)} Q${P2(xi-sd*bt*0.3,yi)} ${P2(xi,yi-bt*0.55)} Z" fill="${bc}"/>`;
     o+=`<path d="M${P2(xi+sd*bt*0.2,yi+bt*0.3)} l${n1(sd*bt*0.15)} ${n1(-bt*0.7)} M${P2(xi+sd*bt*0.6,yi+bt*0.3)} l${n1(sd*bt*0.2)} ${n1(-bt*0.7)}" stroke="${mix(bc,'#000000',0.3)}" stroke-width=".6" opacity=".6"/>`;
@@ -1772,9 +1802,11 @@ function drawHead(g,u,cx,yT,hH,dead,shY){
   if(g.beard>=2&&g.beard!==6) o+=`<path class="o" fill="url(#hg${u})" d="M${P2(cx,mY-lipT*1.1-hH*0.03)} C${P2(cx+mw*0.4,mY-lipT*1.1-hH*0.06)} ${P2(cx+mw*1.0,mY-lipT*1.1-hH*0.04)} ${P2(cx+mw*1.25,mY-lipT*0.4)} C${P2(cx+mw*0.9,mY-lipT*1.1)} ${P2(cx+mw*0.4,mY-lipT*1.1-hH*0.01)} ${P2(cx,mY-lipT*1.05)} C${P2(cx-mw*0.4,mY-lipT*1.1-hH*0.01)} ${P2(cx-mw*0.9,mY-lipT*1.1)} ${P2(cx-mw*1.25,mY-lipT*0.4)} C${P2(cx-mw*1.0,mY-lipT*1.1-hH*0.04)} ${P2(cx-mw*0.4,mY-lipT*1.1-hH*0.06)} ${P2(cx,mY-lipT*1.1-hH*0.03)} Z"/>`;
   if(g.beard>=2&&g.beard<=4) o+=`<ellipse cx="${n1(cx)}" cy="${n1(mY+lipT*0.9)}" rx="${n1(mw*1.02)}" ry="${n1(lipT*1.7)}" fill="${mix(hc,'#000000',0.45)}" opacity=".55"/>`; // 수염 속 입 주변 살짝 드러남
   // 입술: 큐피드 활 모양 윗입술 + 도톰한 아랫입술
-  if(PR) o+=beautyLips({cx,hH,fW,mY,mw,lipT,F,BV,skin,u,EX,dead});
+  const OPEN=EX==='grin'||EX==='gape';
+  if(OPEN) o+=openMouth({EX,cx,hH,fW,mY,mw:PR?mw*0.95:mw,lipT:Math.max(lipT,hH*0.016),lipC:PR?(F?mix(skin,'#d24a62',0.6):mix(skin,'#a8584f',0.38)):lipC,skin,sk,u,AG});
+  else if(PR) o+=beautyLips({cx,hH,fW,mY,mw,lipT,F,BV,skin,u,EX,dead});
   const x1=cx-mw, x2=cx+mw, cyc=mY-sm, cL=cyc+(EX==='smirk'?hH*0.004:0), cR=cyc-(EX==='smirk'?hH*0.018:0);
-  if(!PR){
+  if(!PR&&!OPEN){
   o+=`<path d="M${P2(x1,cL)} C${P2(cx-mw*0.6,mY-lipT*0.55)} ${P2(cx-mw*0.35,mY-lipT*1.15)} ${P2(cx-mw*0.12,mY-lipT*1.0)} Q${P2(cx,mY-lipT*0.8)} ${P2(cx+mw*0.12,mY-lipT*1.0)} C${P2(cx+mw*0.35,mY-lipT*1.15)} ${P2(cx+mw*0.6,mY-lipT*0.55)} ${P2(x2,cR)} Q${P2(cx,mY+lipT*0.1)} ${P2(x1,cL)} Z" fill="${mix(lipC,'#000000',0.12)}"/>`;
   o+=`<path d="M${P2(x1,cL)} Q${P2(cx-mw*0.5,mY+lipT*2.2+sm*0.5)} ${P2(cx,mY+lipT*2.15)} Q${P2(cx+mw*0.5,mY+lipT*2.2+sm*0.5)} ${P2(x2,cR)} Q${P2(cx,mY+lipT*0.1)} ${P2(x1,cL)} Z" fill="url(#ll${u})"/>`;
   o+=`<ellipse cx="${n1(cx-mw*0.08)}" cy="${n1(mY+lipT*1.45)}" rx="${n1(mw*0.22)}" ry="${n1(lipT*0.22)}" fill="url(#hl${u})" opacity="${F?0.8:0.5}"/>`;
@@ -1788,6 +1820,8 @@ function drawHead(g,u,cx,yT,hH,dead,shY){
     o+=`<path d="${tl}" stroke="#b9ad98" stroke-width=".7"/><path d="M${P2(ox1+mw*0.18,bot-lipT*0.2)} Q${P2(cx,bot+lipT*0.1)} ${P2(ox2-mw*0.18,bot-lipT*0.2)}" stroke="#d9cfbd" stroke-width="${n1(lipT*0.35)}" fill="none" opacity=".8"/>`;
   }
   }
+  if(EX==='sad'){ o+=`<path d="M${P2(cx-mw*0.45,mY+lipT*3.4)} Q${P2(cx,mY+lipT*2.7)} ${P2(cx+mw*0.45,mY+lipT*3.4)}" stroke="${sk}" stroke-width="${n1(Math.max(0.7,hH*0.006))}" fill="none" opacity=".45"/>`;
+    if((p.lip+p.eyeSize)%3===0){ const tx=cx+dx*0.95, ty=yE0+ry*2.4; o+=`<path d="M${P2(tx,ty)} q${n1(-hH*0.012)} ${n1(hH*0.03)} 0 ${n1(hH*0.04)} q${n1(hH*0.012)} ${n1(-hH*0.01)} 0 ${n1(-hH*0.04)} Z" fill="#cfe6f5" stroke="#7aa6c4" stroke-width=".5" opacity=".9"/>`; } }
   if(ANG&&!PR) [-1,1].forEach(sd=>{ o+=`<path d="M${P2(cx+sd*noseW*0.55,nBase-hH*0.04)} Q${P2(cx+sd*(mw*1.05),mY-hH*0.05)} ${P2(cx+sd*mw*1.12,mY+hH*0.02)}" stroke="${sk}" stroke-width="${n1(Math.max(0.8,hH*0.009))}" fill="none" opacity=".4"/>`; });
   if(dead) o+=`<path d="M${P2(x2,cyc)} C${P2(x2+2,cyc+hH*0.08)} ${P2(x2-2,cyc+hH*0.14)} ${P2(x2,yB-hH*0.03)}" stroke="#6b1410" stroke-width="${n1(hH*0.014)}" fill="none" stroke-linecap="round"/>`;
   if(g.scar){
@@ -2829,7 +2863,7 @@ function unpackDuel(str){
     const pose=(x,lo,hi)=>String(x).split('.').slice(0,2).map(v=>cl(+v||lo,lo,hi));
     const g={p,blessed:+bl===1,pretty:+bl===2,cm:cl(+cm||175,20,1000),skin:cl(+skin||5,1,10),eyeColor:col(ec),hairColor:col(hc),hairStyle:cl(+hs||0,0,21),beard:cl(+bd||0,0,7),scar:!!scar,tattoo:cl(+tat||0,0,3),
       tunic:col(tun),pants:col(pan),furC:col(fur),armPose:pose(ap,7,20),legPose:pose(lp,2,7),armOk:[ok[0]==='1',ok[1]==='1'],legOk:[ok[2]==='1',ok[3]==='1'],
-      sex:o[26]?'f':'m',mono:!!o[27],uw:col(o[28]||'1E1E22'),bust:o[26]?Math.min(1.3,Math.max(0.8,(+o[29]||100)/100)):0,eth:ETH[o[30]]?o[30]:'eu',expr:['stern','angry','snarl','smirk','calm'].includes(o[31])?o[31]:'stern',oddEye:cl(+o[32]||0,0,2),eye2:/^[0-9a-fA-F]{6}$/.test(o[33]||'')?'#'+o[33]:'',bulk:Math.max(0,Math.min(8,+o[34]||0)),khat:cl(+o[35]||0,0,29),age:cl(+o[36]||30,18,99),freck:o[37]?1:0};
+      sex:o[26]?'f':'m',mono:!!o[27],uw:col(o[28]||'1E1E22'),bust:o[26]?Math.min(1.3,Math.max(0.8,(+o[29]||100)/100)):0,eth:ETH[o[30]]?o[30]:'eu',expr:['stern','angry','snarl','smirk','calm','grin','sad','gape'].includes(o[31])?o[31]:'stern',oddEye:cl(+o[32]||0,0,2),eye2:/^[0-9a-fA-F]{6}$/.test(o[33]||'')?'#'+o[33]:'',bulk:Math.max(0,Math.min(8,+o[34]||0)),khat:cl(+o[35]||0,0,29),age:cl(+o[36]||30,18,99),freck:o[37]?1:0};
     if(g.beard>7) g.beard=0;
     if(g.sex==='f') g.beard=0;
     const o36=i=>parseInt(String(of)[i]||'0',36)||0, gid=(sl,i)=>{ const v=o36(i); return gearOf(sl,v)?v:0; };
@@ -2889,7 +2923,7 @@ function embers(){ let s=''; for(let i=0;i<10;i++) s+=`<span class="ember-p" sty
 const roman='';
 function battleView(){
   const r=ui.rep;
-  const fig=(id,h)=>`<div class="fighter ${id==='A'?'a':'b'}${(h.st.int||50)<=10?' feral':''}" id="f${id}" data-int="${h.st.int||50}"${h.weapon?' data-w="1"':''}><div class="act" id="a${id}"><div class="flip" id="fig${id}">${drawChar(Object.assign({},h,{g:Object.assign({},h.g,{expr:h.g.expr==='snarl'?'snarl':'angry'})}))}</div></div></div>`;
+  const fig=(id,h)=>`<div class="fighter ${id==='A'?'a':'b'}${(h.st.int||50)<=10?' feral':''}" id="f${id}" data-int="${h.st.int||50}"${h.weapon?' data-w="1"':''}><div class="act" id="a${id}"><div class="flip" id="fig${id}">${drawChar(Object.assign({},h,{g:Object.assign({},h.g,{expr:['snarl','grin','gape'].includes(h.g.expr)?h.g.expr:'angry'})}))}</div></div></div>`;
   return topbar()+`<section class="hud"><div><span class="lbl">내 전사 · ${fmtH(r.me.cm)}</span><div class="nm">${flg(r.me)}${esc(r.me.name)}</div><div class="hpbar"><i id="hpA"></i></div><div class="stbar"><i id="stA"></i></div><div class="hpv" id="hpAv"></div></div><div class="r"><span class="lbl">친구의 전사 · ${fmtH(r.foe.cm)}</span><div class="nm">${flg(r.foe)}${esc(r.foe.name)}</div><div class="hpbar"><i id="hpB"></i></div><div class="stbar"><i id="stB"></i></div><div class="hpv" id="hpBv"></div></div></section>`+
     `<section class="stage" id="stage">${stageBg()}${embers()}${fig('A',r.me)}${fig('B',r.foe)}<canvas class="st3d" id="st3d"></canvas><div class="fxl" id="fx"></div></section>`+
     `<div class="log" id="log" aria-live="polite"></div><div class="after" id="after"><button class="btn" data-act="skip">바로 끝장내기</button></div>`;
@@ -3382,7 +3416,7 @@ function battle3d(now){
   const cw=Math.round(W*DPR), ch=Math.round(Hs*DPR);
   if(cv.width!==cw||cv.height!==ch){ cv.width=cw; cv.height=ch; }
   if(ui.stageH&&Math.abs(ui.stageH-Hs)>8&&!document.hidden){ try{ layoutStage(); place(); }catch(e){} }
-  if(!ui.b3){ const ang=h=>Object.assign({},h,{g:Object.assign({},h.g,{expr:h.g.expr==='snarl'?'snarl':'angry'})}); ui.b3={A:build3(ang(ui.rep.me),false),B:build3(ang(ui.rep.foe),false),hA:ang(ui.rep.me),hB:ang(ui.rep.foe)}; }
+  if(!ui.b3){ const ang=h=>Object.assign({},h,{g:Object.assign({},h.g,{expr:['snarl','grin','gape'].includes(h.g.expr)?h.g.expr:'angry'})}); ui.b3={A:build3(ang(ui.rep.me),false),B:build3(ang(ui.rep.foe),false),hA:ang(ui.rep.me),hB:ang(ui.rep.foe)}; }
   const figs=[];
   ['A','B'].forEach(id=>{
     const f=$('#f'+id), a=$('#a'+id), svg=f&&f.querySelector('svg'); if(!f||!a||!svg) return;
