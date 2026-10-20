@@ -51,21 +51,21 @@ svg{overflow:visible}
 .seasons{display:flex;gap:6px;margin-top:10px}.seasons button{flex:1;padding:9px 4px;border:1px solid var(--line);background:#141110;color:#8d8073;font:inherit;font-size:13px;font-weight:700;border-radius:3px}.seasons button.on{background:#3a1a12;color:var(--bone);border-color:#8a3a22}
 .rrow.old{filter:sepia(.35) saturate(.8)}
 .rollwrap{display:flex;flex-direction:column;align-items:center;gap:22px;padding-block:30px 8px}
-.bigroll{position:relative;width:min(66vw,240px);aspect-ratio:1;max-width:100%;background:none;border:0;padding:0;border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:transform .12s;filter:drop-shadow(0 0 24px rgba(216,90,30,.35)) drop-shadow(0 10px 0 #060505)}
-.bigroll .portal{width:100%;height:100%;display:block}
-.bigroll .ring{transform-origin:100px 100px;animation:pspin 22s linear infinite}
-.bigroll .ring2{transform-origin:100px 100px;animation:pspin 9s linear infinite reverse}
-.bigroll .core{transform-origin:100px 100px;animation:pcore 2.4s ease-in-out infinite}
-.bigroll .rune{font-family:serif;font-weight:700;filter:drop-shadow(0 0 6px #ffcf7a)}
-.bigroll .plabel{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);white-space:nowrap;font-family:var(--serif);font-weight:800;font-size:clamp(17px,5vw,21px);color:var(--bone);letter-spacing:.12em;background:#140f0d;border:1px solid #5a4636;padding:5px 14px;border-radius:2px;text-shadow:0 0 10px rgba(216,118,42,.6)}
-.bigroll:active{transform:scale(.95)}
-@keyframes pspin{to{transform:rotate(360deg)}}
-@keyframes pcore{0%,100%{transform:scale(1);opacity:.92}50%{transform:scale(1.06);opacity:1}}
+.birth{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 50%,#1d1411 0%,#0b0908 70%);z-index:5}
+.lifebtn{position:relative;font-family:var(--serif);font-weight:800;font-size:clamp(26px,8vw,40px);letter-spacing:.14em;color:#f3e3c8;background:none;border:0;padding:22px 30px;cursor:pointer;text-shadow:0 0 18px rgba(230,110,40,.75),0 0 2px #000;animation:lglow 2.6s ease-in-out infinite}
+.lifebtn::before{content:"";position:absolute;inset:-30% -12%;background:radial-gradient(ellipse at center,rgba(220,90,30,.28),transparent 65%);z-index:-1;animation:lglow 2.6s ease-in-out infinite}
+.lifebtn:active{transform:scale(.96)}
+.lifebtn.charge{animation:lcharge .15s linear infinite;color:#fff7e8;text-shadow:0 0 30px #ffb060,0 0 70px #ff7a2a,0 0 120px #ff5a1a}
+.lifebtn.charge::before{animation:none;background:radial-gradient(ellipse at center,rgba(255,170,90,.7),transparent 70%);inset:-120% -60%;transition:inset 1.3s ease-in}
+@keyframes lglow{0%,100%{opacity:.85;filter:brightness(.95)}50%{opacity:1;filter:brightness(1.25)}}
+@keyframes lcharge{0%{filter:brightness(1.4)}50%{filter:brightness(2)}100%{filter:brightness(1.4)}}
+.quake{animation:quake .07s linear infinite}
+@keyframes quake{0%{transform:translate(0,0)}25%{transform:translate(calc(var(--qa,4px)*-1),calc(var(--qa,4px)*.6))}50%{transform:translate(var(--qa,4px),calc(var(--qa,4px)*-.5))}75%{transform:translate(calc(var(--qa,4px)*-.6),calc(var(--qa,4px)*-.8))}100%{transform:translate(calc(var(--qa,4px)*.7),calc(var(--qa,4px)*.5))}}
+body.nobody .top,body.nobody .subtabs{display:none}
 .warp{position:fixed;inset:0;z-index:9999;pointer-events:all;touch-action:none}
 .warp canvas{position:absolute;inset:0;width:100%;height:100%}
 .warp-white{position:absolute;inset:0;background:#fff4e6;opacity:0}
 .warp.out{pointer-events:none}.warp.out .warp-white{transition:opacity .9s ease-out;opacity:0!important}
-@media (prefers-reduced-motion:reduce){.bigroll .ring,.bigroll .ring2,.bigroll .core{animation:none}}
 .hint{margin:0;text-align:center;color:var(--soft);font-size:14px;text-wrap:balance}
 .slot{width:min(52vw,190px)}
 .slot svg,.fig svg,.portrait svg{display:block;width:100%;height:auto}
@@ -411,7 +411,6 @@ canvas.v3d{display:block}
   .card{padding:16px}
   .brand{font-size:21px}
   .top{position:sticky;top:0;z-index:20;background:rgba(14,13,12,.94);padding-top:4px;backdrop-filter:blur(8px)}
-  .bigroll{width:min(62vw,280px)}
   .btn{min-height:52px;font-size:17px}
   .fightbig{min-height:108px}
   .stage{height:min(54vh,430px)}
@@ -855,6 +854,9 @@ const ETHW=[['eu',28],['ea',25],['af',13],['me',10],['la',10],['sa',8],['sea',5]
 const SURN={'🇰🇷':['김','이','박','최','정','강','조','윤','장','임','한','오','서','신','권','황','안','송','류','전','홍','고','문','양','손','배','백','허','남','심','노','하','곽','성','차','주','우','구','민','진','나','지','엄','채','원','천','방','공','현','함','변','염','여','추','도','소','석','선','설','마','길','연','위','표','명','기','반','왕','금','옥','육','인','맹','제','모','탁','국','어','은','편','용','예','경','봉','황보','남궁','제갈','독고','선우'],'🇯🇵':['사토','스즈키','타카하시','다나카','이토','와타나베','야마모토','나카무라','코바야시','카토','요시다','야마다','사사키','야마구치','마츠모토','이노우에','키무라','하야시','사이토','시미즈','모리','이케다','하시모토','아베','이시카와','야마시타','오가와','마에다','오카다','후지타','고토','하세가와','무라카미','콘도','사카모토','엔도','미야모토','오다','다케다','핫토리','사나다','우에스기'],'🇨🇳':['왕','리','장','류','천','양','황','자오','우','저우','쉬','쑨','마','주','후','궈','허','가오','린','뤄','정','량','셰','쑹','탕','한','펑','덩','차오','쩡','샤오','판','두','위'],'🇺🇸':['스미스','존슨','윌리엄스','브라운','존스','밀러','데이비스','윌슨','앤더슨','테일러','무어','잭슨','화이트','해리스','클라크','루이스','워커','홀','영','킹','라이트','힐','스콧','그린','베이커','아담스','넬슨','카터','로버츠','터너'],'🇬🇧':['스미스','존스','테일러','브라운','윌리엄스','윌슨','에번스','토머스','존슨','로버츠','워커','라이트','톰슨','화이트','휴즈','에드워즈','그린','홀','우드','해리스','마틴','쿠퍼','킹','클라크'],'🇳🇴':['한센','요한센','올센','라르센','안데르센','페데르센','닐센','크리스티안센','옌센','칼센','할보르센','베르그','하우겐','바켄','룬드','스트란드'],'🇸🇪':['안데르손','요한손','칼손','닐손','에릭손','라르손','올손','페르손','스벤손','구스타프손','린드','베리','셰베리'],'🇩🇰':['옌센','닐센','한센','페데르센','안데르센','크리스텐센','라스무센','쇠렌센','마센','묄레르'],'🇩🇪':['뮐러','슈미트','슈나이더','피셔','베버','마이어','바그너','베커','슐츠','호프만','코흐','리히터','클라인','볼프','슈뢰더','노이만','브라운','하르트만','크뤼거','폰브라운'],'🇫🇷':['마르탱','베르나르','뒤부아','토마','로베르','리샤르','프티','뒤랑','르루아','모로','시몽','로랑','르페브르','미셸','가르니에','보나파르트'],'🇮🇹':['로시','루소','페라리','에스포시토','비앙키','로마노','콜롬보','리치','마리노','그레코','브루노','갈로','콘티','데루카','코스타','조르다노'],'🇪🇸':['가르시아','로드리게스','곤살레스','페르난데스','로페스','마르티네스','산체스','페레스','고메스','마르틴','히메네스','루이스','에르난데스','디아스','모레노','알바레스'],'🇷🇺':['이바노프','스미르노프','쿠즈네초프','포포프','바실리예프','페트로프','소콜로프','미하일로프','노비코프','페도로프','모로조프','볼코프','알렉세예프','레베데프','코즐로프','볼코프'],'🇮🇳':['샤르마','싱','쿠마르','굽타','파텔','레디','나이르','메타','조시','아이어','카푸르','바르마','차우한','라오'],'🇳🇬':['오콘쿼','아데바요','오코로','은와추쿠','오비','에제','오군','바바','이브라힘','오니예'],'🇧🇷':['실바','산투스','올리베이라','소자','호드리게스','페헤이라','알베스','페레이라','리마','고메스','히베이루','카르발류'],'🇲🇽':['에르난데스','가르시아','마르티네스','로페스','곤살레스','페레스','로드리게스','산체스','라미레스','크루스','플로레스','모랄레스'],'🇹🇷':['이을마즈','카야','데미르','샤힌','첼리크','이을드즈','외즈튀르크','아이든','아르슬란','도안','크르치'],'🇪🇬':['하산','모하메드','알리','이브라힘','마흐무드','압델라','사이드','무스타파','파루크'],'🇮🇷':['호세이니','모하마디','라히미','아흐마디','카리미','레자이','하이다리','자파리','사데기'],'🇲🇳':['바트','볼드','칭기스','수흐','간','에르덴','오치르','다와','강바타르','테무르'],'🇻🇳':['응우옌','쩐','레','팜','황','판','부','당','부이','도','호','응오'],'🇬🇷':['파파도풀로스','니콜라우','게오르기우','디미트리우','콘스탄티누','이오아누','바실리우'],'🇵🇱':['노박','코발스키','비시니에프스키','보이치크','카민스키','레반도프스키','지엘린스키'],'🇳🇱':['더용','얀선','더프리스','반데이크','바커르','비서르','스밋','메이르','판다이크'],'🇮🇪':['머피','켈리','오설리번','월시','오브라이언','번','라이언','오코너','오닐','맥카시'],'🇸🇦':['알사우드','알카타니','알오타이비','알가므디','알하르비','알자흐라니','알다우사리'],'🇮🇩':['수산토','위자야','하르토노','쿠스마','세티아완','프라타마','누그로호','하디'],'🇹🇭':['사이통','웡사','분마','시리','차이야','퐁팟','낙촌'],'🇿🇦':['은들로부','마시레','디라미니','줄루','모코에나','반데르메르웨','보타'],'🇬🇭':['멘사','보아텡','아산테','오세이','아피아','오우수','아자이'],'🇰🇿':['누르바예프','세릭바예프','아흐메토프','오마로프','이스마일로프','잔바예프']};
 const GIVM={'🇰🇷':['민준','서준','도윤','예준','시우','하준','주원','지호','지후','준우','준서','도현','건우','현우','우진','선우','연우','유준','정우','승현','시윤','준혁','은우','지환','승민','유찬','윤우','민성','준영','시후','진우','지훈','민재','현준','한결','은찬','태윤','재윤','성민','동현','태민','재현','상우','영호','철수','대성','강호','태식','무진','용준','석진','광수','병철','진혁','태양','도훈','재민','경민','성훈','종현','상철','동욱','형준','범수','태웅','우석','창민','정훈','대호','용팔','만수','두식','칠성','판석','덕배','봉구','끝순'],'🇯🇵':['하루토','소타','유토','하루키','렌','다이키','쇼타','켄지','다이스케','리쿠','신고','겐','타케시','소라','히로시','이치로','지로','료','카이토','유마','쇼','타쿠미','츠바사','류세이','무사시','켄신','코지','마사루','아키라','타로','켄타','유야','신지','곤베'],'🇨🇳':['웨이','지엔','밍','레이','하오','보','량','쥔','펑','강','타오','빈','융','즈하오','쯔위','하오란','위쉬안','이천','원보','톈위','쥔제','즈밍','샤오룽','페이','윈','룽','다웨이','톄주']};
 const GIVF={'🇰🇷':['서연','서윤','지우','서현','민서','하은','하윤','윤서','지유','지민','채원','수아','지아','지윤','은서','다은','예은','수빈','소율','예린','하린','시은','유나','가은','예서','지원','소윤','채은','서아','수민','혜원','미진','은지','보람','다솜','나래','슬기','하늘','초롱','영희','순자','말순','옥자','정숙','미숙','경희','현정','수진','지혜','은영','혜진','유진','소희','아름','나연','다현','채영','지효','미나'],'🇯🇵':['유키','사쿠라','하나','아오이','미오','린','유이','메이','히나','유나','리코','아카리','미사키','나나','아야','마이','에리','카오리','나오미','치히로','하루카','레이','미유','사키','토모코','마나미','유리','아스카','시즈카','노조미'],'🇨🇳':['팡','나','리','징','양','메이','린','샤오','팅','위','쉐','옌','루','칭','이','신이','위퉁','즈한','쯔쉬안','메이링','샤오옌','위에','란','후이','쉐잉']};
+// 베트남: 성 + 이름 순서 (응우옌 반 훙). 성과 이름은 따로 뽑으니 '응우옌 응우옌' 같은 이름은 안 나옴
+Object.assign(GIVM,{'🇻🇳':['반 훙','반 남','득 민','꽝 하이','반 똬','민 뚜언','홍 퐁','반 롱','득 안','반 끄엉','티엔','바오','중','후이','칸','빈']});
+Object.assign(GIVF,{'🇻🇳':['티 란','티 화','응옥 안','티 투','린','투 짱','응옥','마이','티 흐엉','프엉','타오','항']});
 // 성 × 이름 조합으로 수천 가지 이름. 한국·중국은 성+이름 붙여쓰기, 일본은 성 이름, 나머지는 이름 성
 function nameFor(flag,sex){
   const F=sex==='f', given=(F?GIVF[flag]||NATIONS_F[flag]:GIVM[flag]||NATIONS[flag])||NATIONS[flag]||['무명'], sur=SURN[flag];
@@ -863,7 +865,8 @@ function nameFor(flag,sex){
   if(!sur||(!GIVM[flag]&&Math.random()<0.25)) return gv;
   const sn=pick(sur);
   if(flag==='🇰🇷'||flag==='🇨🇳') return sn+gv;
-  if(flag==='🇯🇵') return sn+' '+gv;
+  if(flag==='🇯🇵'||flag==='🇻🇳') return sn+' '+gv;
+  if(sn===gv) return gv;
   const full=gv+' '+sn; return full.length<=12?full:gv;
 }
 let LASTNAT='';
@@ -2720,8 +2723,8 @@ function yardHtml(){
   return `<section class="yard"><h2>묘비 ${S.yard.length}</h2>`+S.yard.slice(0,8).map(y=>
     `<div class="stone"><div>${fig3d({g:y.g,name:y.name,weapon:null,outfit:y.outfit},true,Math.round(hfrac(y.cm||175)*110),'static')}</div><div><b>${esc(y.name)}</b><span>${y.wins}킬 · ${esc(y.cause)}</span></div></div>`).join('')+`</section>`;
 }
-function homeView(){
-  return topbar()+`<section class="rollwrap"><button class="bigroll" data-act="roll" aria-label="전사 뽑기"><svg class="portal" viewBox="0 0 200 200" aria-hidden="true"><defs><radialGradient id="pg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffb35c"/><stop offset=".35" stop-color="#c8381b"/><stop offset=".75" stop-color="#3a0c08"/><stop offset="1" stop-color="#120807"/></radialGradient><path id="rr" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><circle cx="100" cy="100" r="96" fill="#100c0b" stroke="#5a4636" stroke-width="3"/><g class="ring"><text font-size="15" fill="#d8762a" letter-spacing="3.2"><textPath href="#rr">ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟᚠᚢᚦᚨᚱᚲᚷᚹ</textPath></text></g><circle cx="100" cy="100" r="66" fill="none" stroke="#7a3a1c" stroke-width="2" stroke-dasharray="3 6" class="ring2"/><circle class="core" cx="100" cy="100" r="58" fill="url(#pg)"/><text class="rune" x="100" y="128" text-anchor="middle" font-size="84" fill="#fff1d6">ᛉ</text></svg><span class="plabel">생명을 얻는다</span></button><p class="hint">문을 넘으면 신들이 네 살과 뼈를 빚는다.<br>괴물로 나오든 송장으로 나오든, 그게 운명이다.</p></section>`+yardHtml();
+function homeView(){ // 아직 육신이 없는 자: 화면엔 이 버튼 하나뿐
+  return `<section class="birth"><button class="lifebtn" data-act="roll"><span>생명을 얻는다</span></button></section>`;
 }
 const ROLL_STEPS=[
   ['피부',['skin']],
@@ -2864,7 +2867,7 @@ function cardView(){
   let body='';
   if(t==='stat'){
     body=h?fightBig()+profile(h,{kills:h.wins,weapon:true,mine:true})+codeBox()
-      :`<section class="rollwrap"><button class="bigroll" data-act="roll" aria-label="전사 뽑기"><svg class="portal" viewBox="0 0 200 200" aria-hidden="true"><defs><radialGradient id="pg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffb35c"/><stop offset=".35" stop-color="#c8381b"/><stop offset=".75" stop-color="#3a0c08"/><stop offset="1" stop-color="#120807"/></radialGradient><path id="rr" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><circle cx="100" cy="100" r="96" fill="#100c0b" stroke="#5a4636" stroke-width="3"/><g class="ring"><text font-size="15" fill="#d8762a" letter-spacing="3.2"><textPath href="#rr">ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟᚠᚢᚦᚨᚱᚲᚷᚹ</textPath></text></g><circle cx="100" cy="100" r="66" fill="none" stroke="#7a3a1c" stroke-width="2" stroke-dasharray="3 6" class="ring2"/><circle class="core" cx="100" cy="100" r="58" fill="url(#pg)"/><text class="rune" x="100" y="128" text-anchor="middle" font-size="84" fill="#fff1d6">ᛉ</text></svg><span class="plabel">생명을 얻는다</span></button><p class="hint">문을 넘으면 신들이 네 살과 뼈를 빚는다.<br>괴물로 나오든 송장으로 나오든, 그게 운명이다.</p></section>`+codeBox();
+      :'';
   } else if(t==='shop') body=h?shopHtml():`<p class="note center">육신도 없는 놈이 뭘 사겠다고. 먼저 태어나라.</p>`;
   else if(t==='record') body=recordHtml();
   else body=settingsHtml();
@@ -2994,9 +2997,11 @@ function codeBox(){
 const views={born:bornView,incoming:incomingView,home:cardView,rolling:rollingView,card:cardView,invite:inviteView,battle:battleView,rank:rankView,detail:detailView};
 function render(){
   clearTimeout(ui.timer); (ui.tms||[]).forEach(clearTimeout);
-  app.innerHTML=views[view]();
+  const nobody=!S.hero&&(view==='home'||view==='card');
+  app.innerHTML=nobody?homeView():views[view]();
+  document.body.classList.toggle('nobody',nobody);
   if(S.resetNotice&&!ui.notice){ ui.notice='세상이 다시 시작됐다. 모든 전사가 초기화되고 명예의 전당도 새로 열렸다. (골드와 쿠폰은 그대로)'; S.resetNotice=0; saveState(); }
-  if(ui.notice&&view!=='battle') app.insertAdjacentHTML('afterbegin',`<section class="card note">${esc(ui.notice)} <button class="linkbtn" data-act="dismissnotice">닫기</button></section>`);
+  if(ui.notice&&view!=='battle'&&!nobody) app.insertAdjacentHTML('afterbegin',`<section class="card note">${esc(ui.notice)} <button class="linkbtn" data-act="dismissnotice">닫기</button></section>`);
   mount3d();
   document.body.classList.toggle('bview',view==='battle');
   document.body.classList.toggle('b2d',view==='battle'&&B2D());
@@ -3004,41 +3009,48 @@ function render(){
   if(view==='battle'){ ui.b3=null; ui.brk={}; try{ window.scrollTo(0,0); }catch(e){} play(); }
 }
 
-/* 차원이동: 핏빛 룬 터널로 빨려 들어가다(1.3초) → 새하얘지고 → 빛이 걷히며 탄생 룰렛 */
+/* 탄생: 버튼이 달아오르며 땅이 드드드 흔들리고 먼지가 떨어짐(1.6초) → 번쩍 → 핏빛 룬 터널로 차원이동 → 하얀 빛이 걷히며 캐릭터 생성 */
 function warpIn(done){
   if(document.querySelector('.warp')) return;
+  const btn=document.querySelector('.lifebtn'), shk=document.querySelector('.birth')||app;
   const o=document.createElement('div'); o.className='warp'; o.innerHTML='<canvas></canvas><div class="warp-white"></div>'; document.body.append(o);
   const cv=o.querySelector('canvas'), ctx=cv.getContext('2d'), white=o.querySelector('.warp-white');
   const dpr=Math.min(devicePixelRatio||1,1.5), W=innerWidth, H=innerHeight; cv.width=W*dpr; cv.height=H*dpr;
   const RU='ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ';
   const st=Array.from({length:200},()=>({a:Math.random()*Math.PI*2,r:Math.random()*.3+.02,s:.6+Math.random()*1.4,c:Math.random()<.4?'255,120,50':Math.random()<.5?'255,220,170':'200,40,25'}));
   const rn=Array.from({length:18},()=>({a:Math.random()*Math.PI*2,r:Math.random()*.4+.05,ch:RU[Math.floor(Math.random()*RU.length)]}));
-  const t0=performance.now(), IN=1.3;
+  const dust=[]; const addDust=n=>{ for(let i=0;i<n;i++) dust.push({x:Math.random()*W,y:-10-Math.random()*40,vy:40+Math.random()*90,vx:(Math.random()-.5)*20,r:.8+Math.random()*2.4,a:.35+Math.random()*.5,c:Math.random()<.5?'170,150,125':'120,100,85'}); };
+  if(btn) btn.classList.add('charge'); shk.classList.add('quake');
+  try{ navigator.vibrate&&navigator.vibrate([60,30,80,30,120,30,200]); }catch(e){}
+  const SH=1.6, FL=0.22, TN=0.95; let last=performance.now(), t0=last, fin=false;
   (function frame(now){
     if(!o.isConnected) return;
-    const t=(now-t0)/1000, sp=Math.min(1,t/IN);
+    const t=(now-t0)/1000, dt=Math.min(.05,(now-last)/1000); last=now;
     ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
-    const cx=W/2, cy=H*.45, R=Math.hypot(W,H)*.6;
-    ctx.fillStyle=`rgba(10,4,3,${Math.min(.85,t*1.6)})`; ctx.fillRect(0,0,W,H);
-    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R*(.12+sp*.9));
-    g.addColorStop(0,`rgba(255,236,200,${.3+sp*.6})`); g.addColorStop(.3,`rgba(220,70,25,${.25+sp*.35})`); g.addColorStop(1,'rgba(30,5,3,0)');
-    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-    ctx.lineCap='round';
-    for(const p of st){
-      p.r*=1+(.014+.1*sp*sp)*p.s; if(p.r>1.15) p.r=.02+Math.random()*.05;
-      const r1=p.r*R, r0=r1*(1-.08-.4*sp*sp);
-      ctx.strokeStyle=`rgba(${p.c},${Math.min(1,p.r*2.2)})`; ctx.lineWidth=(.6+p.r*3.4)*p.s;
-      ctx.beginPath(); ctx.moveTo(cx+Math.cos(p.a)*r0,cy+Math.sin(p.a)*r0); ctx.lineTo(cx+Math.cos(p.a)*r1,cy+Math.sin(p.a)*r1); ctx.stroke();
+    if(t<SH){ // 1) 흔들림 + 먼지
+      const k=t/SH; shk.style.setProperty('--qa',(2+12*k*k).toFixed(1)+'px');
+      if(Math.random()<.5+k) addDust(1+Math.floor(k*5));
+      ctx.fillStyle=`rgba(255,120,40,${.12*k})`; ctx.fillRect(0,0,W,H);
+      white.style.opacity=k>.85?((k-.85)/.15*.5).toFixed(2):0;
+    } else if(t<SH+FL){ // 2) 번쩍
+      shk.classList.remove('quake'); white.style.opacity=1;
+    } else { // 3) 룬 터널로 빨려 들어감
+      const u=t-SH-FL, sp=Math.min(1,u/TN);
+      white.style.opacity=u<.25?(1-u/.25).toFixed(2):sp>.62?Math.min(1,(sp-.62)/.38).toFixed(2):0;
+      const cx=W/2, cy=H*.47, R=Math.hypot(W,H)*.6;
+      ctx.fillStyle='rgba(10,4,3,.92)'; ctx.fillRect(0,0,W,H);
+      const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R*(.12+sp*.9)); g.addColorStop(0,`rgba(255,236,200,${.35+sp*.6})`); g.addColorStop(.3,`rgba(220,70,25,${.3+sp*.35})`); g.addColorStop(1,'rgba(30,5,3,0)');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H); ctx.lineCap='round';
+      for(const p of st){ p.r*=1+(.03+.14*sp*sp)*p.s; if(p.r>1.15) p.r=.02+Math.random()*.05;
+        const r1=p.r*R, r0=r1*(1-.1-.45*sp*sp); ctx.strokeStyle=`rgba(${p.c},${Math.min(1,p.r*2.2)})`; ctx.lineWidth=(.6+p.r*3.4)*p.s;
+        ctx.beginPath(); ctx.moveTo(cx+Math.cos(p.a)*r0,cy+Math.sin(p.a)*r0); ctx.lineTo(cx+Math.cos(p.a)*r1,cy+Math.sin(p.a)*r1); ctx.stroke(); }
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      for(const q of rn){ q.r*=1+.03+.08*sp; q.a+=.012; if(q.r>1.1){ q.r=.04+Math.random()*.06; q.ch=RU[Math.floor(Math.random()*RU.length)]; }
+        ctx.font=`700 ${Math.round(10+q.r*70)}px serif`; ctx.fillStyle=`rgba(255,170,90,${Math.min(.9,q.r*1.6)})`; ctx.fillText(q.ch,cx+Math.cos(q.a)*q.r*R,cy+Math.sin(q.a)*q.r*R); }
+      if(u>=TN+.12&&!fin){ fin=true; cv.remove(); try{ done(); }catch(e){ console.error(e); } setTimeout(()=>{ o.classList.add('out'); setTimeout(()=>o.remove(),1000); },120); return; }
     }
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    for(const q of rn){
-      q.r*=1+.02+.07*sp; q.a+=.01; if(q.r>1.1){ q.r=.04+Math.random()*.06; q.ch=RU[Math.floor(Math.random()*RU.length)]; }
-      ctx.font=`700 ${Math.round(10+q.r*70)}px serif`; ctx.fillStyle=`rgba(255,170,90,${Math.min(.9,q.r*1.6)})`;
-      ctx.fillText(q.ch,cx+Math.cos(q.a)*q.r*R,cy+Math.sin(q.a)*q.r*R);
-    }
-    white.style.opacity=t<IN-.5?0:Math.min(1,(t-(IN-.5))/.5);
-    if(t<IN+.25) requestAnimationFrame(frame);
-    else { cv.remove(); try{ done(); }catch(e){ console.error(e); } setTimeout(()=>{ o.classList.add('out'); setTimeout(()=>o.remove(),1000); },120); }
+    for(const d of dust){ d.vy+=160*dt; d.y+=d.vy*dt; d.x+=d.vx*dt; ctx.fillStyle=`rgba(${d.c},${d.a})`; ctx.beginPath(); ctx.arc(d.x,d.y,d.r,0,7); ctx.fill(); }
+    requestAnimationFrame(frame);
   })(t0);
 }
 /* ---------- actions ---------- */
