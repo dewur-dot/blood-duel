@@ -4,6 +4,6 @@ window.BLOOD_DUEL_SUPPORT = {
   bank: '카카오뱅크',
   account: '3333-04-7558601',
   holder: '최성*',
-  goldPerWon: 1,            // 1원 = 1골드 → 1,000원 = 1,000골드
+  goldPerWon: 1,            // 1원 = 1골드, 5,000원 이상은 1.4배 (5,000원 → 7,000골드)
   renameFrom: 10000         // 이 금액 이상 후원하면 이름 변경권 1장
 };

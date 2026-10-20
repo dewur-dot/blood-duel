@@ -59,8 +59,9 @@ textarea{resize:vertical;min-height:70px}
     <div class="acct"><span id="bank"></span><b id="acct"></b><span id="holder"></span><button class="btn small" id="copyAcct" type="button">계좌번호 복사</button></div>
     <table style="margin-top:12px">
       <tr><td>1,000원</td><td>1,000 골드</td></tr>
-      <tr><td>5,000원</td><td>5,000 골드</td></tr>
-      <tr><td>10,000원 이상</td><td>금액만큼 골드 + 이름변경 쿠폰 1장</td></tr>
+      <tr><td>5,000원</td><td>7,000 골드 (40% 덤)</td></tr>
+      <tr><td>10,000원</td><td>14,000 골드 + 이름변경 쿠폰 1장</td></tr>
+      <tr><td>5,000원 이상 아무 금액</td><td>금액의 1.4배 골드</td></tr>
     </table>
     <p class="note">① 위 계좌로 이체 → ② 아래에 입금자명과 금액으로 신청 → ③ 오딘(관리자)이 입금을 확인하면 이 페이지의 '내 쿠폰 코드'에 코드가 나타나고, 적어주신 이메일이나 전화번호로도 보내드립니다 → ④ 게임의 <b>오딘에게 청원</b> 탭에서 코드를 입력하세요.</p>
   </section>
@@ -105,6 +106,7 @@ textarea{resize:vertical;min-height:70px}
     <button class="btn primary" id="cMake" type="button">쿠폰 만들기</button>
     <div class="list" id="made" style="margin-top:10px"></div>
   </section>
+  <p class="note uid" id="foot" style="text-align:center;margin-top:18px;color:#6a6058"></p>
 </main>
 <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
@@ -118,11 +120,13 @@ textarea{resize:vertical;min-height:70px}
   const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const won=n=>Number(n||0).toLocaleString('ko-KR')+'원';
   const RENAME=C.renameFrom||10000, RATE=C.goldPerWon||1;
+  // 5,000원 이상은 40% 덤: 5,000원 → 7,000골드
+  const goldFor=a=>Math.floor(a*RATE*(a>=5000?1.4:1));
   $('#bank').textContent=C.bank||''; $('#acct').textContent=C.account||'계좌 준비 중'; $('#holder').textContent=C.holder?('예금주 '+C.holder):'';
   const copy=(t,btn)=>{ const done=()=>{ const o=btn.textContent; btn.textContent='복사됨'; setTimeout(()=>btn.textContent=o,1400); };
     try{ navigator.clipboard.writeText(t).then(done,()=>{ prompt('복사하세요',t); }); }catch(e){ prompt('복사하세요',t); } };
   $('#copyAcct').onclick=e=>copy(String(C.account||'').replace(/[^0-9-]/g,''),e.target);
-  const isAdminPage=/[?&]admin\b/.test(location.search); if(isAdminPage) $('#admin').hidden=false;
+  const isAdminPage=/admin/i.test(location.search+location.hash); if(isAdminPage) $('#admin').hidden=false;
 
   let db, uid;
   const cfg=window.BLOOD_DUEL_FIREBASE_CONFIG;
@@ -158,7 +162,7 @@ textarea{resize:vertical;min-height:70px}
     $('#send').disabled=true; say('제단에 올리는 중…');
     try{ await ready; const dref=await db.collection('donations').add({uid,name,amount,msg,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
       await db.collection('contacts').doc(dref.id).set({uid,contact});
-      say(`신청했다. 입금이 확인되면 '내 쿠폰 코드'에 ${(amount*RATE).toLocaleString('ko-KR')} 골드${amount>=RENAME?' + 이름변경 쿠폰':''} 코드가 나타나고 ${contact}(으)로도 보내준다.`); $('#fMsg').value=''; loadMine();
+      say(`신청했다. 입금이 확인되면 '내 쿠폰 코드'에 ${goldFor(amount).toLocaleString('ko-KR')} 골드${amount>=RENAME?' + 이름변경 쿠폰':''} 코드가 나타나고 ${contact}(으)로도 보내준다.`); $('#fMsg').value=''; loadMine();
     }catch(e){ console.error(e); say('신청하지 못했다. 잠시 뒤 다시 시도해라.'); }
     $('#send').disabled=false;
   };
@@ -175,9 +179,9 @@ textarea{resize:vertical;min-height:70px}
   async function approve(x,b){
     if(!x) return; b.disabled=true;
     try{ const code=rand(12), batch=db.batch(), now=firebase.firestore.FieldValue.serverTimestamp();
-      batch.set(db.collection('codes').doc(code),{uid:x.uid,donationId:x.id,gold:Math.floor(x.amount*RATE),rename:x.amount>=RENAME,redeemedBy:null,createdAt:now});
+      batch.set(db.collection('codes').doc(code),{uid:x.uid,donationId:x.id,gold:goldFor(x.amount),rename:x.amount>=RENAME,redeemedBy:null,createdAt:now});
       batch.update(db.collection('donations').doc(x.id),{status:'done',approvedAt:now});
-      await batch.commit(); showMade(code,Math.floor(x.amount*RATE),x.amount>=RENAME,x.contact,x.name); loadPending(); loadDonors();
+      await batch.commit(); showMade(code,goldFor(x.amount),x.amount>=RENAME,x.contact,x.name); loadPending(); loadDonors();
     }catch(e){ console.error(e); b.disabled=false; alert(e.code==='permission-denied'?'관리자 권한이 없습니다. 위의 관리자 ID를 규칙에 넣고 게시하세요.':'처리하지 못했습니다.'); }
   }
   function showMade(code,gold,rename,contact,who){
@@ -198,7 +202,8 @@ textarea{resize:vertical;min-height:70px}
     try{ await db.collection('donations').doc(id).update({status:'rejected'}); loadPending(); }
     catch(e){ console.error(e); b.disabled=false; alert(e.code==='permission-denied'?'관리자 권한이 없습니다.':'처리하지 못했습니다.'); }
   }
-  ready.then(()=>{ loadDonors(); loadMine(); if(isAdminPage) loadPending(); }).catch(e=>{ fail($('#donors'),e); fail($('#mine'),e); });
+  ready.then(()=>{ $('#myUid').textContent=uid; $('#copyUid').onclick=e=>copy(uid,e.target); $('#foot').textContent='내 ID: '+uid; loadDonors(); loadMine(); if(isAdminPage) loadPending(); })
+    .catch(e=>{ console.error(e); $('#myUid').textContent='로그인 실패: '+(e&&(e.code||e.message)||e); fail($('#donors'),e); fail($('#mine'),e); });
 })();
 </script>
 </body>
