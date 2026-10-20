@@ -997,17 +997,21 @@ function newHero(){
 const STCAP=k=>k==='hp'?4000:k==='int'?100:199;
 function clampSt(h){ if(!h||!h.st) return h; Object.keys(h.st).forEach(k=>{ const v=+h.st[k]; h.st[k]=Math.max(1,Math.min(STCAP(k),Number.isFinite(v)?Math.round(v):1)); });
   h.maxhp=Math.max(1,Math.min(4000,Math.round(+h.maxhp||h.st.hp))); if(h.hp!=null) h.hp=Math.min(h.hp,h.maxhp); return h; }
-function grow(h){
-  const gain={}, streak=h.wins+1, bonus=Math.min(6,Math.floor(streak/5)*2);
-  const add=(k,v)=>{ const cap=STCAP(k), soft=Math.max(0.15,1-h.st[k]/cap), nv=Math.min(cap,Math.round(h.st[k]+Math.max(v>0?1:0,v*soft))); gain[k]=(gain[k]||0)+nv-h.st[k]; h.st[k]=nv; };
-  const keys=SKEYS.filter(k=>k!=='hp'&&k!=='luck'&&k!=='str').sort(()=>Math.random()-0.5).slice(0,6);
-  add('str',RI(3,5)+bonus);
-  keys.forEach(k=>add(k,RI(2,4)+bonus));
-  const size=Math.max(1,Math.pow(h.cm/175,1.2));
-  add('hp',Math.round((RI(14,22)+bonus*3)*size));
-  if(streak%5===0) SKEYS.filter(k=>k!=='luck'&&k!=='hp').forEach(k=>add(k,5));
-  if(h.g){ const add2=0.14+Math.min(0.12,bonus*0.02); h.g.bulk=Math.min(8,Math.round(((h.g.bulk||0)+add2)*100)/100); gain.bulk=add2; if(h.g.bulk>=3&&h.tags&&!h.tags.some(t=>t[0]==='레어 · 근육 괴물')) h.tags.unshift(['레어 · 근육 괴물',1]); }
-  h.st.hp=Math.min(99999,h.st.hp); h.maxhp=h.st.hp; h.hp=h.maxhp; h.wins++;
+// 이기면 '상대에게서 배운다': 상대가 가장 뛰어났던 능력 하나만 조금 오름. 키·팔 길이(리치)와 운은 타고난 것이라 안 오르고, 지능은 아주 조금만
+const LEARN_KEYS=['sta','spd','str','acc','crit','def','dodge','reflex','bal','guts','punch','kick','head','slam'];
+function grow(h,foe){
+  const gain={};
+  const src=foe&&foe.st?foe:null;
+  // 상대가 나보다 가장 크게 앞선 능력을 배움 (없으면 상대의 가장 높은 능력을 아주 조금)
+  const lead=x=>((src.st[x]||0)-(h.st[x]||0))/STCAP(x);
+  let k=src?LEARN_KEYS.slice().sort((a,b)=>lead(b)-lead(a))[0]:pick(LEARN_KEYS);
+  if(src&&lead(k)<=0) k=LEARN_KEYS.slice().sort((a,b)=>(src.st[b]||0)-(src.st[a]||0))[0];
+  const mine=h.st[k]||1, theirs=src?(src.st[k]||0):mine+5;
+  const inc=theirs>mine?Math.max(1,Math.min(5,Math.round((theirs-mine)*0.12))):(Math.random()<0.6?1:0);
+  const nv=Math.min(STCAP(k),mine+inc); gain[k]=nv-mine; h.st[k]=nv; gain.learn=k;
+  if(Math.random()<0.1&&h.st.int<100){ h.st.int++; gain.int=1; } // 지능은 가끔 1씩만
+  if(h.g){ const add2=0.12; h.g.bulk=Math.min(8,Math.round(((h.g.bulk||0)+add2)*100)/100); gain.bulk=add2; if(h.g.bulk>=3&&h.tags&&!h.tags.some(t=>t[0]==='레어 · 근육 괴물')) h.tags.unshift(['레어 · 근육 괴물',1]); }
+  h.maxhp=h.st.hp; h.hp=h.maxhp; h.wins++;
   const ls=LOOT_AT[h.wins]; if(ls){ const it=rollGear(ls), worn=giveGear(h,it); gain.loot={slot:it.slot,id:it.id,tier:it.tier,worn,at:h.wins}; }
   return gain;
 }
@@ -2638,8 +2642,11 @@ function pose3(J,A,breath){
 
 /* ---------- state ---------- */
 const reduce=false; // 게임 연출이 핵심이라 기기의 '동작 줄이기' 설정과 상관없이 움직임을 보여줌
-const KEY='piui-gyeoldu-v3';
-function loadState(){ try{ return JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ return {}; } }
+const KEY='piui-gyeoldu-v4'; // v4: 성장 방식 개편으로 모든 전사 초기화 (골드·쿠폰·설정은 유지)
+function loadState(){ try{ const cur=JSON.parse(localStorage.getItem(KEY)); if(cur) return cur;
+    const old=JSON.parse(localStorage.getItem('piui-gyeoldu-v3')||'null'); if(!old) return {};
+    const keep={}; ['gold','owned','renameT','redeemed','gfx','flag'].forEach(k=>{ if(old[k]!==undefined) keep[k]=old[k]; }); keep.resetNotice=1; return keep;
+  }catch(e){ return {}; } }
 function saveState(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
 let S=Object.assign({hero:null,yard:[],fights:0,board:[],seeded:false,flag:'',duels:[],handledDuels:[]},loadState());
 if(!Number.isFinite(S.gold)) S.gold=500; if(!Array.isArray(S.owned)) S.owned=[]; if(!Number.isFinite(S.renameT)) S.renameT=0;
@@ -2647,7 +2654,7 @@ const SUPPORT_URL='./support.html';
 const owns=k=>S.owned.includes(k)||(S.hero&&(S.hero.loot||[]).includes(k));
 const fmtG=n=>Math.round(n).toLocaleString('ko-KR')+' 골드';
 // 승리 보상 골드: 연승할수록 조금씩 더
-function winGold(h){ const g=RI(1,99); S.gold=(S.gold||0)+g; return g; } // 승리 보상: 1~99골드, 100은 넘지 않음
+function winGold(h){ const g=RI(1,10); S.gold=(S.gold||0)+g; return g; } // 승리 보상: 아주 조금 (1~10골드)
 if(!Array.isArray(S.duels)) S.duels=[];
 if(!Array.isArray(S.handledDuels)) S.handledDuels=[];
 let intMigrated=false;
@@ -2975,6 +2982,7 @@ const views={born:bornView,incoming:incomingView,home:cardView,rolling:rollingVi
 function render(){
   clearTimeout(ui.timer); (ui.tms||[]).forEach(clearTimeout);
   app.innerHTML=views[view]();
+  if(S.resetNotice&&!ui.notice){ ui.notice='세상이 다시 시작됐다. 모든 전사가 초기화되고 명예의 전당도 새로 열렸다. (골드와 쿠폰은 그대로)'; S.resetNotice=0; saveState(); }
   if(ui.notice&&view!=='battle') app.insertAdjacentHTML('afterbegin',`<section class="card note">${esc(ui.notice)} <button class="linkbtn" data-act="dismissnotice">닫기</button></section>`);
   mount3d();
   document.body.classList.toggle('bview',view==='battle');
@@ -3061,7 +3069,7 @@ function startFight(foeIn){
   const res=fight(A,B);
   const win=res.winner==='A';
   const rep={me:snapMe,foe,log:res.log,win,broke:null,gain:null,fled:res.fled||null};
-  if(win){ rep.gain=grow(me); rep.gold=winGold(me); rep.plunder=res.fled?null:plunderHelm(me,foe); rep.wins=me.wins; sync(me,true); }
+  if(win){ rep.gain=grow(me,foe); rep.gold=winGold(me); rep.plunder=res.fled?null:plunderHelm(me,foe); rep.wins=me.wins; sync(me,true); }
   else if(res.fled==='A'){ cowardize(me); sync(me,true); }
   else {
     const last=res.log[res.log.length-1];
@@ -3256,9 +3264,9 @@ function finish(){
   const wf=$('#f'+w); if(wf){ wf.dataset.ct=performance.now(); wf.classList.add('cheer'); }
   let h='';
   if(r.win){
-    const top=Object.entries(r.gain).filter(([k])=>k!=='bulk'&&k!=='loot').sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>{
+    const top=Object.entries(r.gain).filter(([k])=>k!=='bulk'&&k!=='loot'&&k!=='learn').sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>{
       const nm=SGROUPS.flatMap(g=>g[1]).find(x=>x[0]===k)[1]; return `${nm} +${v}`; });
-    h+=`<div class="verdict win"><b>${r.fled?'놈이 꽁무니를 뺐다.':r.vline||(r.vline=pick(WIN_LINES))}</b><span>${r.wins}킬 · ${top.join(' · ')}${r.gold?` · <b class="gold">+${fmtG(r.gold)}</b>`:''}</span></div>`;
+    h+=`<div class="verdict win"><b>${r.fled?'놈이 꽁무니를 뺐다.':r.vline||(r.vline=pick(WIN_LINES))}</b><span>${r.wins}킬 · ${(()=>{ const k=r.gain.learn, v=r.gain[k]||0, nm=k&&(SGROUPS.flatMap(g=>g[1]).find(x=>x[0]===k)||[])[1]; return k?(v>0?`놈에게서 ${nm}을(를) 배웠다 +${v}`:`놈의 ${nm}에서 더 배울 게 없었다`):top.join(' · '); })()}${r.gold?` · <b class="gold">+${fmtG(r.gold)}</b>`:''}</span></div>`;
     if(r.plunder){ const it=gearOf(r.plunder.slot,r.plunder.id); if(it) h+=`<div class="plunder">${itemIcon(it)}<div><b>놈의 투구를 빼앗았다</b><span><i class="tierb" style="background:${TIER_C(it.tier)}">${it.tier}</i>${esc(it.name)} · ${r.plunder.worn?'바로 썼다':'창고에 넣었다 (지금 것이 더 좋다)'}</span></div></div>`; }
   } else if(r.fled==='A'){
     h+=`<div class="verdict lose"><b>도망쳤다. 살긴 살았다.</b><span>이제부터 너의 이름은 '비겁한 겁쟁이'다. 전사들이 손가락질한다.</span></div>`;

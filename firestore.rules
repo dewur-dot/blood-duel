@@ -91,7 +91,7 @@ service cloud.firestore {
     }
 
     // 명예의 전당: 실제로 플레이한 전사들. 누구나 읽고, 자기 전사만 쓴다
-    match /heroes/{heroId} {
+    match /heroes2/{heroId} {
       function valid() {
         return request.resource.data.keys().hasOnly(['uid', 'name', 'kills', 'alive', 'hero', 'updatedAt'])
           && request.resource.data.uid == request.auth.uid

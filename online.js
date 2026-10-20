@@ -188,7 +188,7 @@
     const myId=isOwner?'B':'A', iFled=result.fled===myId, theyFled=!!result.fled&&!iFled;
     const rep={me:clone(me),foe:opponent,log:isOwner?flipLog(result.log):result.log,
       win:won,broke:null,gain:null,fled:result.fled?(isOwner?(result.fled==='A'?'B':'A'):result.fled):null};
-    if(won){ rep.gain=grow(me); rep.gold=typeof winGold==='function'?winGold(me):0; rep.plunder=theyFled?null:(typeof plunderHelm==='function'?plunderHelm(me,opponent):null); rep.wins=me.wins; sync(me,true); }
+    if(won){ rep.gain=grow(me,opponent); rep.gold=typeof winGold==='function'?winGold(me):0; rep.plunder=theyFled?null:(typeof plunderHelm==='function'?plunderHelm(me,opponent):null); rep.wins=me.wins; sync(me,true); }
     else if(iFled&&typeof cowardize==='function'){ cowardize(me); sync(me,true); }
     else{
       const last=result.log[result.log.length-1];
@@ -325,14 +325,14 @@
     pushT[h.id]=setTimeout(async()=>{
       try{
         const db=await ready, uid=firebase.auth().currentUser.uid;
-        await db.collection('heroes').doc(h.id).set({...data,uid,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+        await db.collection('heroes2').doc(h.id).set({...data,uid,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
       }catch(error){ console.warn('랭킹 저장 실패',error&&error.code||error); }
     },alive?1200:0);
   }
   async function loadBoard(){
     try{
       const db=await ready;
-      const qs=await db.collection('heroes').orderBy('kills','desc').limit(50).get();
+      const qs=await db.collection('heroes2').orderBy('kills','desc').limit(50).get();
       const list=[];
       qs.forEach(doc=>{ const d=doc.data(), h=d&&unpackDuel(d.hero); if(!h) return;
         list.push({id:doc.id,name:h.name,flag:h.flag||'',nick:h.nick,g:h.g,st:h.st,cm:h.cm,kg:h.kg,outfit:h.outfit,weapon:h.weapon,tags:h.tags,kills:Math.max(0,d.kills|0),alive:d.alive!==false}); });
