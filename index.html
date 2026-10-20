@@ -71,6 +71,10 @@ svg{overflow:visible}
 .quake{animation:quake .07s linear infinite}
 @keyframes quake{0%{transform:translate(0,0)}25%{transform:translate(calc(var(--qa,4px)*-1),calc(var(--qa,4px)*.6))}50%{transform:translate(var(--qa,4px),calc(var(--qa,4px)*-.5))}75%{transform:translate(calc(var(--qa,4px)*-.6),calc(var(--qa,4px)*-.8))}100%{transform:translate(calc(var(--qa,4px)*.7),calc(var(--qa,4px)*.5))}}
 body.nobody .top,body.nobody .subtabs{display:none}
+.natpick{padding:18px 4px 30px}.natpick h2{font-family:var(--serif);font-size:24px;text-align:center;margin:6px 0 6px;color:var(--bone)}.natpick .note{text-align:center;margin-bottom:14px}
+.natgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.natbtn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;background:#151110;border:1px solid var(--line);border-radius:3px;color:var(--bone);font:inherit;font-size:13px;cursor:pointer}
+.natbtn:active{background:#3a1a12;border-color:#8a3a22}.natbtn .flgnat{width:44px;height:auto}
 .warp{position:fixed;inset:0;z-index:9999;pointer-events:all;touch-action:none}
 .warp canvas{position:absolute;inset:0;width:100%;height:100%}
 .warp-white{position:absolute;inset:0;background:#fff4e6;opacity:0}
@@ -3005,7 +3009,7 @@ function battleView(){
 function codeBox(){
   return `<section class="card panel codebox"><h2>친구에게 받은 결투장</h2><p class="note">친구가 보낸 결투 링크를 붙여넣으세요. 결투하거나 도주할 수 있습니다.</p><textarea id="codeIn" rows="2" placeholder="여기에 붙여넣기" autocomplete="off"></textarea><div class="note" id="codemsg">${esc(ui.codemsg||'')}</div><button class="btn" data-act="joincode">결투장 열기</button></section>`;
 }
-const views={born:bornView,incoming:incomingView,home:cardView,rolling:rollingView,card:cardView,invite:inviteView,battle:battleView,rank:rankView,detail:detailView};
+const views={nation:nationView,born:bornView,incoming:incomingView,home:cardView,rolling:rollingView,card:cardView,invite:inviteView,battle:battleView,rank:rankView,detail:detailView};
 function render(){
   clearTimeout(ui.timer); (ui.tms||[]).forEach(clearTimeout);
   const nobody=!S.hero&&(view==='home'||view==='card');
@@ -3123,6 +3127,11 @@ function doneRoll(){
 }
 const BORN_LINES=['당신은 끝없는 전투의 세상에 태어났습니다','당신은 태어나자마자 도끼를 들었습니다','당신은 타고난 전사입니다','당신을 본 어머니는 외쳤다. 발할라!','산파가 당신의 첫 울음소리에 기절했습니다','당신은 탯줄을 이빨로 끊었습니다','당신의 첫마디는 엄마가 아니라 피였습니다','당신은 젖 대신 꿀술을 달라고 울었습니다','까마귀들이 당신의 탄생을 축하하러 몰려왔습니다','당신이 태어나던 밤, 마을의 개들이 모두 꼬리를 내렸습니다','당신의 요람은 적의 방패였습니다','오딘이 당신을 내려다보며 한숨을 쉬었습니다. 또 하나의 미친놈이군','당신은 걸음마보다 박치기를 먼저 배웠습니다','아버지는 당신을 보고 조용히 도끼를 물려주었습니다','당신의 첫 장난감은 적의 해골이었습니다','신들이 주사위를 굴렸고, 당신이 나왔습니다. 신들도 놀랐습니다','당신은 태어난 지 사흘 만에 늑대와 눈싸움에서 이겼습니다','이 세상은 당신을 원하지 않았습니다. 당신은 상관하지 않습니다','당신의 이름이 불리기도 전에 적들이 이미 떨고 있습니다','당신은 피 냄새를 맡고 눈을 떴습니다','발키리가 당신의 이름을 미리 적어두었습니다','당신은 울지 않았습니다. 대신 산파를 노려봤습니다','장로가 예언했습니다. 이 아이는 많은 무덤을 팔 것이다','당신의 탄생으로 마을 대장장이가 야근을 시작했습니다','당신은 태어나서 처음 본 사람을 때렸습니다. 아버지였습니다','당신은 어릴 적 어머니의 젖가슴조차 양보하지 않았습니다','당신은 세 살 때 아버지를 때려눕혔습니다','당신은 말보다 주먹이 먼저 나갑니다','당신은 어린아이도 용서하지 않습니다','당신은 노인에게도 전력을 다합니다','당신이 잠드는 날은 죽는 날입니다'];
 // 다 만들어진 전사를 한 번 구경시키고, 화면을 누르면 대기화면으로
+// 처음 태어난 자(국적이 없는 자)는 탄생 화면 다음에 국적을 한 번 고름 → 명예의 전당 국가 전쟁에 쓰임
+function nationView(){
+  const list=FLAGS.slice().sort((a,b)=>(a==='🇰🇷')-(b==='🇰🇷')?(b==='🇰🇷')-(a==='🇰🇷'):(FLAGN[a]||'').localeCompare(FLAGN[b]||'','ko')); // 한국은 맨 앞
+  return `<section class="natpick"><h2>어느 땅의 피를 타고났느냐</h2><p class="note">명예의 전당에서 이 깃발 아래 피를 흘린다. 나중에 초상화의 국기 칸에서 바꿀 수 있다.</p><div class="natgrid">${list.map(f=>`<button class="natbtn" data-act="setnat" data-f="${f}">${flagSvg(f,'flgnat')}<span>${FLAGN[f]||''}</span></button>`).join('')}</div></section>`;
+}
 function bornView(){
   const h=S.hero; if(!h) return homeView();
   return `<section class="born" data-act="bornok" role="button" aria-label="대기화면으로">`+
@@ -3232,7 +3241,7 @@ function fx(e){
     attackAnim(e.by,e.move==='tank'?'tank':e.weapon?'w':(e.move||'punch'));
     later(()=>impact(e),reduce?60:540);
   } else if(e.kind==='self'){
-    setHp(e.hpA,e.hpB); act(e.target,'trip',1100); pop(e.word,e.target,'word'); if(e.dmg) pop('-'+e.dmg,e.target,'dmgn',24);
+    setHp(e.hpA,e.hpB); act(e.target,'trip',1500); pop(e.word,e.target,'word'); if(e.dmg) pop('-'+e.dmg,e.target,'dmgn',24);
   } else if(e.kind==='stun'){
     setSt(e.sA,e.sB);
     if(e.groin){ const f=$('#f'+e.target); if(f) f.dataset.cu=performance.now()+1800; act(e.target,'curl',1800); } else act(e.target,'woozy',1500);
@@ -3269,7 +3278,7 @@ function chargeAnim(e){
   later(()=>{ setHp(e.hpA,e.hpB); pop(e.word,e.hit?e.target:e.by,'word');
     if(e.hit){ if(e.move==='takedown'){ ui.mount={top:e.by,bottom:e.target,t0:performance.now()}; stageShake(); }
       else { act(e.target,'big',1100); if(e.dmg) pop('-'+e.dmg,e.target,'dmgn',24); stageShake(); } }
-    else if(e.self){ act(e.by,'trip',1100); pop('-'+e.self,e.by,'dmgn',24); } },560);
+    else if(e.self){ act(e.by,'trip',1500); pop('-'+e.self,e.by,'dmgn',24); } },560);
 }
 // 모래 뿌리기 / 돌 던지기
 // 흙먼지 뭉게구름
@@ -3472,6 +3481,8 @@ app.addEventListener('click',e=>{
   }
   else if(a==='copycode'){ const ta=$('#letter'); if(ta) ui.letter=ta.value.slice(0,200); DuelOnline.send(true); }
   else if(a==='skiproll'){ doneRoll(); }
+  else if(a==='setnat'){ const v=b.dataset.f; if(FLAGS.includes(v)){ S.flag=v; if(S.hero){ S.hero.flag=v; sync(S.hero,true); } saveState(); } view=ui.incoming?'incoming':'card'; ui.tab='stat'; render(); window.scrollTo(0,0); }
+  else if(a==='bornok'&&!S.flag&&S.hero){ view='nation'; render(); window.scrollTo(0,0); }
   else if(a==='bornok'){ view=ui.incoming?'incoming':'card'; ui.tab='stat'; render(); window.scrollTo(0,0); }
   else if(a==='shout'){
     const k=$('#keeper'); if(k){ k.classList.remove('shout'); void k.offsetWidth; k.dataset.st=performance.now(); k.classList.add('shout'); clearTimeout(ui.shoutT); ui.shoutT=setTimeout(()=>k.classList.remove('shout'),1700); }
@@ -3647,6 +3658,21 @@ function battle3d(now){
       const ph=now/1000*2*Math.PI/0.46, sn=Math.sin(ph);
       pose3(J,(+f.dataset.int||50)<=10?fighterAngles3(f,now):{a0:45*sn,a1:-45*sn,e0:-85,e1:-85,l0:-50*sn,l1:50*sn,k0:20+70*Math.max(0,Math.sin(ph-1.1)),k1:20+70*Math.max(0,Math.sin(ph-1.1+Math.PI)),ln:18,tw:9*sn,z:6},0);
       figs.push({J,M:M4.mul(M4.T(x,y0,0),M4.S(s,s,s)),des:false,roll:0}); return; }
+    // 넘어짐: 발이 휙 앞으로 미끄러져 뜨고 → 등으로 콰당 → 바닥을 쭉 미끄러짐 → 주섬주섬 일어남
+    if(a.dataset.ac==='trip'&&!ko){ const u=(now-(+a.dataset.at||now))/1000; if(u>=0&&u<1.5){
+      const dir=id==='A'?-1:1, ez=t=>1-Math.pow(1-t,2), FL=Math.PI/2*0.93;
+      const x=f.offsetLeft+sw*cxr+fm.e, yb=Hs-(f.offsetTop+f.offsetHeight)+L.ground*hpx-fm.f;
+      let th,dx,dy=0,P;
+      if(u<0.34){ const k=u/0.34, kl=ez(Math.min(1,k*1.8)); th=FL*Math.pow(k,1.7); dy=s*0.12*Math.sin(k*Math.PI); dx=dir*s*0.04*k;
+        P={free:1,l0:-85*kl+45*Math.max(0,k-0.6)/0.4,l1:-65*kl+35*Math.max(0,k-0.6)/0.4,k0:8,k1:22,a0:-40-110*k,a1:-30-100*k,e0:-25,e1:-45,z:20,ln:-14*k}; }
+      else if(u<0.95){ const k=(u-0.34)/0.61; th=FL+(k<0.18?0.1*Math.sin(k/0.18*Math.PI):0); dx=dir*s*(0.04+0.26*ez(k));
+        P={free:1,l0:-40+25*k,l1:-30+18*k,k0:8+22*k,k1:22+20*k,a0:-150+10*Math.sin(k*20)*(1-k),a1:-130-10*Math.sin(k*18)*(1-k),e0:-20,e1:-30,z:24,ln:-8}; }
+      else { const k=(u-0.95)/0.55, e=k*k*(3-2*k), hb=Math.sin(e*Math.PI); th=FL*(1-e); dx=dir*s*0.3*(1-e);
+        P={free:1,l0:-25*(1-e)-30*hb,l1:-20*(1-e),k0:30*(1-e)+70*hb,k1:42*(1-e)+20*hb,a0:-150*(1-e)+30*hb,a1:-130*(1-e),e0:-30-40*hb,e1:-30,z:20*(1-e),ln:30*hb}; }
+      { const lim=dir>0?W-s*0.95-6:s*0.95+6, sn=Math.sin(Math.min(th,Math.PI/2)); let x2=x+dx; x2=dir>0?Math.min(x2,x+(lim-x)*sn):Math.max(x2,x+(lim-x)*sn); dx=x2-x; } // 누운 몸이 무대 밖으로 나가지 않게
+      const roll=-dir*th, lift=s*0.055*Math.sin(Math.min(th,Math.PI/2));
+      pose3(J,P,0);
+      figs.push({J,M:M4.mul(M4.mul(M4.T(x+dx,yb+dy+lift,0),M4.RZ(roll)),M4.S(s,s,s)),des:false,roll}); return; } }
     const crawl3=f.classList.contains('feral')&&f.classList.contains('run');
     const x=f.offsetLeft+sw*cxr+fm.e+am.e, ybot=Hs-(f.offsetTop+f.offsetHeight)+L.ground*hpx-(fm.f+(crawl3?0:am.f));
     // 네발 기기(지능 10 이하)는 2D용 기울임 애니메이션을 3D 몸에 적용하지 않음: 3D 자세가 직접 엎드려 김
