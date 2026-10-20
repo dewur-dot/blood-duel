@@ -141,11 +141,12 @@
     try{
       const db=await ready;
       const shot=await db.collection('duels').doc(id).get();
-      if(!shot.exists){ say('결투장을 찾지 못했습니다.'); return; }
+      if(!shot.exists){ clearLink(); closedDuel('찾을 수 없는 결투장입니다'); return; }
       const data=shot.data();
       if(data.status!=='pending'){
         clearLink();
-        say('이미 종료된 결투장입니다.');
+        if(data.status==='accepted'&&applyResult(id,data,true)) return;
+        closedDuel('이미 초대가 종료된 결투장입니다');
         return;
       }
       if(data.ownerUid===firebase.auth().currentUser.uid){ say('내가 보낸 결투장입니다. 친구에게 링크를 보내세요.'); return; }
@@ -252,7 +253,8 @@
         recipientHeroId:me.id,recipient,result},true);
     }catch(error){
       if(error.message==='outgoing-decided') say('먼저 도착한 결투 결과를 확인해 주세요.');
-      else say(error.message==='already-decided'?'이미 종료된 결투장입니다.':reason(error));
+      else if(error.message==='already-decided'){ clearLink(); closedDuel('이미 초대가 종료된 결투장입니다'); }
+      else say(reason(error));
       if(button){ button.disabled=false; button.textContent='덤벼라'; }
     }
   }
@@ -273,7 +275,7 @@
       ui.duelId=null; ui.incoming=null; clearLink();
       ui.notice='결투를 거절하고 도주했습니다.';
       view=S.hero?'card':'home'; render();
-    }catch(error){ say(error.message==='already-decided'?'이미 종료된 결투장입니다.':reason(error)); }
+    }catch(error){ if(error.message==='already-decided'){ clearLink(); closedDuel('이미 초대가 종료된 결투장입니다'); } else say(reason(error)); }
   }
 
   async function checkDuels(){
@@ -314,8 +316,33 @@
       else say(reason(error));
     }
   }
-  const isLocked=action=>!!S.pendingDuel&&['roll','reset','accept','buy','wear','strip','unequip','rename'].includes(action);
-  window.DuelOnline={send,open,accept,decline,cancel,checkDuels,isLocked};
+  /* 랭킹: 실제로 플레이한 전사들 */
+  const pushT={};
+  function pushHero(h,alive){
+    if(!h||!h.id) return;
+    const data={hero:packDuel(h,''),name:String(h.name||'').slice(0,20),kills:Math.max(0,h.wins|0),alive:!!alive};
+    clearTimeout(pushT[h.id]);
+    pushT[h.id]=setTimeout(async()=>{
+      try{
+        const db=await ready, uid=firebase.auth().currentUser.uid;
+        await db.collection('heroes').doc(h.id).set({...data,uid,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      }catch(error){ console.warn('랭킹 저장 실패',error&&error.code||error); }
+    },alive?1200:0);
+  }
+  async function loadBoard(){
+    try{
+      const db=await ready;
+      const qs=await db.collection('heroes').orderBy('kills','desc').limit(50).get();
+      const list=[];
+      qs.forEach(doc=>{ const d=doc.data(), h=d&&unpackDuel(d.hero); if(!h) return;
+        list.push({id:doc.id,name:h.name,flag:h.flag||'',nick:h.nick,g:h.g,st:h.st,cm:h.cm,kg:h.kg,outfit:h.outfit,weapon:h.weapon,tags:h.tags,kills:Math.max(0,d.kills|0),alive:d.alive!==false}); });
+      ui.board=list; ui.boardErr=false;
+    }catch(error){ console.warn('랭킹 불러오기 실패',error&&error.code||error); ui.boardErr=true; }
+    if(view==='rank') render();
+  }
+  const isLocked=action=>!!S.pendingDuel&&['roll','reset','accept','buy','wear','rename'].includes(action);
+  window.DuelOnline={send,open,accept,decline,cancel,checkDuels,isLocked,pushHero,loadBoard};
+  if(S.hero) pushHero(S.hero,true);
   const match=/#(?:[^#]*&)?duel-id=([A-Za-z0-9]{20})/.exec(location.hash);
   if(match) open(match[1]);
   else checkDuels();

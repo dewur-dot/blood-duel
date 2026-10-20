@@ -299,6 +299,21 @@ svg.dead{filter:saturate(.35) brightness(.78)}
 .chip.on{border-color:var(--ember);color:var(--ember);background:rgba(216,118,42,.08)}
 .rlname{font-family:var(--serif);font-weight:800;font-size:44px;min-height:58px;letter-spacing:.08em;color:var(--bone)}
 .rlname span{display:inline-block;animation:letter .4s ease-out both}
+.closed{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.82);animation:bornin .35s ease-out both}
+.closed.out{opacity:0;transition:opacity .25s}
+.closed .cbox{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;max-width:360px}
+.closed .cx{font-size:64px;line-height:1;color:#8d2018;text-shadow:0 0 24px rgba(200,40,20,.6)}
+.closed b{font-family:var(--serif);font-weight:800;font-size:30px;line-height:1.3;color:#f0e6d2;animation:bline .8s ease-out both}
+.closed span{font-size:15px;color:#bfb3a2}
+.closed .btn{min-width:160px;margin-top:8px}
+.born{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 0 28px;cursor:pointer;min-height:calc(100dvh - 40px);text-align:center;animation:bornin .6s ease-out both}
+.born .bname{font-family:var(--serif);font-weight:800;font-size:40px;letter-spacing:.06em;color:var(--bone);margin:6px 0 0;animation:letter .5s .2s ease-out both}
+.born .tags{justify-content:center}
+.born .bline{font-family:var(--serif);font-weight:800;font-size:22px;line-height:1.4;color:#e8742a;margin:18px 12px 0;text-shadow:0 2px 12px rgba(0,0,0,.6);animation:bline 1.4s .6s ease-out both}
+.born .btap{font-size:13px;color:var(--mute,#a89c8e);margin:14px 0 0;animation:btap 1.6s 2s ease-in-out infinite both}
+@keyframes bornin{from{opacity:0}to{opacity:1}}
+@keyframes bline{from{opacity:0;transform:scale(1.25);letter-spacing:.3em}to{opacity:1;transform:none}}
+@keyframes btap{0%,100%{opacity:.25}50%{opacity:1}}
 @keyframes letter{0%{opacity:0;transform:translateY(-18px) scale(1.8);filter:blur(5px)}100%{opacity:1;transform:none;filter:none}}
 .subtabs{display:grid;grid-template-columns:1fr 1.4fr 1fr 1fr;gap:0;margin:0 0 14px;border:1px solid var(--line2);position:sticky;top:0;z-index:5;background:#141110}
 .subtabs .st{appearance:none;border:0;border-right:1px solid var(--line2);background:none;color:var(--soft);font:inherit;font-size:13px;font-weight:800;padding:8px 4px;min-height:48px;line-height:1.25;cursor:pointer;word-break:keep-all}
@@ -734,7 +749,7 @@ const WEAPONS=[
   {kind:'axe',name:'도끼',atk:16,price:500},
   {kind:'sword',name:'장검',atk:22,price:1000},
   {kind:'maul',name:'오함마',atk:26,price:1000},
-  {kind:'tank',name:'탱크',atk:240,price:100000}
+  {kind:'tank',name:'탱크',atk:240,price:100000,off:true} // 밸런스 문제로 잠시 중지
 ];
 // 장비: 투구·상의·하의 각 10단계 (나무→철투구, 짐승가죽→철갑옷). id는 예전 저장/링크와 호환되게 유지하고 tier로 순서를 정함
 const TIER_W=[28,20,15,11,8,6,4.5,3.5,3,1]; // 보상 뽑기 확률(%) 1단계→10단계, 10단계는 1%
@@ -2110,6 +2125,7 @@ if(!Array.isArray(S.duels)) S.duels=[];
 if(!Array.isArray(S.handledDuels)) S.handledDuels=[];
 let intMigrated=false;
 const ensureInt=h=>{ if(h&&h.st&&!Number.isFinite(h.st.int)){ h.st.int=RI(1,100); intMigrated=true; } if(h&&h.st&&h.st.int<=10&&Array.isArray(h.tags)&&!h.tags.some(t=>t[0]==='야수 지능 · 네발 보행')) h.tags.push(['야수 지능 · 네발 보행',1]); };
+if(S.hero&&S.hero.weapon&&S.hero.weapon.kind==='tank'){ S.hero.weapon=null; saveState(); }
 ensureInt(S.hero); if(Array.isArray(S.board)) S.board.forEach(ensureInt); if(intMigrated) saveState();
 if(!S.flag&&S.hero&&S.hero.flag&&FLAGS.includes(S.hero.flag)) S.flag=S.hero.flag;
 let view=S.hero?'card':'home';
@@ -2125,6 +2141,13 @@ function sync(h,alive){
   const e=snap(JSON.parse(JSON.stringify(h)),alive), i=S.board.findIndex(x=>x.id===h.id);
   if(i>=0) S.board[i]=e; else S.board.push(e);
   S.board.sort((a,b)=>b.kills-a.kills); S.board=S.board.slice(0,60);
+  if(!h.sample&&window.DuelOnline&&DuelOnline.pushHero) DuelOnline.pushHero(h,alive);
+}
+// 랭킹 = 서버에 올라온 실제 전사들 + (아직 못 올라간) 내 전사들
+function boardList(){
+  const m=new Map(); (ui.board||[]).forEach(e=>m.set(e.id,e));
+  S.board.forEach(e=>{ if(e.sample) return; const r=m.get(e.id); if(!r||e.kills>r.kills||(r.alive&&!e.alive)) m.set(e.id,e); });
+  return [...m.values()].sort((a,b)=>b.kills-a.kills).slice(0,50);
 }
 function seedBoard(){
   if(S.seeded) return;
@@ -2145,7 +2168,7 @@ function seedBait(){
   h.sample=true; h.id='bait1'; S.board=S.board.filter(x=>x.id!=='bait1'); S.board.push(snap(h,true));
   S.board.sort((a,b)=>b.kills-a.kills); S.baited=3; saveState();
 }
-seedBoard(); seedBait();
+if(S.board.some(x=>x.sample)){ S.board=S.board.filter(x=>!x.sample); saveState(); }
 
 /* ---------- views ---------- */
 function topbar(){
@@ -2181,7 +2204,7 @@ function rollingView(){
 }
 function weaponLine(h){
   if(!h.weapon) return `<span>무기</span><span>맨주먹</span>`;
-  return `<span>무기</span><span>${h.weapon.name} (공격 +${h.weapon.atk})</span>`;
+  return `<span>무기</span><span>${h.weapon.name} (공격 +${h.weapon.atk})${h===S.hero?' <button class="mini" data-act="unequip">해제</button>':''}</span>`;
 }
 function bar(v,cap){ const M=cap>200?30000:2500; return Math.max(2,Math.min(100,Math.log(1+v)/Math.log(1+M)*100)); }
 function statSheet(h){
@@ -2249,7 +2272,7 @@ function shopHtml(){
     grid=CLOTHES.map((c,i)=>[c,i]).filter(([c])=>cat==='etc'?(c.slot==='boots'||c.slot==='fur'):c.slot===cat).sort((x,y)=>x[0].tier-y[0].tier).map(([c,i])=>{ const worn=o[c.slot]===c.id;
       return card(itemIcon(c),`${c.fun?'':`<i class="tierb" style="background:${TIER_C(c.tier)}">${c.tier}</i>`}${c.name}`,`${c.fun?'장난감':cat==='etc'?SLOTN[c.slot]:c.tier+'단계'}${c.def?` · 맷집 +${c.def}`:''}${own.includes(c.slot+':'+c.id)?' · <b class="own">획득</b>':''}`,c.price?`${c.price.toLocaleString('ko-KR')}원`:'무료',`<button class="btn small${worn?'':' primary'}" data-act="${worn?'strip':'wear'}" data-i="${i}">${worn?'벗기':'입기'}</button>`,worn); }).join('');
   } else if(cat==='weapon'){
-    grid=WEAPONS.map((w,i)=>{ const eqd=h.weapon&&h.weapon.kind===w.kind;
+    grid=WEAPONS.map((w,i)=>{ if(w.off) return ''; const eqd=h.weapon&&h.weapon.kind===w.kind;
       return card(weaponIcon(w.kind),w.name,`공격 +${w.atk}${w.kind==='tank'?' · 받는 피해 -40%':''}`,`${w.price.toLocaleString('ko-KR')}원`,eqd?`<button class="btn small" data-act="unequip">해제</button>`:`<button class="btn small primary" data-act="buy" data-i="${i}">장착</button>`,eqd); }).join('');
   }
   const nameBox=`<div class="item namebox"><div class="info"><b>이름 바꾸기</b><span>내가 원하는 이름으로 (최대 12자) · 1,000원</span></div><div class="namerow"><input id="nameInput" maxlength="12" placeholder="새 이름" autocomplete="off"><button class="btn small" data-act="rename">바꾸기</button></div>${ui.msg?`<span class="note">${esc(ui.msg)}</span>`:''}</div>`;
@@ -2304,15 +2327,16 @@ function cardView(){
   return topbar()+subtabs()+body;
 }
 function rankView(){
-  const rows=S.board.slice(0,30).map((e,i)=>{
+  const list=boardList();
+  const rows=list.slice(0,30).map((e,i)=>{
     const me=S.hero&&e.id===S.hero.id;
-    return `<button class="rrow${me?' me':''}" data-act="detail" data-id="${e.id}"><span class="rk">${i+1}</span><span class="pt">${drawPortrait(Object.assign({},e,{flag:''}),!e.alive)}</span><span class="rf">${e.flag?flagSvg(e.flag,'flgrow'):'<i class="noflag"></i>'}</span><span class="rn"><b>${esc(e.name)}</b><em>${e.flag&&FLAGN[e.flag]?FLAGN[e.flag]+' · ':''}${esc(e.nick)}${e.sample?' · 예시':''}${me?' · 나':''}${e.alive?'':' · 전사'}</em></span><span class="rkl"><b>${e.kills}</b>킬</span></button>`;
+    return `<button class="rrow${me?' me':''}" data-act="detail" data-id="${e.id}"><span class="rk">${i+1}</span><span class="pt">${drawPortrait(Object.assign({},e,{flag:''}),!e.alive)}</span><span class="rf">${e.flag?flagSvg(e.flag,'flgrow'):'<i class="noflag"></i>'}</span><span class="rn"><b>${esc(e.name)}</b><em>${e.flag&&FLAGN[e.flag]?FLAGN[e.flag]+' · ':''}${esc(e.nick)}${me?' · 나':''}${e.alive?'':' · 전사'}</em></span><span class="rkl"><b>${e.kills}</b>킬</span></button>`;
   }).join('');
   // 국가별 킬 합계
-  const nat={}; S.board.forEach(e=>{ if(!e.flag) return; const n=nat[e.flag]||(nat[e.flag]={k:0,c:0}); n.k+=e.kills; n.c++; });
+  const nat={}; list.forEach(e=>{ if(!e.flag) return; const n=nat[e.flag]||(nat[e.flag]={k:0,c:0}); n.k+=e.kills; n.c++; });
   const top=Object.entries(nat).sort((a,b)=>b[1].k-a[1].k).slice(0,5);
   const natHtml=top.length?`<section class="card panel"><h2>국가 전쟁</h2><div class="nats">${top.map(([f,v],i)=>`<div class="nat${i===0?' first':''}"><span class="nrk">${i+1}</span>${flagSvg(f,'flgnat')}<span class="nn"><b>${FLAGN[f]||''}</b><em>전사 ${v.c}명</em></span><span class="rkl"><b>${v.k}</b>킬</span></div>`).join('')}</div><p class="note">조국의 이름으로 피를 흘리려면 초상화의 국기 칸을 눌러라.</p></section>`:'';
-  return topbar()+natHtml+`<section class="card panel"><h2>학살 랭킹</h2><p class="note">가장 많이 죽인 자가 위에 선다. 누르면 그 살육자의 몸을 볼 수 있다. 지금은 데모라 '예시' 전사와 내 기록만 올라가요.</p></section><div class="rboard">${rows}</div>`;
+  return topbar()+natHtml+`<section class="card panel"><h2>학살 랭킹</h2><p class="note">가장 많이 죽인 자가 위에 선다. 누르면 그 살육자의 몸을 볼 수 있다. ${ui.boardErr?' 지금은 서버에 닿지 않아 내 기록만 보인다.':''}</p></section><div class="rboard">${rows||'<p class="note center">아직 아무도 피를 보지 않았다. 첫 번째 학살자가 되어라.</p>'}</div>`;
 }
 function detailView(){
   const e=ui.detail;
@@ -2352,7 +2376,7 @@ function unpackDuel(str){
     if(g.sex==='f') g.beard=0;
     const o36=i=>parseInt(String(of)[i]||'0',36)||0, gid=(sl,i)=>{ const v=o36(i); return gearOf(sl,v)?v:0; };
     const outfit={top:gid('top',0),bottom:gid('bottom',1),boots:cl(o36(2),0,1),fur:cl(o36(3),0,1),helm:gid('helm',4)};
-    const wp=+wk>0?WEAPONS[(+wk)-1]:null, hp=cl(+hp0||st.hp,1,4000);
+    const wp0=+wk>0?WEAPONS[(+wk)-1]:null, wp=wp0&&!wp0.off?wp0:null, hp=cl(+hp0||st.hp,1,4000);
     return {id:'in'+Date.now(),name:String(n||'도전자').replace(/[\u0000-\u001f<>]/g,'').slice(0,12),nick:String(k||'').slice(0,20),g,st,cm:g.cm,kg:+kg||70,outfit,
       flag:isFlag(o[25])?o[25]:'',weapon:wp?{...wp}:null,wins:cl(+wins||0,0,9999),maxhp:hp,hp,tags:makeTags(g),letter:String(letter||'').slice(0,200)};
   }catch(e){ return null; }
@@ -2415,13 +2439,14 @@ function battleView(){
 function codeBox(){
   return `<section class="card panel codebox"><h2>친구에게 받은 결투장</h2><p class="note">친구가 보낸 결투 링크를 붙여넣으세요. 결투하거나 도주할 수 있습니다.</p><textarea id="codeIn" rows="2" placeholder="여기에 붙여넣기" autocomplete="off"></textarea><div class="note" id="codemsg">${esc(ui.codemsg||'')}</div><button class="btn" data-act="joincode">결투장 열기</button></section>`;
 }
-const views={incoming:incomingView,home:cardView,rolling:rollingView,card:cardView,invite:inviteView,battle:battleView,rank:rankView,detail:detailView};
+const views={born:bornView,incoming:incomingView,home:cardView,rolling:rollingView,card:cardView,invite:inviteView,battle:battleView,rank:rankView,detail:detailView};
 function render(){
   clearTimeout(ui.timer); (ui.tms||[]).forEach(clearTimeout);
   app.innerHTML=views[view]();
   if(ui.notice&&view!=='battle') app.insertAdjacentHTML('afterbegin',`<section class="card note">${esc(ui.notice)} <button class="linkbtn" data-act="dismissnotice">닫기</button></section>`);
   mount3d();
   document.body.classList.toggle('bview',view==='battle');
+  if(view!=='battle'&&S.pendingReplay){ S.pendingReplay=null; saveState(); }
   if(view==='battle'){ ui.b3=null; ui.brk={}; try{ window.scrollTo(0,0); }catch(e){} play(); }
 }
 
@@ -2480,7 +2505,17 @@ function roll(){
 function doneRoll(){
   if(!ui.rolling) return;
   clearTimeout(ui.rollT);
-  S.hero=ui.rollFin; ui.rollFin=null; sync(S.hero,true); saveState(); ui.rolling=false; view=ui.incoming?'incoming':'card'; render(); window.scrollTo(0,0);
+  S.hero=ui.rollFin; ui.rollFin=null; sync(S.hero,true); saveState(); ui.rolling=false; view='born'; render(); window.scrollTo(0,0);
+}
+// 다 만들어진 전사를 한 번 구경시키고, 화면을 누르면 대기화면으로
+function bornView(){
+  const h=S.hero; if(!h) return homeView();
+  return `<section class="born" data-act="bornok" role="button" aria-label="대기화면으로">`+
+    `<div class="rlpics"><div class="rlfig">${fig3d(h,false,230,'roll')}</div><div class="portrait">${USE3D?fig3d(h,false,0,'bust'):drawPortrait(h,false)}</div></div>`+
+    `<div class="rlcm">${fmtH(h.cm)} · ${fmtKg(h.kg)}</div>`+
+    `<h1 class="bname">${flg(h)}${esc(h.name)}</h1><div class="nick">${esc(h.nick)}</div>`+
+    (h.tags&&h.tags.length?`<div class="tags">${h.tags.map(t=>`<span class="tag${t[1]?' rare':''}">${t[0]}</span>`).join('')}</div>`:'')+
+    `<p class="bline">당신은 끝없는 전투의 세상에 태어났습니다</p><p class="btap">화면을 눌러라</p></section>`;
 }
 // 도망쳐서 살아남은 전사: 이름이 '비겁한 겁쟁이'로 바뀜
 function cowardize(h){ if(!h) return; h.name='비겁한 겁쟁이'; h.tags=h.tags||[]; if(!h.tags.some(t=>t[0]==='도망친 겁쟁이')) h.tags.unshift(['도망친 겁쟁이',1]); h.hp=h.maxhp; }
@@ -2702,6 +2737,14 @@ function finish(){
   if(r.win&&r.gain&&r.gain.loot&&!r.gachaShown){ r.gachaShown=1; if(S.pendingReplay===r) saveState(); setTimeout(()=>gacha(r.gain.loot),700); }
 }
 
+/* ---- 끝난 결투장 링크 ---- */
+function closedDuel(text){
+  document.querySelectorAll('.closed').forEach(x=>x.remove());
+  const ov=document.createElement('div'); ov.className='closed'; ov.setAttribute('role','dialog');
+  ov.innerHTML=`<div class="cbox"><div class="cx">⚔</div><b>${esc(text||'이미 초대가 종료된 결투장입니다')}</b><span>피는 이미 식었다. 시체도 까마귀가 다 치웠다.</span><button class="btn primary">돌아간다</button></div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',()=>{ ov.classList.add('out'); setTimeout(()=>ov.remove(),250); ui.incoming=null; ui.duelId=null; if(view==='incoming'){ view=S.hero?'card':'home'; render(); } });
+}
 /* ---- 보상 뽑기 룰렛 ---- */
 function gacha(loot){
   const it=gearOf(loot.slot,loot.id); if(!it) return;
@@ -2745,11 +2788,11 @@ app.addEventListener('click',e=>{
   if(a==='dismissnotice'){ ui.notice=''; render(); }
   else if(a==='cancelduel') DuelOnline.cancel();
   else if(a==='roll') roll();
-  else if(a==='go'){ const v=b.dataset.v; view=v==='rank'?'rank':(S.hero?'card':'home'); ui.msg=''; render(); }
-  else if(a==='detail'){ ui.detail=S.board.find(x=>x.id===b.dataset.id)||null; view='detail'; render(); window.scrollTo(0,0); }
+  else if(a==='go'){ const v=b.dataset.v; view=v==='rank'?'rank':(S.hero?'card':'home'); ui.msg=''; render(); if(view==='rank'&&window.DuelOnline&&DuelOnline.loadBoard) DuelOnline.loadBoard(); }
+  else if(a==='detail'){ ui.detail=boardList().find(x=>x.id===b.dataset.id)||null; view='detail'; render(); window.scrollTo(0,0); }
   else if(a==='shop'){ ui.tab='shop'; ui.msg=''; render(); }
   else if(a==='scat'){ ui.scat=b.dataset.c; ui.msg=''; render(); }
-  else if(a==='unequip'){ S.hero.weapon=null; sync(S.hero,true); saveState(); render(); }
+  else if(a==='unequip'){ if(!S.hero) return; S.hero.weapon=null; sync(S.hero,true); saveState(); render(); }
   else if(a==='tab'){ ui.tab=b.dataset.t; ui.msg=''; ui.confirmReset=false; render(); window.scrollTo(0,0); }
   else if(a==='askreset'){ ui.confirmReset=true; render(); }
   else if(a==='noreset'){ ui.confirmReset=false; render(); }
@@ -2775,6 +2818,7 @@ app.addEventListener('click',e=>{
   }
   else if(a==='copycode'){ const ta=$('#letter'); if(ta) ui.letter=ta.value.slice(0,200); DuelOnline.send(true); }
   else if(a==='skiproll'){ doneRoll(); }
+  else if(a==='bornok'){ view=ui.incoming?'incoming':'card'; ui.tab='stat'; render(); window.scrollTo(0,0); }
   else if(a==='shout'){
     const k=$('#keeper'); if(k){ k.classList.remove('shout'); void k.offsetWidth; k.dataset.st=performance.now(); k.classList.add('shout'); clearTimeout(ui.shoutT); ui.shoutT=setTimeout(()=>k.classList.remove('shout'),1700); }
   }
@@ -2783,7 +2827,7 @@ app.addEventListener('click',e=>{
   }
   else if(a==='back'){ view=S.hero?'card':'home'; render(); }
   else if(a==='skip') skip();
-  else if(a==='reset'){ S={hero:null,yard:[],fights:0,board:[],seeded:false,flag:'',duels:[],handledDuels:[]}; seedBoard(); seedBait(); ui.confirmReset=false; ui.tab='stat'; view='home'; render(); }
+  else if(a==='reset'){ S={hero:null,yard:[],fights:0,board:[],seeded:true,flag:'',duels:[],handledDuels:[]}; ui.confirmReset=false; ui.tab='stat'; view='home'; render(); }
 });
 try{ const m=/[#&]duel=([A-Za-z0-9_-]+)/.exec(location.hash); if(m){ const f=unpackDuel(m[1]); if(f){ ui.incoming=f; view='incoming'; } } }catch(_){}
 /* ---- 3D 연결 ---- */
