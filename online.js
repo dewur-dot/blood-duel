@@ -364,6 +364,7 @@
   const isLocked=action=>!!S.pendingDuel&&['roll','reset','accept','buy','wear','rename'].includes(action);
   window.DuelOnline={send,open,accept,decline,cancel,checkDuels,isLocked,pushHero,loadBoard,redeem};
   if(S.hero) pushHero(S.hero,true);
+  ready.then(()=>{ const ad=((window.BLOOD_DUEL_SUPPORT||{}).admins)||[]; const u=firebase.auth().currentUser; if(u&&ad.includes(u.uid)){ ui.isAdmin=true; if(view==='card'&&ui.tab==='set') render(); } }).catch(()=>{});
   const match=/#(?:[^#]*&)?duel-id=([A-Za-z0-9]{20})/.exec(location.hash);
   if(match) open(match[1]);
   else checkDuels();

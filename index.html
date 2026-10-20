@@ -379,6 +379,7 @@ b.gold{color:#E8C164}.shopmsg{color:#E8C164}
 .st3d{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
 .has3d .fighter .flip{opacity:0}
 .b2d .fighter .flip{opacity:1!important}.b2d #st3d{display:none}
+.adminbtn{display:flex;justify-content:center;text-decoration:none;border-color:#7a2a2a;background:#2a1412;color:#f0c0a0;font-weight:800}
 .gear{border:1px solid var(--line,#3a312a);background:transparent;color:var(--soft,#a89c8e);border-radius:8px;width:38px;font-size:18px;cursor:pointer}
 .gfxp{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.72)}
 .gfxp .box{width:100%;max-width:360px;background:#1c1714;border:1px solid #5a5046;border-radius:14px;padding:16px;display:grid;gap:10px}
@@ -468,6 +469,7 @@ body.bview .after{gap:8px}
 <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
 <script src="./firebase-config.js"></script>
+<script src="./support-config.js"></script>
 <script>
 //ENGINE-START
 const RI=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
@@ -2830,7 +2832,7 @@ function recordHtml(){
     `<div class="stone"><div>${fig3d({g:y.g,name:y.name,weapon:null,outfit:y.outfit},true,Math.round(hfrac(y.cm||175)*110),'static')}</div><div><b>${S.yard.length-i}대 · ${esc(y.name)}</b><span>${y.wins}킬 · ${esc(y.cause)}</span></div></div>`).join('')+`</section>`;
 }
 function settingsHtml(){
-  return `<section class="card panel"><h2>오딘에게 청원</h2><p class="note">후원하면 골드와 이름변경 쿠폰을 담은 쿠폰 코드를 받는다. 1,000원 = 1,000 골드, 5,000원 = 7,000 골드, 1만원이면 14,000 골드에 이름변경 쿠폰 1장.</p>`+
+  return (ui.isAdmin?`<a class="btn adminbtn" href="./support.html?admin">운영자 · 후원 확인 페이지</a>`:'')+`<section class="card panel"><h2>오딘에게 청원</h2><p class="note">후원하면 골드와 이름변경 쿠폰을 담은 쿠폰 코드를 받는다. 1,000원 = 1,000 골드, 5,000원 = 7,000 골드, 1만원이면 14,000 골드에 이름변경 쿠폰 1장.</p>`+
     (ui.askSupport?`<div class="confirm2"><b>후원 링크로 이동하시겠습니까?</b><div class="confirm"><button class="btn primary" data-act="gosupport">간다</button><button class="btn" data-act="nosupport">아니</button></div></div>`:`<button class="btn primary sacrifice" data-act="asksupport">오딘에게 제물을 바친다</button>`)+
     `<div class="redeem"><input id="codeRedeem" maxlength="16" placeholder="쿠폰 코드 입력" autocomplete="off" autocapitalize="characters"><button class="btn" data-act="redeem">받기</button></div><div class="note" id="redeemMsg">${esc(ui.rmsg||'')}</div><p class="note">지금 골드 ${fmtG(S.gold||0)} · 이름변경 쿠폰 ${S.renameT||0}장</p></section>`+
     `<section class="card panel"><h2>세상을 불태우기</h2><p class="note">오딘은 불평 따위 듣지 않는다. 대신 세상을 통째로 불태워 줄 수는 있다.</p><div class="setrow"><div><b>세상을 불태우기</b><span>전사, 묘지, 전적, 국기, 랭킹 전부 잿더미가 된다. 되돌릴 수 없다.</span></div>`+

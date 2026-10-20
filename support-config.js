@@ -5,5 +5,6 @@ window.BLOOD_DUEL_SUPPORT = {
   account: '3333-04-7558601',
   holder: '최성*',
   goldPerWon: 1,            // 1원 = 1골드, 5,000원 이상은 1.4배 (5,000원 → 7,000골드)
-  renameFrom: 10000         // 이 금액 이상 후원하면 이름 변경권 1장
+  renameFrom: 10000,        // 이 금액 이상 후원하면 이름 변경권 1장
+  admins: ['W8sKysNV3Whf4WXSzkocqIvYSdg2'] // 운영자 ID: 게임에 '운영자' 버튼이 보임 (실제 권한은 firestore.rules가 정함)
 };
