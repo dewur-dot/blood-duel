@@ -1230,16 +1230,17 @@ function beautyPick(g){
   const r=n=>{ h=(h*1103515245+12345)|0; return ((h>>>8)%n+n)%n; };
   const F=g.sex==='f', AS=g.eth==='ea'||g.eth==='sea';
   // 눈: 0 아몬드(살짝 올라간 눈꼬리) 1 사슴눈(둥글고 큼) 2 고양이눈(아이라인 날개) 3 동양 아몬드(애교살)
-  const eye=AS?[3,3,0,1,2][r(5)]:[0,1,1,2,0][r(5)];
-  const face=r(3), nose=r(3), lip=r(3), brow=AS?[0,0,1][r(3)]:[1,2,0][r(3)];
+  const eye=AS?[3,3,0,1,2][r(5)]:[0,4,0,4,2][r(5)];
+  const face=r(3), nose=r(3), lip=r(3), brow=AS?[0,0,1][r(3)]:[0,1,0][r(3)];
   const FS=F?[{jw:0.64,cw:0.2,jy:0.8},{jw:0.6,cw:0.16,jy:0.82},{jw:0.68,cw:0.23,jy:0.79}]:[{jw:0.86,cw:0.36,jy:0.84},{jw:0.82,cw:0.32,jy:0.85},{jw:0.9,cw:0.4,jy:0.83}];
-  return Object.assign({eye,face,nose,lip,brow,AS,mwk:[1,1.06,0.94][lip],lk:[1.05,1.18,0.88][lip]},FS[face]);
+  const FW=[{jw:0.71,cw:0.24,jy:0.8},{jw:0.68,cw:0.22,jy:0.81},{jw:0.73,cw:0.26,jy:0.8}];
+  return Object.assign({eye,face,nose,lip,brow,AS,mwk:[1,1.06,0.94][lip],lk:[1.05,1.18,0.88][lip]},(F&&!AS)?FW[face]:FS[face]);
 }
 function bzp(a,b,c,d,t){ const u=1-t; return [u*u*u*a[0]+3*u*u*t*b[0]+3*u*t*t*c[0]+t*t*t*d[0],u*u*u*a[1]+3*u*u*t*b[1]+3*u*t*t*c[1]+t*t*t*d[1]]; }
 function beautyEyes(c){
   const {g,u,cx,hH,fW,yE,dx,F,BV,skin,hc,dead,EX,sk}=c, E=BV.eye;
-  const rx=fW*(E===1?0.122:0.117)*(F?1:0.94), up=rx*([0.58,0.7,0.52,0.52][E])*(F?1:0.8), dn=rx*([0.36,0.44,0.32,0.32][E])*(F?1:0.85);
-  const lift=rx*([0.14,0.04,0.24,0.12][E]), ir=rx*(E===1?0.6:0.56);
+  const WS=!BV.AS, rx=fW*(E===1?0.122:WS?0.106:0.117)*(F?1:0.94), up=rx*([WS?0.5:0.58,0.7,0.5,0.52,0.4][E])*(F?1:0.8), dn=rx*([0.34,0.44,0.32,0.32,0.3][E])*(F?1:0.85);
+  const lift=rx*([0.12,0.04,0.2,0.12,0.06][E]), ir=rx*(E===1?0.6:WS?0.5:0.56);
   const lash=hH*(F?0.011:0.0075), dk='#1d1310';
   let o='', defs='';
   const irisC=g.eyeColor;
@@ -1284,14 +1285,14 @@ function beautyEyes(c){
     if(F&&(E===3||E===1||BV.AS)){ o+=`<path d="M${P2(xi+sd*rx*0.15,yE+dn*0.95)} Q${P2(ex,yE+dn*2.1)} ${P2(xo-sd*rx*0.1,yo+dn*0.9)}" stroke="#fff" stroke-width="${n1(rx*0.2)}" fill="none" opacity=".14" stroke-linecap="round"/><path d="M${P2(xi+sd*rx*0.3,yE+dn*1.85)} Q${P2(ex,yE+dn*2.5)} ${P2(xo-sd*rx*0.25,yo+dn*1.55)}" stroke="${mix(skin,'#6a3a2a',0.5)}" stroke-width="${n1(hH*0.003)}" fill="none" opacity=".14"/>`; }
     // 눈썹: 안쪽은 도톰하고 바깥은 가늘게
     const B=BV.brow, ANG=EX==='angry'||EX==='snarl';
-    const by=yE-hH*(F?0.088:0.08), bi=[ex-sd*rx*1.05,by+(ANG?hH*0.012:0)], bo=[ex+sd*rx*1.3,by-hH*(B===0?0.0:-0.004)+hH*0.006];
+    const by=yE-hH*(F?(BV.AS?0.088:0.075):0.075), bi=[ex-sd*rx*1.05,by+(ANG?hH*0.012:0)], bo=[ex+sd*rx*1.3,by-hH*(B===0?0.0:-0.004)+hH*0.006];
     const pk=[ex+sd*rx*([0.35,0.5,0.55][B]),by-hH*([0.008,0.016,0.024][B])];
-    const bt=hH*(F?0.017:0.026);
+    const bt=hH*(F?(BV.AS?0.017:0.022):0.026);
     const bc=mix(hc,'#5a3e2c',/^#[0-3]/.test(hc)?0.25:0.35);
     o+=`<path d="M${P2(bi[0],bi[1]-bt*0.5)} Q${P2(pk[0]-sd*rx*0.2,pk[1]-bt*0.55)} ${P2(pk[0],pk[1]-bt*0.4)} Q${P2(bo[0]-sd*rx*0.25,bo[1]-bt*0.1)} ${P2(bo[0],bo[1])} Q${P2(pk[0]+sd*rx*0.15,pk[1]+bt*0.35)} ${P2(pk[0]-sd*rx*0.1,pk[1]+bt*0.55)} Q${P2(bi[0]+sd*rx*0.3,bi[1]+bt*0.7)} ${P2(bi[0],bi[1]+bt*0.5)} Z" fill="${bc}" opacity="${F?0.88:0.95}"/>`;
     o+=`<path d="M${P2(bi[0]+sd*bt*0.2,bi[1]+bt*0.35)} l${n1(sd*bt*0.15)} ${n1(-bt*0.7)} M${P2(bi[0]+sd*bt*0.55,bi[1]+bt*0.3)} l${n1(sd*bt*0.2)} ${n1(-bt*0.75)}" stroke="${bc}" stroke-width="${n1(bt*0.18)}" opacity=".7"/>`;
     // 볼 홍조 (여자, 은은하게)
-    if(F) o+=`<ellipse cx="${n1(cx+sd*fW*0.3)}" cy="${n1(yE+hH*0.12)}" rx="${n1(fW*0.13)}" ry="${n1(hH*0.055)}" fill="url(#bl${u})" opacity=".75"/>`;
+    if(F) o+=`<ellipse cx="${n1(cx+sd*fW*0.3)}" cy="${n1(yE+hH*0.12)}" rx="${n1(fW*0.13)}" ry="${n1(hH*0.055)}" fill="url(#bl${u})" opacity="${BV.AS?0.75:0.45}"/>`;
   });
   return o;
 }
@@ -1338,7 +1339,7 @@ function drawHead(g,u,cx,yT,hH,dead,shY){
   const hc=g.hairColor;
   const EX=dead?'dead':(g.expr||'stern'), ANG=EX==='angry'||EX==='snarl', PR=g.blessed?2:g.pretty?1:0; // PR: 잘생김 단계
   const BV=PR?beautyPick(g):null;
-  const fW=PR?hH*(F?0.68:0.69)*(0.97+p.faceW*0.006):hH*(0.56+p.faceW*0.022), yB=yT+hH; if(PR&&F) lipC=mix(skin,'#c8344a',dark?0.45:0.68);
+  const fW=PR?hH*(F?(g.eth==='ea'||g.eth==='sea'?0.68:0.655):0.69)*(0.97+p.faceW*0.006):hH*(0.56+p.faceW*0.022), yB=yT+hH; if(PR&&F) lipC=mix(skin,'#c8344a',dark?0.45:0.68);
   const yE=PR?yT+hH*0.5:yT+hH*(0.44+p.eyeHeight*0.013), yE0=yE;
   const rx=Math.min(hH*(0.05+p.eyeSize*0.0055)*(PR?(F?1.18:1.08):1),fW*(PR?0.19:0.17)), ry=rx*(g.mono?(PR?0.48:0.38):(PR?(F?0.62:0.52):0.5));
   const RX=[rx,rx], RY=[ry,ry], EY=[0,0];
