@@ -2476,7 +2476,11 @@ function build3(h,dead){
     } else {
       add3(hip,loft(lc,thighCtrl(D),L1*0.55,{cap0:1,cap1:1,steps:8}));
       const kn=add3(hip,N3(null)); kn.T=[0,-L1,0];
-      add3(kn,cyl('#6B4A2B',0,-L2/2+0.011,0,D.t0*0.12,L2+0.022));
+      // 나무 목발 다리: 잘린 허벅지 끝 속에서 시작해 땅까지 한 줄로 이어짐 (공중에 뜨지 않게)
+      const top=L1*0.42, PL=L1+L2+0.022-top;
+      add3(hip,cyl('#6B4A2B',0,-top-PL/2,0,D.t0*0.13,PL));
+      add3(hip,cyl('#3a2a1a',0,-L1*0.52,0,D.t0*0.5,D.t0*0.22)); // 허벅지를 감싼 가죽 끈
+      add3(hip,cyl('#4a3a2a',0,-L1-L2-0.012,0,D.t0*0.17,0.02)); // 바닥 굽
       J.leg.push({hip,kn});
     }
   });
