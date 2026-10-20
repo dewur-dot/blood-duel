@@ -1031,32 +1031,33 @@ function korHat(cx,yT,hH,fW,k){
   const B='#121212', st='rgba(0,0,0,.7)', P=P2;
   const strings=(y0)=>[-1,1].map(sd=>`<path d="M${P(cx+sd*fW*0.42,y0)} C${P(cx+sd*fW*0.5,yT+hH*0.6)} ${P(cx+sd*fW*0.3,yT+hH*0.95)} ${P(cx+sd*fW*0.06,yT+hH*1.06)}" stroke="#1a1a1a" stroke-width="${n1(hH*0.008)}" fill="none"/>`).join('');
   if(k===1){ // 흑립: 반투명한 넓은 챙 + 높은 원통
-    return `<path d="M${P(cx-fW*0.24,yT+hH*0.1)} L${P(cx-fW*0.21,yT-hH*0.3)} Q${P(cx,yT-hH*0.34)} ${P(cx+fW*0.21,yT-hH*0.3)} L${P(cx+fW*0.24,yT+hH*0.1)} Z" fill="${B}" opacity=".82" stroke="${st}" stroke-width=".6"/>`+
-      `<ellipse cx="${n1(cx)}" cy="${n1(yT-hH*0.31)}" rx="${n1(fW*0.21)}" ry="${n1(hH*0.025)}" fill="#2a2a2a"/>`+
-      `<ellipse cx="${n1(cx)}" cy="${n1(yT+hH*0.12)}" rx="${n1(fW*1.08)}" ry="${n1(hH*0.07)}" fill="${B}" opacity=".62" stroke="${st}" stroke-width=".7"/>`+
-      `<rect x="${n1(cx-fW*0.24)}" y="${n1(yT+hH*0.04)}" width="${n1(fW*0.48)}" height="${n1(hH*0.05)}" fill="#050505" opacity=".9"/>`+strings(yT+hH*0.14);
+    return `<path d="M${P(cx-fW*0.56,yT+hH*0.22)} L${P(cx-fW*0.44,yT-hH*0.3)} Q${P(cx,yT-hH*0.35)} ${P(cx+fW*0.44,yT-hH*0.3)} L${P(cx+fW*0.56,yT+hH*0.22)} Z" fill="${B}" opacity=".95" stroke="${st}" stroke-width=".6"/>`+
+      `<ellipse cx="${n1(cx)}" cy="${n1(yT-hH*0.31)}" rx="${n1(fW*0.44)}" ry="${n1(hH*0.035)}" fill="#2a2a2a"/>`+
+      `<path d="M${P(cx-fW*0.44,yT-hH*0.2)} L${P(cx+fW*0.44,yT-hH*0.2)}" stroke="#2c2c2c" stroke-width="${n1(hH*0.01)}"/>`+
+      `<ellipse cx="${n1(cx)}" cy="${n1(yT+hH*0.23)}" rx="${n1(fW*1.15)}" ry="${n1(hH*0.075)}" fill="${B}" opacity=".7" stroke="${st}" stroke-width=".7"/>`+
+      `<rect x="${n1(cx-fW*0.56)}" y="${n1(yT+hH*0.14)}" width="${n1(fW*1.12)}" height="${n1(hH*0.07)}" fill="#050505"/>`+strings(yT+hH*0.25);
   }
   if(k===2){ // 탕건: 앞이 낮고 뒤가 높은 2단 관
-    return `<path d="M${P(cx-fW*0.48,yT+hH*0.24)} C${P(cx-fW*0.5,yT+hH*0.0)} ${P(cx-fW*0.36,yT-hH*0.06)} ${P(cx-fW*0.3,yT-hH*0.08)} L${P(cx-fW*0.26,yT-hH*0.22)} L${P(cx+fW*0.26,yT-hH*0.22)} L${P(cx+fW*0.3,yT-hH*0.08)} C${P(cx+fW*0.36,yT-hH*0.06)} ${P(cx+fW*0.5,yT)} ${P(cx+fW*0.48,yT+hH*0.24)} Q${P(cx,yT+hH*0.14)} ${P(cx-fW*0.48,yT+hH*0.24)} Z" fill="${B}" opacity=".9" stroke="${st}" stroke-width=".6"/>`+
+    return `<path d="M${P(cx-fW*0.57,yT+hH*0.27)} C${P(cx-fW*0.6,yT+hH*0.0)} ${P(cx-fW*0.4,yT-hH*0.08)} ${P(cx-fW*0.32,yT-hH*0.1)} L${P(cx-fW*0.28,yT-hH*0.24)} L${P(cx+fW*0.28,yT-hH*0.24)} L${P(cx+fW*0.32,yT-hH*0.1)} C${P(cx+fW*0.4,yT-hH*0.08)} ${P(cx+fW*0.6,yT)} ${P(cx+fW*0.57,yT+hH*0.27)} Q${P(cx,yT+hH*0.17)} ${P(cx-fW*0.57,yT+hH*0.27)} Z" fill="${B}" opacity=".9" stroke="${st}" stroke-width=".6"/>`+
       `<path d="M${P(cx-fW*0.3,yT-hH*0.08)} Q${P(cx,yT-hH*0.02)} ${P(cx+fW*0.3,yT-hH*0.08)}" stroke="#3a3a3a" stroke-width="${n1(hH*0.01)}" fill="none"/>`;
   }
   if(k===3){ // 사모: 둥근 검은 모자 + 양옆 날개
     return [-1,1].map(sd=>`<rect x="${n1(sd>0?cx+fW*0.2:cx-fW*0.5)}" y="${n1(yT-hH*0.035)}" width="${n1(fW*0.3)}" height="${n1(hH*0.03)}" fill="${B}"/><ellipse cx="${n1(cx+sd*fW*0.72)}" cy="${n1(yT-hH*0.02)}" rx="${n1(fW*0.26)}" ry="${n1(hH*0.05)}" fill="${B}" stroke="${st}" stroke-width=".6"/>`).join('')+
       `<path d="M${P(cx-fW*0.3,yT-hH*0.05)} C${P(cx-fW*0.3,yT-hH*0.3)} ${P(cx+fW*0.3,yT-hH*0.3)} ${P(cx+fW*0.3,yT-hH*0.05)} Z" fill="${B}" stroke="${st}" stroke-width=".6"/>`+
-      `<path d="M${P(cx-fW*0.5,yT+hH*0.24)} C${P(cx-fW*0.52,yT-hH*0.06)} ${P(cx+fW*0.52,yT-hH*0.06)} ${P(cx+fW*0.5,yT+hH*0.24)} Q${P(cx,yT+hH*0.16)} ${P(cx-fW*0.5,yT+hH*0.24)} Z" fill="#1c1c1c" stroke="${st}" stroke-width=".6"/>`;
+      `<path d="M${P(cx-fW*0.58,yT+hH*0.27)} C${P(cx-fW*0.62,yT-hH*0.16)} ${P(cx+fW*0.62,yT-hH*0.16)} ${P(cx+fW*0.58,yT+hH*0.27)} Q${P(cx,yT+hH*0.18)} ${P(cx-fW*0.58,yT+hH*0.27)} Z" fill="#1c1c1c" stroke="${st}" stroke-width=".6"/>`;
   }
   if(k===4){ // 삿갓: 커다란 삼각 대나무 갓
     let ln=''; for(let i=-4;i<=4;i++) ln+=`M${P(cx,yT-hH*0.32)} L${P(cx+i*fW*0.26,yT+hH*0.22)} `;
     return `<path d="M${P(cx,yT-hH*0.34)} L${P(cx+fW*1.12,yT+hH*0.2)} Q${P(cx,yT+hH*0.3)} ${P(cx-fW*1.12,yT+hH*0.2)} Z" fill="#C9A869" stroke="#6b5226" stroke-width=".8"/><path d="${ln}" stroke="#8a6c34" stroke-width=".6" opacity=".6"/>`+strings(yT+hH*0.24);
   }
   if(k===5){ // 패랭이: 대나무를 엮은 낮은 모자
-    let ln=''; for(let i=-3;i<=3;i++) ln+=`M${P(cx+i*fW*0.07,yT-hH*0.16)} L${P(cx+i*fW*0.1,yT+hH*0.08)} `;
-    return `<ellipse cx="${n1(cx)}" cy="${n1(yT+hH*0.1)}" rx="${n1(fW*0.85)}" ry="${n1(hH*0.06)}" fill="#D8BF85" stroke="#7a6230" stroke-width=".7"/>`+
-      `<path d="M${P(cx-fW*0.38,yT+hH*0.1)} C${P(cx-fW*0.38,yT-hH*0.3)} ${P(cx+fW*0.38,yT-hH*0.3)} ${P(cx+fW*0.38,yT+hH*0.1)} Z" fill="#DCC48C" stroke="#7a6230" stroke-width=".7"/><path d="${ln}" stroke="#9a7f45" stroke-width=".6" opacity=".7"/>`+strings(yT+hH*0.12);
+    let ln=''; for(let i=-4;i<=4;i++) ln+=`M${P(cx+i*fW*0.07,yT-hH*0.15)} L${P(cx+i*fW*0.13,yT+hH*0.2)} `;
+    return `<path d="M${P(cx-fW*0.58,yT+hH*0.22)} C${P(cx-fW*0.62,yT-hH*0.3)} ${P(cx+fW*0.62,yT-hH*0.3)} ${P(cx+fW*0.58,yT+hH*0.22)} Z" fill="#DCC48C" stroke="#7a6230" stroke-width=".7"/><path d="${ln}" stroke="#9a7f45" stroke-width=".6" opacity=".7"/>`+
+      `<ellipse cx="${n1(cx)}" cy="${n1(yT+hH*0.22)}" rx="${n1(fW*1.0)}" ry="${n1(hH*0.065)}" fill="#D8BF85" stroke="#7a6230" stroke-width=".7"/><path d="M${P(cx-fW*0.57,yT+hH*0.17)} Q${P(cx,yT+hH*0.12)} ${P(cx+fW*0.57,yT+hH*0.17)}" stroke="#7a6230" stroke-width="${n1(hH*0.02)}" fill="none"/>`+strings(yT+hH*0.24);
   }
   if(k===6){ // 정자관: 산 모양이 겹겹이 올라간 관
     const zig=(y,h,w)=>`M${P(cx-fW*w,y)} L${P(cx-fW*w,y-h*0.4)} L${P(cx-fW*w*0.5,y-h)} L${P(cx,y-h*0.4)} L${P(cx+fW*w*0.5,y-h)} L${P(cx+fW*w,y-h*0.4)} L${P(cx+fW*w,y)} Z`;
-    return `<path d="${zig(yT+hH*0.2,hH*0.3,0.48)}" fill="${B}" stroke="${st}" stroke-width=".6"/><path d="${zig(yT-hH*0.02,hH*0.28,0.36)}" fill="#1e1e1e" stroke="${st}" stroke-width=".6"/>`;
+    return `<path d="M${P(cx-fW*0.58,yT+hH*0.27)} C${P(cx-fW*0.6,yT-hH*0.12)} ${P(cx+fW*0.6,yT-hH*0.12)} ${P(cx+fW*0.58,yT+hH*0.27)} Q${P(cx,yT+hH*0.18)} ${P(cx-fW*0.58,yT+hH*0.27)} Z" fill="${B}" stroke="${st}" stroke-width=".6"/><path d="${zig(yT+hH*0.02,hH*0.3,0.48)}" fill="${B}" stroke="${st}" stroke-width=".6"/><path d="${zig(yT-hH*0.16,hH*0.22,0.36)}" fill="#1e1e1e" stroke="${st}" stroke-width=".6"/>`;
   }
   if(k===7){ // 복건: 머리를 감싸는 검은 두건
     return [-1,1].map(sd=>`<path d="M${P(cx+sd*fW*0.5,yT+hH*0.2)} C${P(cx+sd*fW*0.62,yT+hH*0.45)} ${P(cx+sd*fW*0.66,yT+hH*0.8)} ${P(cx+sd*fW*0.6,yT+hH*1.05)} L${P(cx+sd*fW*0.48,yT+hH*1.0)} C${P(cx+sd*fW*0.52,yT+hH*0.7)} ${P(cx+sd*fW*0.5,yT+hH*0.5)} ${P(cx+sd*fW*0.44,yT+hH*0.32)} Z" fill="#161616"/>`).join('')+
