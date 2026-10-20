@@ -2249,11 +2249,8 @@ function headSVG(h,dead,part){
   const g=h.g, u=++UID, hd=drawHead(g,u,100,62,100,dead,62+100+26);
   const vo=visOut(h), helm=vo.helm?helmShape(100,62,100,hd.fW,u,vo._hk,vo._hc,vo._hmet):g.khat?korHat(100,62,100,hd.fW,g.khat):'';
   let neck='';
-  if(part==='front'){ const D=dims3(h), w=Math.max(16,Math.min(70,D.nW/D.hH*100)), sk=SKIN[g.skin-1], u2='nk'+u;
-    // 턱 밑을 3D 목과 부드럽게 이어주는 살색 그라데이션 (가장자리는 투명하게 사라짐)
-    neck=`<defs><radialGradient id="${u2}" cx=".5" cy=".3" r=".5"><stop offset="0" stop-color="${mix(sk,'#000000',0.12)}"/><stop offset=".6" stop-color="${mix(sk,'#000000',0.15)}" stop-opacity=".9"/><stop offset="1" stop-color="${mix(sk,'#000000',0.2)}" stop-opacity="0"/></radialGradient></defs>`+
-      `<ellipse cx="100" cy="166" rx="${n1(w*0.55)}" ry="22" fill="url(#${u2})"/>`; }
-  const body=part==='back'?hd.back:neck+hd.front+helm;
+  if(part==='front'){ const u2='nk'+u; neck=`<defs><radialGradient id="${u2}" cx=".5" cy=".2" r=".6"><stop offset="0" stop-color="#000" stop-opacity=".32"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs><ellipse cx="100" cy="166" rx="${n1(hd.fW*0.36)}" ry="9" fill="url(#${u2})"/>`; }
+  const body=part==='back'?hd.back:hd.front+neck+helm;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="416" viewBox="0 0 200 260"><defs>${hd.defs}</defs>${body}</svg>`;
 }
 function headTex(h,dead,part){
@@ -2442,7 +2439,8 @@ function build3(h,dead){
   if(ou.fur){ const fr=add3(spine,N3(MS.raw((()=>{ const a=[]; for(let i=0;i<=10;i++){ const t=i/10*Math.PI*2; a.push([Math.sin(t)*T*0.07,D.SW*0.55+Math.cos(t)*T*0.07]); } return a; })(),18),g.furC)); fr.S=[1,1,0.85]; }
   // 목 (턱 밑에서 몸통 속으로)
   const nw=D.nW/2, NL=D.neckL+D.hH*0.2+T*0.02;
-  const nk=add3(spine,loft(skin,[{t:0,w:nw*0.92,f:nw*0.95,b:nw*0.9},{t:0.55,w:nw,f:nw*0.92,b:nw},{t:1,w:nw*1.05,f:nw*0.8,b:nw*1.05}],NL,{steps:6,cap1:0.5}));
+  const cT=Math.min(0.45,(D.hH*0.2)/NL); // 턱 높이 (목 위쪽에서부터의 비율)
+  const nk=add3(spine,loft(skin,[{t:0,w:nw*0.45,f:nw*0.45,b:nw*0.6},{t:cT*0.6,w:nw*0.62,f:nw*0.6,b:nw*0.8},{t:cT+0.06,w:nw*0.92,f:nw*0.9,b:nw*0.92},{t:0.6,w:nw,f:nw*0.92,b:nw},{t:1,w:nw*1.05,f:nw*0.8,b:nw*1.05}],NL,{steps:10,cap1:0.5}));
   nk.T=[0,D.neckL+D.hH*0.2,-nw*0.12];
   J.chin=add3(spine,N3(null)); J.chin.T=[0,D.neckL,0]; J.chin.cap=1;
   // 다리
