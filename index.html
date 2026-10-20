@@ -52,13 +52,22 @@ svg{overflow:visible}
 .rrow.old{filter:sepia(.35) saturate(.8)}
 .rollwrap{display:flex;flex-direction:column;align-items:center;gap:22px;padding-block:30px 8px}
 .birth{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 50%,#1d1411 0%,#0b0908 70%);z-index:5}
-.lifebtn{position:relative;font-family:var(--serif);font-weight:800;font-size:clamp(26px,8vw,40px);letter-spacing:.14em;color:#f3e3c8;background:none;border:0;padding:22px 30px;cursor:pointer;text-shadow:0 0 18px rgba(230,110,40,.75),0 0 2px #000;animation:lglow 2.6s ease-in-out infinite}
-.lifebtn::before{content:"";position:absolute;inset:-30% -12%;background:radial-gradient(ellipse at center,rgba(220,90,30,.28),transparent 65%);z-index:-1;animation:lglow 2.6s ease-in-out infinite}
-.lifebtn:active{transform:scale(.96)}
-.lifebtn.charge{animation:lcharge .15s linear infinite;color:#fff7e8;text-shadow:0 0 30px #ffb060,0 0 70px #ff7a2a,0 0 120px #ff5a1a}
-.lifebtn.charge::before{animation:none;background:radial-gradient(ellipse at center,rgba(255,170,90,.7),transparent 70%);inset:-120% -60%;transition:inset 1.3s ease-in}
-@keyframes lglow{0%,100%{opacity:.85;filter:brightness(.95)}50%{opacity:1;filter:brightness(1.25)}}
-@keyframes lcharge{0%{filter:brightness(1.4)}50%{filter:brightness(2)}100%{filter:brightness(1.4)}}
+.bigroll{position:relative;width:min(66vw,240px);aspect-ratio:1;max-width:100%;background:none;border:0;padding:0;border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:transform .12s;filter:drop-shadow(0 0 24px rgba(216,90,30,.35)) drop-shadow(0 10px 0 #060505)}
+.bigroll .portal{width:100%;height:100%;display:block}
+.bigroll .ring{transform-origin:100px 100px;animation:pspin 22s linear infinite}
+.bigroll .ring2{transform-origin:100px 100px;animation:pspin 9s linear infinite reverse}
+.bigroll .core{transform-origin:100px 100px;animation:pcore 2.4s ease-in-out infinite}
+.bigroll .rune{font-family:serif;font-weight:700;filter:drop-shadow(0 0 6px #ffcf7a)}
+.bigroll .plabel{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);white-space:nowrap;font-family:var(--serif);font-weight:800;font-size:clamp(17px,5vw,21px);color:var(--bone);letter-spacing:.12em;background:#140f0d;border:1px solid #5a4636;padding:5px 14px;border-radius:2px;text-shadow:0 0 10px rgba(216,118,42,.6)}
+.bigroll:active{transform:scale(.95)}
+@keyframes pspin{to{transform:rotate(360deg)}}
+@keyframes pcore{0%,100%{transform:scale(1);opacity:.92}50%{transform:scale(1.06);opacity:1}}
+.bigroll{width:min(70vw,290px)}
+.bigroll.charge{animation:lcharge .12s linear infinite}
+.bigroll.charge .ring{animation-duration:1.4s}.bigroll.charge .ring2{animation-duration:.7s}
+.bigroll.charge .core{animation:pcore .25s ease-in-out infinite}
+.bigroll.charge .portal{filter:drop-shadow(0 0 30px #ff8a3a) drop-shadow(0 0 80px #ff5a1a)}
+@keyframes lcharge{0%{filter:brightness(1.3) drop-shadow(0 0 40px rgba(255,140,60,.8))}50%{filter:brightness(2) drop-shadow(0 0 90px rgba(255,170,90,1))}100%{filter:brightness(1.3) drop-shadow(0 0 40px rgba(255,140,60,.8))}}
 .quake{animation:quake .07s linear infinite}
 @keyframes quake{0%{transform:translate(0,0)}25%{transform:translate(calc(var(--qa,4px)*-1),calc(var(--qa,4px)*.6))}50%{transform:translate(var(--qa,4px),calc(var(--qa,4px)*-.5))}75%{transform:translate(calc(var(--qa,4px)*-.6),calc(var(--qa,4px)*-.8))}100%{transform:translate(calc(var(--qa,4px)*.7),calc(var(--qa,4px)*.5))}}
 body.nobody .top,body.nobody .subtabs{display:none}
@@ -2724,7 +2733,7 @@ function yardHtml(){
     `<div class="stone"><div>${fig3d({g:y.g,name:y.name,weapon:null,outfit:y.outfit},true,Math.round(hfrac(y.cm||175)*110),'static')}</div><div><b>${esc(y.name)}</b><span>${y.wins}킬 · ${esc(y.cause)}</span></div></div>`).join('')+`</section>`;
 }
 function homeView(){ // 아직 육신이 없는 자: 화면엔 이 버튼 하나뿐
-  return `<section class="birth"><button class="lifebtn" data-act="roll"><span>생명을 얻는다</span></button></section>`;
+  return `<section class="birth"><button class="bigroll" data-act="roll" aria-label="전사 뽑기"><svg class="portal" viewBox="0 0 200 200" aria-hidden="true"><defs><radialGradient id="pg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffb35c"/><stop offset=".35" stop-color="#c8381b"/><stop offset=".75" stop-color="#3a0c08"/><stop offset="1" stop-color="#120807"/></radialGradient><path id="rr" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><circle cx="100" cy="100" r="96" fill="#100c0b" stroke="#5a4636" stroke-width="3"/><g class="ring"><text font-size="15" fill="#d8762a" letter-spacing="3.2"><textPath href="#rr">ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟᚠᚢᚦᚨᚱᚲᚷᚹ</textPath></text></g><circle cx="100" cy="100" r="66" fill="none" stroke="#7a3a1c" stroke-width="2" stroke-dasharray="3 6" class="ring2"/><circle class="core" cx="100" cy="100" r="58" fill="url(#pg)"/><text class="rune" x="100" y="128" text-anchor="middle" font-size="84" fill="#fff1d6">ᛉ</text></svg><span class="plabel">생명을 얻는다</span></button></section>`;
 }
 const ROLL_STEPS=[
   ['피부',['skin']],
@@ -3012,7 +3021,7 @@ function render(){
 /* 탄생: 버튼이 달아오르며 땅이 드드드 흔들리고 먼지가 떨어짐(1.6초) → 번쩍 → 핏빛 룬 터널로 차원이동 → 하얀 빛이 걷히며 캐릭터 생성 */
 function warpIn(done){
   if(document.querySelector('.warp')) return;
-  const btn=document.querySelector('.lifebtn'), shk=document.querySelector('.birth')||app;
+  const btn=document.querySelector('.bigroll'), shk=document.querySelector('.birth')||app;
   const o=document.createElement('div'); o.className='warp'; o.innerHTML='<canvas></canvas><div class="warp-white"></div>'; document.body.append(o);
   const cv=o.querySelector('canvas'), ctx=cv.getContext('2d'), white=o.querySelector('.warp-white');
   const dpr=Math.min(devicePixelRatio||1,1.5), W=innerWidth, H=innerHeight; cv.width=W*dpr; cv.height=H*dpr;
@@ -3283,9 +3292,11 @@ let shown=0;
 function layoutStage(){
   const st=$('#stage'), r=ui.rep, W=st.clientWidth||360, Hs=Math.max(220,st.clientHeight||0), info=[];
   ui.stageH=Hs; ui.cx={}; ui.hh={};
+  // 둘의 키 비율은 실제 키 그대로: 큰 쪽이 무대에 맞춰지고, 작은 쪽은 그 비율만큼 (4.9m 옆 175cm는 허리께)
+  const cmMax=Math.max(r.me.cm||170,r.foe.cm||170), hMax=hfrac(cmMax)*(Hs-40);
   [['A',r.me],['B',r.foe]].forEach(([id,h])=>{
     const f=$('#f'+id), svg=f.querySelector('svg');
-    const hh=Math.round(hfrac(h.cm)*(Hs-40));
+    const hh=Math.max(18,Math.round(hMax*(h.cm||170)/cmMax));
     svg.style.height=hh+'px'; svg.style.width='auto';
     const w=svg.getBoundingClientRect().width; f.style.width=w+'px'; info.push({id,f,w}); ui.hh[id]=hh;
   });
