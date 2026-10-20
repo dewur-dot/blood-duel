@@ -356,7 +356,7 @@
       });
       const g=Math.max(0,data.gold|0), r=data.rename?1:0;
       S.gold=(S.gold||0)+g; S.renameT=(S.renameT||0)+r; S.redeemed=(S.redeemed||[]).concat(code).slice(-50); saveState();
-      ui.rmsg=`공물이 받아들여졌다. +${g.toLocaleString('ko-KR')} 골드${r?' · 이름 변경권 +1장':''}`; render();
+      ui.rmsg=`공물이 받아들여졌다. +${g.toLocaleString('ko-KR')} 골드${r?' · 이름변경 쿠폰 +1장':''}`; render();
     }catch(error){
       show(error.message==='no-code'?'그런 코드는 없다.':error.message==='used'?'이미 누군가 써버린 코드다.':reason(error));
     }

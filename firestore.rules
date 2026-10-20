@@ -68,6 +68,16 @@ service cloud.firestore {
         || isAdmin();
       allow update, delete: if isAdmin();
     }
+    // 쿠폰 받을 연락처: 신청한 본인과 관리자만 볼 수 있음 (후원자 명단에는 안 나옴)
+    match /contacts/{id} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['uid', 'contact'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.contact is string && request.resource.data.contact.size() > 0 && request.resource.data.contact.size() <= 60;
+      allow get: if request.auth != null && (resource.data.uid == request.auth.uid || isAdmin());
+      allow list: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
     // 보상 코드: 관리자만 만들고, 코드를 아는 사람이 딱 한 번 '사용함'으로 바꿀 수 있음
     match /codes/{code} {
       allow get: if request.auth != null;

@@ -60,9 +60,9 @@ textarea{resize:vertical;min-height:70px}
     <table style="margin-top:12px">
       <tr><td>1,000원</td><td>1,000 골드</td></tr>
       <tr><td>5,000원</td><td>5,000 골드</td></tr>
-      <tr><td>10,000원 이상</td><td>금액만큼 골드 + 이름 변경권 1장</td></tr>
+      <tr><td>10,000원 이상</td><td>금액만큼 골드 + 이름변경 쿠폰 1장</td></tr>
     </table>
-    <p class="note">① 위 계좌로 이체 → ② 아래에 입금자명과 금액으로 신청 → ③ 오딘(관리자)이 입금을 확인하면 이 페이지의 '내 보상 코드'에 코드가 나타납니다 → ④ 게임의 <b>오딘에게 청원</b> 탭에서 코드를 입력하세요.</p>
+    <p class="note">① 위 계좌로 이체 → ② 아래에 입금자명과 금액으로 신청 → ③ 오딘(관리자)이 입금을 확인하면 이 페이지의 '내 쿠폰 코드'에 코드가 나타나고, 적어주신 이메일이나 전화번호로도 보내드립니다 → ④ 게임의 <b>오딘에게 청원</b> 탭에서 코드를 입력하세요.</p>
   </section>
 
   <section>
@@ -71,6 +71,8 @@ textarea{resize:vertical;min-height:70px}
     <input id="fName" maxlength="20" autocomplete="off" placeholder="통장에 찍힌 이름">
     <label for="fAmt">보낸 금액 (원)</label>
     <input id="fAmt" type="number" inputmode="numeric" min="1000" step="1000" placeholder="10000">
+    <label for="fContact">쿠폰을 받을 이메일 또는 전화번호 (둘 중 하나, 관리자만 봅니다)</label>
+    <input id="fContact" maxlength="60" autocomplete="email" placeholder="you@example.com 또는 010-1234-5678">
     <label for="fMsg">오딘에게 한마디 (선택, 200자)</label>
     <textarea id="fMsg" maxlength="200" placeholder="도끼가 굶주렸다"></textarea>
     <button class="btn primary" id="send" type="button">공물을 바쳤다 (신청)</button>
@@ -78,7 +80,7 @@ textarea{resize:vertical;min-height:70px}
   </section>
 
   <section>
-    <h2>내 신청과 보상 코드</h2>
+    <h2>내 신청과 쿠폰 코드</h2>
     <div class="list" id="mine"><p class="note">불러오는 중…</p></div>
     <p class="note">코드는 이 기기의 이 브라우저에서 신청한 것만 보입니다. 카카오톡 안에서 신청했다면 카카오톡 안에서 이 페이지를 여세요.</p>
   </section>
@@ -96,6 +98,12 @@ textarea{resize:vertical;min-height:70px}
     <button class="btn small" id="copyUid" type="button" style="margin-top:8px">ID 복사</button>
     <h2 style="margin-top:16px">확인 대기 중인 신청</h2>
     <div class="list" id="pending"><p class="note">불러오는 중…</p></div>
+    <h2 style="margin-top:16px">쿠폰 직접 만들기</h2>
+    <p class="note">이벤트나 선물용으로 아무 신청 없이 쿠폰을 만듭니다. 만든 코드를 상대에게 보내면 게임의 오딘에게 청원 탭에서 한 번 쓸 수 있습니다.</p>
+    <label for="cGold">줄 골드</label><input id="cGold" type="number" inputmode="numeric" min="0" step="100" value="1000">
+    <label style="display:flex;align-items:center;gap:8px;margin-top:10px"><input id="cRename" type="checkbox" style="width:auto"> 이름변경 쿠폰 1장 포함</label>
+    <button class="btn primary" id="cMake" type="button">쿠폰 만들기</button>
+    <div class="list" id="made" style="margin-top:10px"></div>
   </section>
 </main>
 <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
@@ -138,17 +146,19 @@ textarea{resize:vertical;min-height:70px}
       $('#mine').innerHTML=l.length?l.map(x=>{ const c=codes[x.id];
         const st=x.status==='done'?'<span class="tag ok">확인됨</span>':x.status==='rejected'?'<span class="tag no">입금 확인 안 됨</span>':'<span class="tag wait">확인 대기</span>';
         const cd=c?(c.redeemedBy?`<div class="note">코드 ${esc(c.id)} · 사용함</div>`:`<div class="code">${esc(c.id)}</div><button class="btn small" data-copy="${esc(c.id)}" type="button">코드 복사</button>`):'';
-        return `<div class="row" style="grid-template-columns:1fr auto"><span class="who"><b>${esc(x.name)} · ${won(x.amount)}</b><em>${ts(x.createdAt)} 신청${c?` · ${Number(c.gold||0).toLocaleString('ko-KR')} 골드${c.rename?' + 이름 변경권':''}`:''}</em>${cd}</span>${st}</div>`; }).join(''):'<p class="note">아직 신청한 공물이 없다.</p>';
+        return `<div class="row" style="grid-template-columns:1fr auto"><span class="who"><b>${esc(x.name)} · ${won(x.amount)}</b><em>${ts(x.createdAt)} 신청${c?` · ${Number(c.gold||0).toLocaleString('ko-KR')} 골드${c.rename?' + 이름변경 쿠폰':''}`:''}</em>${cd}</span>${st}</div>`; }).join(''):'<p class="note">아직 신청한 공물이 없다.</p>';
       $('#mine').querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copy(b.dataset.copy,b));
     }catch(e){ fail($('#mine'),e); }
   }
   $('#send').onclick=async()=>{
     const name=$('#fName').value.replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,20), amount=Math.floor(+$('#fAmt').value||0), msg=$('#fMsg').value.replace(/[\u0000-\u001f<>]/g,' ').trim().slice(0,200);
-    const say=t=>$('#sendMsg').textContent=t;
-    if(!name){ say('입금자명을 적어라.'); return; } if(!(amount>=1000)){ say('1,000원 이상만 받는다.'); return; } if(amount>10000000){ say('금액을 다시 확인해라.'); return; }
+    const say=t=>$('#sendMsg').textContent=t, contact=$('#fContact').value.trim().slice(0,60);
+    if(!name){ say('입금자명을 적어라.'); return; }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)&&!/^[0-9+][0-9\-\s]{8,16}$/.test(contact)){ say('쿠폰을 받을 이메일이나 전화번호를 제대로 적어라.'); return; } if(!(amount>=1000)){ say('1,000원 이상만 받는다.'); return; } if(amount>10000000){ say('금액을 다시 확인해라.'); return; }
     $('#send').disabled=true; say('제단에 올리는 중…');
-    try{ await ready; await db.collection('donations').add({uid,name,amount,msg,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-      say(`신청했다. 입금이 확인되면 '내 보상 코드'에 ${(amount*RATE).toLocaleString('ko-KR')} 골드${amount>=RENAME?' + 이름 변경권':''} 코드가 나타난다.`); $('#fMsg').value=''; loadMine();
+    try{ await ready; const dref=await db.collection('donations').add({uid,name,amount,msg,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+      await db.collection('contacts').doc(dref.id).set({uid,contact});
+      say(`신청했다. 입금이 확인되면 '내 쿠폰 코드'에 ${(amount*RATE).toLocaleString('ko-KR')} 골드${amount>=RENAME?' + 이름변경 쿠폰':''} 코드가 나타나고 ${contact}(으)로도 보내준다.`); $('#fMsg').value=''; loadMine();
     }catch(e){ console.error(e); say('신청하지 못했다. 잠시 뒤 다시 시도해라.'); }
     $('#send').disabled=false;
   };
@@ -156,7 +166,8 @@ textarea{resize:vertical;min-height:70px}
     $('#myUid').textContent=uid; $('#copyUid').onclick=e=>copy(uid,e.target);
     try{ const qs=await db.collection('donations').where('status','==','pending').limit(100).get();
       const l=[]; qs.forEach(d=>l.push(Object.assign({id:d.id},d.data())));
-      $('#pending').innerHTML=l.length?l.map(x=>`<div class="row" style="grid-template-columns:1fr auto"><span class="who"><b>${esc(x.name)} · ${won(x.amount)}</b><em>${ts(x.createdAt)}${x.msg?' · "'+esc(x.msg)+'"':''}</em></span><span class="acts"><button class="btn small primary" data-ok="${x.id}" type="button">입금 확인</button><button class="btn small" data-no="${x.id}" type="button">거절</button></span></div>`).join(''):'<p class="note">대기 중인 신청이 없다.</p>';
+      await Promise.all(l.map(x=>db.collection('contacts').doc(x.id).get().then(c=>{ x.contact=c.exists?c.data().contact:''; }).catch(()=>{})));
+      $('#pending').innerHTML=l.length?l.map(x=>`<div class="row" style="grid-template-columns:1fr auto"><span class="who"><b>${esc(x.name)} · ${won(x.amount)}</b><em>${ts(x.createdAt)} · 연락처 ${esc(x.contact||'없음')}${x.msg?' · "'+esc(x.msg)+'"':''}</em></span><span class="acts"><button class="btn small primary" data-ok="${x.id}" type="button">입금 확인</button><button class="btn small" data-no="${x.id}" type="button">거절</button></span></div>`).join(''):'<p class="note">대기 중인 신청이 없다.</p>';
       $('#pending').querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>approve(l.find(x=>x.id===b.dataset.ok),b));
       $('#pending').querySelectorAll('[data-no]').forEach(b=>b.onclick=()=>reject(b.dataset.no,b));
     }catch(e){ fail($('#pending'),e); }
@@ -166,9 +177,22 @@ textarea{resize:vertical;min-height:70px}
     try{ const code=rand(12), batch=db.batch(), now=firebase.firestore.FieldValue.serverTimestamp();
       batch.set(db.collection('codes').doc(code),{uid:x.uid,donationId:x.id,gold:Math.floor(x.amount*RATE),rename:x.amount>=RENAME,redeemedBy:null,createdAt:now});
       batch.update(db.collection('donations').doc(x.id),{status:'done',approvedAt:now});
-      await batch.commit(); loadPending(); loadDonors();
+      await batch.commit(); showMade(code,Math.floor(x.amount*RATE),x.amount>=RENAME,x.contact,x.name); loadPending(); loadDonors();
     }catch(e){ console.error(e); b.disabled=false; alert(e.code==='permission-denied'?'관리자 권한이 없습니다. 위의 관리자 ID를 규칙에 넣고 게시하세요.':'처리하지 못했습니다.'); }
   }
+  function showMade(code,gold,rename,contact,who){
+    const el=document.createElement('div'); el.className='row'; el.style.gridTemplateColumns='1fr auto';
+    el.innerHTML=`<span class="who"><span class="code">${esc(code)}</span><em>${Number(gold).toLocaleString('ko-KR')} 골드${rename?' + 이름변경 쿠폰':''}${who?' · '+esc(who):''}${contact?' · 보낼 곳 '+esc(contact):''}</em></span><button class="btn small" type="button">복사</button>`;
+    el.querySelector('button').onclick=e=>copy(code,e.target); $('#made').prepend(el);
+  }
+  $('#cMake').onclick=async()=>{
+    const gold=Math.max(0,Math.floor(+$('#cGold').value||0)), rename=$('#cRename').checked, b=$('#cMake');
+    if(!gold&&!rename){ alert('골드나 이름변경 쿠폰 중 하나는 있어야 합니다.'); return; }
+    b.disabled=true;
+    try{ await ready; const code=rand(12); await db.collection('codes').doc(code).set({uid,donationId:'gift',gold,rename,redeemedBy:null,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); showMade(code,gold,rename,'',''); }
+    catch(e){ console.error(e); alert(e.code==='permission-denied'?'관리자 권한이 없습니다. 위의 관리자 ID를 규칙에 넣고 게시하세요.':'만들지 못했습니다.'); }
+    b.disabled=false;
+  };
   async function reject(id,b){
     b.disabled=true;
     try{ await db.collection('donations').doc(id).update({status:'rejected'}); loadPending(); }
