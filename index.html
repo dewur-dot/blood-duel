@@ -2833,7 +2833,7 @@ function shopHtml(){
 }
 const BOX=340;
 function figBox(h,dead){
-  const sc=c=>Math.min(1,hfrac(c)/hfrac(225)), px=Math.round(sc(h.cm)*BOX), ref=Math.round((sc(175)*BOX+0.03*px)/1.1);
+  const sc=c=>Math.min(1,hfrac(c)/hfrac(225)), px=Math.round(sc(h.cm)*BOX), ref=Math.min(BOX-16,Math.round((px*175/Math.max(30,h.cm||175)+0.03*px)/1.1)); // 175cm 선은 그 전사의 실제 키에 비례한 자리
   return `<div class="figbox pop" style="height:${BOX}px"><div class="refl" style="bottom:${ref}px"><i>보통 사람 175cm</i></div>${fig3d(h,dead,px,'idle')}</div>`;
 }
 function outfitLine(h){
