@@ -329,15 +329,17 @@
       }catch(error){ console.warn('랭킹 저장 실패',error&&error.code||error); }
     },alive?1200:0);
   }
-  async function loadBoard(){
+  // 시즌 2 = heroes2, 시즌 1 기록은 heroes 컬렉션에 따로 보관 (읽기 전용)
+  async function loadBoard(season){
+    const old=season===1;
     try{
       const db=await ready;
-      const qs=await db.collection('heroes2').orderBy('kills','desc').limit(50).get();
+      const qs=await db.collection(old?'heroes':'heroes2').orderBy('kills','desc').limit(50).get();
       const list=[];
       qs.forEach(doc=>{ const d=doc.data(), h=d&&unpackDuel(d.hero); if(!h) return;
         list.push({id:doc.id,name:h.name,flag:h.flag||'',nick:h.nick,g:h.g,st:h.st,cm:h.cm,kg:h.kg,outfit:h.outfit,weapon:h.weapon,tags:h.tags,kills:Math.max(0,d.kills|0),alive:d.alive!==false}); });
-      ui.board=list; ui.boardErr=false;
-    }catch(error){ console.warn('랭킹 불러오기 실패',error&&error.code||error); ui.boardErr=true; }
+      if(old){ ui.board1=list; ui.board1Err=false; } else { ui.board=list; ui.boardErr=false; }
+    }catch(error){ console.warn('랭킹 불러오기 실패',error&&error.code||error); if(old) ui.board1Err=true; else ui.boardErr=true; }
     if(view==='rank') render();
   }
   /* 후원 보상 코드: 서버에서 한 번만 쓸 수 있게 확인 */

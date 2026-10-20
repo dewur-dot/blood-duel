@@ -90,7 +90,13 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // 명예의 전당: 실제로 플레이한 전사들. 누구나 읽고, 자기 전사만 쓴다
+    // 명예의 전당 시즌 1 기록: 따로 보관, 읽기만 가능 (아무도 고치거나 지울 수 없음)
+    match /heroes/{heroId} {
+      allow get, list: if request.auth != null;
+      allow write: if false;
+    }
+
+    // 명예의 전당 (시즌 2): 실제로 플레이한 전사들. 누구나 읽고, 자기 전사만 쓴다
     match /heroes2/{heroId} {
       function valid() {
         return request.resource.data.keys().hasOnly(['uid', 'name', 'kills', 'alive', 'hero', 'updatedAt'])

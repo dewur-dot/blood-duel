@@ -48,20 +48,24 @@ svg{overflow:visible}
 .brand{font-family:var(--serif);font-weight:800;font-size:20px;letter-spacing:.14em}
 .chip{font-family:var(--serif);font-weight:800;font-size:13px;border:1px solid var(--ember);color:var(--ember);padding:0 10px}
 
+.seasons{display:flex;gap:6px;margin-top:10px}.seasons button{flex:1;padding:9px 4px;border:1px solid var(--line);background:#141110;color:#8d8073;font:inherit;font-size:13px;font-weight:700;border-radius:3px}.seasons button.on{background:#3a1a12;color:var(--bone);border-color:#8a3a22}
+.rrow.old{filter:sepia(.35) saturate(.8)}
 .rollwrap{display:flex;flex-direction:column;align-items:center;gap:22px;padding-block:30px 8px}
-.bigroll{
-  position:relative;width:min(66vw,240px);aspect-ratio:1;max-width:100%;
-  font-family:var(--serif);font-weight:800;font-size:clamp(96px,30vw,128px);line-height:1;
-  color:var(--bone);text-shadow:0 0 26px rgba(216,118,42,.55),0 2px 0 #000;
-  background:radial-gradient(circle at 50% 38%,#2b2621 0%,#151210 75%);
-  border:3px solid var(--line2);border-radius:4px;
-  box-shadow:inset 0 0 0 5px #0f0d0c,inset 0 0 0 6px var(--line),inset 0 0 40px rgba(0,0,0,.8),0 0 44px rgba(216,118,42,.16),0 10px 0 #060505;
-  display:grid;place-items:center;padding:0;
-  transition:transform .1s,box-shadow .1s;
-}
-.bigroll::before,.bigroll::after{content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:#3d362f;box-shadow:inset 0 1px 1px #6d6256;top:12px}
-.bigroll::before{left:12px}.bigroll::after{right:12px}
-.bigroll:active{transform:translateY(6px);box-shadow:inset 0 0 0 5px #0f0d0c,inset 0 0 0 6px var(--line),inset 0 0 40px rgba(0,0,0,.8),0 0 60px rgba(216,118,42,.3),0 4px 0 #060505}
+.bigroll{position:relative;width:min(66vw,240px);aspect-ratio:1;max-width:100%;background:none;border:0;padding:0;border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:transform .12s;filter:drop-shadow(0 0 24px rgba(216,90,30,.35)) drop-shadow(0 10px 0 #060505)}
+.bigroll .portal{width:100%;height:100%;display:block}
+.bigroll .ring{transform-origin:100px 100px;animation:pspin 22s linear infinite}
+.bigroll .ring2{transform-origin:100px 100px;animation:pspin 9s linear infinite reverse}
+.bigroll .core{transform-origin:100px 100px;animation:pcore 2.4s ease-in-out infinite}
+.bigroll .rune{font-family:serif;font-weight:700;filter:drop-shadow(0 0 6px #ffcf7a)}
+.bigroll .plabel{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);white-space:nowrap;font-family:var(--serif);font-weight:800;font-size:clamp(17px,5vw,21px);color:var(--bone);letter-spacing:.12em;background:#140f0d;border:1px solid #5a4636;padding:5px 14px;border-radius:2px;text-shadow:0 0 10px rgba(216,118,42,.6)}
+.bigroll:active{transform:scale(.95)}
+@keyframes pspin{to{transform:rotate(360deg)}}
+@keyframes pcore{0%,100%{transform:scale(1);opacity:.92}50%{transform:scale(1.06);opacity:1}}
+.warp{position:fixed;inset:0;z-index:9999;pointer-events:all;touch-action:none}
+.warp canvas{position:absolute;inset:0;width:100%;height:100%}
+.warp-white{position:absolute;inset:0;background:#fff4e6;opacity:0}
+.warp.out{pointer-events:none}.warp.out .warp-white{transition:opacity .9s ease-out;opacity:0!important}
+@media (prefers-reduced-motion:reduce){.bigroll .ring,.bigroll .ring2,.bigroll .core{animation:none}}
 .hint{margin:0;text-align:center;color:var(--soft);font-size:14px;text-wrap:balance}
 .slot{width:min(52vw,190px)}
 .slot svg,.fig svg,.portrait svg{display:block;width:100%;height:auto}
@@ -407,7 +411,7 @@ canvas.v3d{display:block}
   .card{padding:16px}
   .brand{font-size:21px}
   .top{position:sticky;top:0;z-index:20;background:rgba(14,13,12,.94);padding-top:4px;backdrop-filter:blur(8px)}
-  .bigroll{width:min(72vw,310px)}
+  .bigroll{width:min(62vw,280px)}
   .btn{min-height:52px;font-size:17px}
   .fightbig{min-height:108px}
   .stage{height:min(54vh,430px)}
@@ -2248,7 +2252,9 @@ function g3mesh(key,make){
   m.p=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,m.p); gl.bufferData(gl.ARRAY_BUFFER,g.p,gl.STATIC_DRAW);
   m.nn=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,m.nn); gl.bufferData(gl.ARRAY_BUFFER,g.n,gl.STATIC_DRAW);
   m.i=gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,m.i); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,g.i,gl.STATIC_DRAW);
-  if(G3.cache.size>600){ const k0=G3.cache.keys().next().value; const o=G3.cache.get(k0); G3.cache.delete(k0); [o.p,o.nn,o.i].forEach(b=>gl.deleteBuffer(b)); }
+  // 살덩어리 버그의 진짜 원인: 캐시가 꽉 차면 아직 화면에 쓰이는 몸 조각의 버퍼까지 지워버렸고,
+  // 아이폰은 지워진 버퍼 대신 직전 조각의 버퍼로 그려서 엉덩이·허벅지가 화면만 하게 부풀었음 → 목록에서만 빼고, 실제 해제는 아무도 안 쓸 때 브라우저가 알아서
+  if(G3.cache.size>600){ const k0=G3.cache.keys().next().value; G3.cache.delete(k0); }
   G3.cache.set(key,m); return m;
 }
 const hex3=h=>{ const x=parseInt(String(h).slice(1),16); return [((x>>16)&255)/255,((x>>8)&255)/255,(x&255)/255]; };
@@ -2715,7 +2721,7 @@ function yardHtml(){
     `<div class="stone"><div>${fig3d({g:y.g,name:y.name,weapon:null,outfit:y.outfit},true,Math.round(hfrac(y.cm||175)*110),'static')}</div><div><b>${esc(y.name)}</b><span>${y.wins}킬 · ${esc(y.cause)}</span></div></div>`).join('')+`</section>`;
 }
 function homeView(){
-  return topbar()+`<section class="rollwrap"><button class="bigroll" data-act="roll" aria-label="전사 뽑기">생</button><p class="hint">누르면 신들이 네 살과 뼈를 빚는다.<br>괴물로 나오든 송장으로 나오든, 그게 운명이다.</p></section>`+yardHtml();
+  return topbar()+`<section class="rollwrap"><button class="bigroll" data-act="roll" aria-label="전사 뽑기"><svg class="portal" viewBox="0 0 200 200" aria-hidden="true"><defs><radialGradient id="pg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffb35c"/><stop offset=".35" stop-color="#c8381b"/><stop offset=".75" stop-color="#3a0c08"/><stop offset="1" stop-color="#120807"/></radialGradient><path id="rr" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><circle cx="100" cy="100" r="96" fill="#100c0b" stroke="#5a4636" stroke-width="3"/><g class="ring"><text font-size="15" fill="#d8762a" letter-spacing="3.2"><textPath href="#rr">ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟᚠᚢᚦᚨᚱᚲᚷᚹ</textPath></text></g><circle cx="100" cy="100" r="66" fill="none" stroke="#7a3a1c" stroke-width="2" stroke-dasharray="3 6" class="ring2"/><circle class="core" cx="100" cy="100" r="58" fill="url(#pg)"/><text class="rune" x="100" y="128" text-anchor="middle" font-size="84" fill="#fff1d6">ᛉ</text></svg><span class="plabel">피의 문을 연다</span></button><p class="hint">문을 넘으면 신들이 네 살과 뼈를 빚는다.<br>괴물로 나오든 송장으로 나오든, 그게 운명이다.</p></section>`+yardHtml();
 }
 const ROLL_STEPS=[
   ['피부',['skin']],
@@ -2858,13 +2864,20 @@ function cardView(){
   let body='';
   if(t==='stat'){
     body=h?fightBig()+profile(h,{kills:h.wins,weapon:true,mine:true})+codeBox()
-      :`<section class="rollwrap"><button class="bigroll" data-act="roll" aria-label="전사 뽑기">생</button><p class="hint">누르면 신들이 네 살과 뼈를 빚는다.<br>괴물로 나오든 송장으로 나오든, 그게 운명이다.</p></section>`+codeBox();
+      :`<section class="rollwrap"><button class="bigroll" data-act="roll" aria-label="전사 뽑기"><svg class="portal" viewBox="0 0 200 200" aria-hidden="true"><defs><radialGradient id="pg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffb35c"/><stop offset=".35" stop-color="#c8381b"/><stop offset=".75" stop-color="#3a0c08"/><stop offset="1" stop-color="#120807"/></radialGradient><path id="rr" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><circle cx="100" cy="100" r="96" fill="#100c0b" stroke="#5a4636" stroke-width="3"/><g class="ring"><text font-size="15" fill="#d8762a" letter-spacing="3.2"><textPath href="#rr">ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟᚠᚢᚦᚨᚱᚲᚷᚹ</textPath></text></g><circle cx="100" cy="100" r="66" fill="none" stroke="#7a3a1c" stroke-width="2" stroke-dasharray="3 6" class="ring2"/><circle class="core" cx="100" cy="100" r="58" fill="url(#pg)"/><text class="rune" x="100" y="128" text-anchor="middle" font-size="84" fill="#fff1d6">ᛉ</text></svg><span class="plabel">피의 문을 연다</span></button><p class="hint">문을 넘으면 신들이 네 살과 뼈를 빚는다.<br>괴물로 나오든 송장으로 나오든, 그게 운명이다.</p></section>`+codeBox();
   } else if(t==='shop') body=h?shopHtml():`<p class="note center">육신도 없는 놈이 뭘 사겠다고. 먼저 태어나라.</p>`;
   else if(t==='record') body=recordHtml();
   else body=settingsHtml();
   return topbar()+subtabs()+body;
 }
 function rankView(){
+  const s1=ui.season===1;
+  const tabs=`<div class="seasons"><button class="${s1?'':'on'}" data-act="season" data-s="2">시즌 2 · 지금</button><button class="${s1?'on':''}" data-act="season" data-s="1">시즌 1 · 옛 전설</button></div>`;
+  if(s1){
+    const l1=(ui.board1||[]).slice(0,30);
+    const rows1=l1.map((e,i)=>`<button class="rrow old" data-act="detail" data-id="${e.id}" data-s="1"><span class="rk">${i+1}</span><span class="pt">${drawPortrait(Object.assign({},e,{flag:''}),!e.alive)}</span><span class="rf">${e.flag?flagSvg(e.flag,'flgrow'):'<i class="noflag"></i>'}</span><span class="rn"><b>${esc(e.name)}</b><em>${e.flag&&FLAGN[e.flag]?FLAGN[e.flag]+' · ':''}${esc(e.nick||'')}</em></span><span class="rkl"><b>${e.kills}</b>킬</span></button>`).join('');
+    return topbar()+`<section class="card panel"><h2>명예의 전당 · 시즌 1</h2><p class="note">세상이 무너지기 전, 첫 시대의 살육자들. 기록은 돌에 새겨져 더는 바뀌지 않는다.${ui.board1Err?' 지금은 서버에 닿지 않는다.':''}</p>${tabs}</section><div class="rboard">${rows1||`<p class="note center">${ui.board1?'남은 기록이 없다.':'돌판을 파내는 중…'}</p>`}</div>`;
+  }
   const list=boardList();
   const rows=list.slice(0,30).map((e,i)=>{
     const me=S.hero&&e.id===S.hero.id;
@@ -2874,7 +2887,7 @@ function rankView(){
   const nat={}; list.forEach(e=>{ if(!e.flag) return; const n=nat[e.flag]||(nat[e.flag]={k:0,c:0}); n.k+=e.kills; n.c++; });
   const top=Object.entries(nat).sort((a,b)=>b[1].k-a[1].k).slice(0,5);
   const natHtml=top.length?`<section class="card panel"><h2>국가 전쟁</h2><div class="nats">${top.map(([f,v],i)=>`<div class="nat${i===0?' first':''}"><span class="nrk">${i+1}</span>${flagSvg(f,'flgnat')}<span class="nn"><b>${FLAGN[f]||''}</b><em>전사 ${v.c}명</em></span><span class="rkl"><b>${v.k}</b>킬</span></div>`).join('')}</div><p class="note">조국의 이름으로 피를 흘리려면 초상화의 국기 칸을 눌러라.</p></section>`:'';
-  return topbar()+natHtml+`<section class="card panel"><h2>학살 랭킹</h2><p class="note">가장 많이 죽인 자가 위에 선다. 누르면 그 살육자의 몸을 볼 수 있다. ${ui.boardErr?' 지금은 서버에 닿지 않아 내 기록만 보인다.':''}</p></section><div class="rboard">${rows||'<p class="note center">아직 아무도 피를 보지 않았다. 첫 번째 학살자가 되어라.</p>'}</div>`;
+  return topbar()+natHtml+`<section class="card panel"><h2>명예의 전당 · 시즌 2</h2><p class="note">가장 많이 죽인 자가 위에 선다. 누르면 그 살육자의 몸을 볼 수 있다. ${ui.boardErr?' 지금은 서버에 닿지 않아 내 기록만 보인다.':''}</p>${tabs}</section><div class="rboard">${rows||'<p class="note center">아직 아무도 피를 보지 않았다. 첫 번째 학살자가 되어라.</p>'}</div>`;
 }
 function detailView(){
   const e=ui.detail;
@@ -2991,6 +3004,45 @@ function render(){
   if(view==='battle'){ ui.b3=null; ui.brk={}; try{ window.scrollTo(0,0); }catch(e){} play(); }
 }
 
+/* 차원이동: 핏빛 룬 터널로 빨려 들어가다(1.3초) → 새하얘지고 → 빛이 걷히며 탄생 룰렛 */
+function warpIn(done){
+  if(document.querySelector('.warp')) return;
+  let reduce=false; try{ reduce=matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+  if(reduce){ done(); return; }
+  const o=document.createElement('div'); o.className='warp'; o.innerHTML='<canvas></canvas><div class="warp-white"></div>'; document.body.append(o);
+  const cv=o.querySelector('canvas'), ctx=cv.getContext('2d'), white=o.querySelector('.warp-white');
+  const dpr=Math.min(devicePixelRatio||1,1.5), W=innerWidth, H=innerHeight; cv.width=W*dpr; cv.height=H*dpr;
+  const RU='ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ';
+  const st=Array.from({length:200},()=>({a:Math.random()*Math.PI*2,r:Math.random()*.3+.02,s:.6+Math.random()*1.4,c:Math.random()<.4?'255,120,50':Math.random()<.5?'255,220,170':'200,40,25'}));
+  const rn=Array.from({length:18},()=>({a:Math.random()*Math.PI*2,r:Math.random()*.4+.05,ch:RU[Math.floor(Math.random()*RU.length)]}));
+  const t0=performance.now(), IN=1.3;
+  (function frame(now){
+    if(!o.isConnected) return;
+    const t=(now-t0)/1000, sp=Math.min(1,t/IN);
+    ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
+    const cx=W/2, cy=H*.45, R=Math.hypot(W,H)*.6;
+    ctx.fillStyle=`rgba(10,4,3,${Math.min(.85,t*1.6)})`; ctx.fillRect(0,0,W,H);
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R*(.12+sp*.9));
+    g.addColorStop(0,`rgba(255,236,200,${.3+sp*.6})`); g.addColorStop(.3,`rgba(220,70,25,${.25+sp*.35})`); g.addColorStop(1,'rgba(30,5,3,0)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ctx.lineCap='round';
+    for(const p of st){
+      p.r*=1+(.014+.1*sp*sp)*p.s; if(p.r>1.15) p.r=.02+Math.random()*.05;
+      const r1=p.r*R, r0=r1*(1-.08-.4*sp*sp);
+      ctx.strokeStyle=`rgba(${p.c},${Math.min(1,p.r*2.2)})`; ctx.lineWidth=(.6+p.r*3.4)*p.s;
+      ctx.beginPath(); ctx.moveTo(cx+Math.cos(p.a)*r0,cy+Math.sin(p.a)*r0); ctx.lineTo(cx+Math.cos(p.a)*r1,cy+Math.sin(p.a)*r1); ctx.stroke();
+    }
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    for(const q of rn){
+      q.r*=1+.02+.07*sp; q.a+=.01; if(q.r>1.1){ q.r=.04+Math.random()*.06; q.ch=RU[Math.floor(Math.random()*RU.length)]; }
+      ctx.font=`700 ${Math.round(10+q.r*70)}px serif`; ctx.fillStyle=`rgba(255,170,90,${Math.min(.9,q.r*1.6)})`;
+      ctx.fillText(q.ch,cx+Math.cos(q.a)*q.r*R,cy+Math.sin(q.a)*q.r*R);
+    }
+    white.style.opacity=t<IN-.5?0:Math.min(1,(t-(IN-.5))/.5);
+    if(t<IN+.25) requestAnimationFrame(frame);
+    else { cv.remove(); try{ done(); }catch(e){ console.error(e); } setTimeout(()=>{ o.classList.add('out'); setTimeout(()=>o.remove(),1000); },120); }
+  })(t0);
+}
 /* ---------- actions ---------- */
 function roll(){
   if(ui.rolling) return;
@@ -3061,8 +3113,17 @@ function bornView(){
 }
 // 도망쳐서 살아남은 전사: 이름이 '비겁한 겁쟁이'로 바뀜
 function cowardize(h){ if(!h) return; h.name='비겁한 겁쟁이'; h.tags=h.tags||[]; if(!h.tags.some(t=>t[0]==='도망친 겁쟁이')) h.tags.unshift(['도망친 겁쟁이',1]); h.hp=h.maxhp; }
+// 연습 상대: 외형은 남이지만 능력치·무기는 나와 똑같은 거울 전사 (약한 놈만 골라 패서 크는 꼼수 금지)
+function mirrorFoe(me){
+  const f=makeFoe(me.name);
+  f.st=JSON.parse(JSON.stringify(me.st)); f.maxhp=me.maxhp; f.hp=f.maxhp;
+  f.weapon=me.weapon?JSON.parse(JSON.stringify(me.weapon)):null; f.wins=me.wins||0;
+  f.g.armOk=me.g.armOk.slice(); f.g.legOk=me.g.legOk.slice();
+  f.st.def=Math.max(0,me.st.def+outfitDef(me)-outfitDef(f)); // 옷이 달라도 맷집 합계는 같게
+  f.mirror=true; return f;
+}
 function startFight(foeIn){
-  const me=S.hero, foe=foeIn||makeFoe(me.name);
+  const me=S.hero, foe=foeIn||mirrorFoe(me);
   const snapMe=JSON.parse(JSON.stringify(me));
   const A=JSON.parse(JSON.stringify(me)); A.hp=A.maxhp; A.st.def+=outfitDef(me);
   const B=JSON.parse(JSON.stringify(foe)); B.hp=B.maxhp; B.st.def+=outfitDef(foe);
@@ -3345,9 +3406,10 @@ app.addEventListener('click',e=>{
   if(a==='gfx'){ gfxPanel(); return; }
   if(a==='dismissnotice'){ ui.notice=''; render(); }
   else if(a==='cancelduel') DuelOnline.cancel();
-  else if(a==='roll') roll();
-  else if(a==='go'){ const v=b.dataset.v; view=v==='rank'?'rank':(S.hero?'card':'home'); ui.msg=''; render(); if(view==='rank'&&window.DuelOnline&&DuelOnline.loadBoard) DuelOnline.loadBoard(); }
-  else if(a==='detail'){ ui.detail=boardList().find(x=>x.id===b.dataset.id)||null; view='detail'; render(); window.scrollTo(0,0); }
+  else if(a==='roll'){ if(!ui.rolling) warpIn(roll); }
+  else if(a==='go'){ const v=b.dataset.v; view=v==='rank'?'rank':(S.hero?'card':'home'); ui.msg=''; render(); if(view==='rank'&&window.DuelOnline&&DuelOnline.loadBoard) DuelOnline.loadBoard(ui.season===1?1:2); }
+  else if(a==='season'){ ui.season=b.dataset.s==='1'?1:2; render(); if(window.DuelOnline&&DuelOnline.loadBoard&&(ui.season===2||!ui.board1)) DuelOnline.loadBoard(ui.season); }
+  else if(a==='detail'){ ui.detail=(b.dataset.s==='1'?(ui.board1||[]):boardList()).find(x=>x.id===b.dataset.id)||null; view='detail'; render(); window.scrollTo(0,0); }
   else if(a==='shop'){ ui.tab='shop'; ui.msg=''; render(); }
   else if(a==='scat'){ ui.scat=b.dataset.c; ui.msg=''; render(); }
   else if(a==='unequip'){ if(!S.hero) return; S.hero.weapon=null; sync(S.hero,true); saveState(); render(); }
