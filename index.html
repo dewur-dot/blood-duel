@@ -806,7 +806,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 
 // 1~10 값을 극단적인 배율로 (p=1 최소, p=10 최대)
 const mult=(p,lo,hi)=>lo*Math.pow(hi/lo,(p-1)/9);
-const M={build:p=>mult(p,0.4,2.2),head:p=>mult(p,0.65,1.7),sh:p=>mult(p,0.65,1.7),arm:p=>mult(p,0.62,1.85),leg:p=>mult(p,0.65,1.7),neck:p=>mult(p,0.72,1.3)};
+const M={build:p=>mult(p,0.4,2.2),head:p=>mult(p,0.65,1.7),sh:p=>mult(p,0.65,1.7),arm:p=>p>=10?1.85:mult(p,0.72,1.35),leg:p=>mult(p,0.65,1.7),neck:p=>mult(p,0.72,1.3)};
 // 키: 대부분 150~199cm, 위로는 아주 드물게 10m까지, 아래로는 20cm까지
 function rollCm(){
   const r=Math.random();
@@ -2280,7 +2280,7 @@ function dims3(h){
   const chestW2=Math.min(chestW,SWf*(F?0.8:0.8+0.03*Math.min(MX,1)));
   const hipW0=(F?0.2:0.172)*(0.72+0.28*bM)*(1+0.05*Math.min(MT,2)), waistW=F?Math.min(chestW2*0.82,hipW0*(0.6+0.08*bM)):Math.min(chestW2*0.8,hipW0*(0.84+0.06*bM)*(1+0.04*MX));
   const bL=0.62+0.38*Math.min(bM,1.7); // 체격이 커도 팔다리가 풍선처럼 부풀지 않게
-  const wa=Math.min(0.085+0.015*fat,0.05*bL*(F?0.84:1)*(1+0.24*musc+0.14*MX)*(1+0.3*fat)), ua=0.17*aM, fa=0.15*aM;
+  const wa=Math.min(0.085+0.015*fat,0.05*bL*(F?0.84:1)*(1+0.24*musc+0.14*MX)*(1+0.3*fat)), ua=0.165*aM, fa=0.145*aM;
   const t0=Math.min(0.105+0.02*fat,0.075*bL*(F?0.98:1)*(1+0.12*musc+0.08*MX)*(1+0.25*fat));
   const nW=Math.min(0.1+0.02*fat,(0.06*bL+0.017)*(F?0.8:1)*(1+0.22*MX)*(1+0.3*fat));
   const hipW=Math.max(hipW0*(1+0.22*fat),t0*2.45); // 골반은 허벅지 두 개를 담을 만큼은 넓게
