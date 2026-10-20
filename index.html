@@ -299,6 +299,11 @@ svg.dead{filter:saturate(.35) brightness(.78)}
 .chip.on{border-color:var(--ember);color:var(--ember);background:rgba(216,118,42,.08)}
 .rlname{font-family:var(--serif);font-weight:800;font-size:44px;min-height:58px;letter-spacing:.08em;color:var(--bone)}
 .rlname span{display:inline-block;animation:letter .4s ease-out both}
+.sacrifice{width:100%;min-height:52px;font-family:var(--serif);font-size:18px}.confirm2{display:grid;gap:8px;text-align:center;padding:10px;border:1px solid #7a2a2a;border-radius:10px}.confirm2 b{font-size:16px}
+.goldbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;margin-bottom:10px;border:1px solid #6a5a2a;border-radius:8px;background:rgba(201,162,60,.08)}
+.goldbar b{color:#E8C164;font-size:17px;white-space:nowrap}.goldbar span{font-size:12px;color:var(--soft,#a89c8e);text-align:right}.goldbar a{color:#E8C164}
+b.gold{color:#E8C164}.shopmsg{color:#E8C164}
+.redeem{display:flex;gap:8px;margin-top:12px}.redeem input{flex:1;min-width:0;padding:10px;border-radius:8px;border:1px solid #5a5046;background:#16120f;color:var(--bone,#f0e6d2);font-size:16px;letter-spacing:.12em;text-transform:uppercase}
 .closed{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.82);animation:bornin .35s ease-out both}
 .closed.out{opacity:0;transition:opacity .25s}
 .closed .cbox{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;max-width:360px}
@@ -2619,6 +2624,12 @@ const KEY='piui-gyeoldu-v3';
 function loadState(){ try{ return JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ return {}; } }
 function saveState(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
 let S=Object.assign({hero:null,yard:[],fights:0,board:[],seeded:false,flag:'',duels:[],handledDuels:[]},loadState());
+if(!Number.isFinite(S.gold)) S.gold=500; if(!Array.isArray(S.owned)) S.owned=[]; if(!Number.isFinite(S.renameT)) S.renameT=0;
+const SUPPORT_URL='./support.html';
+const owns=k=>S.owned.includes(k)||(S.hero&&(S.hero.loot||[]).includes(k));
+const fmtG=n=>Math.round(n).toLocaleString('ko-KR')+' 골드';
+// 승리 보상 골드: 연승할수록 조금씩 더
+function winGold(h){ const g=RI(1,99); S.gold=(S.gold||0)+g; return g; } // 승리 보상: 1~99골드, 100은 넘지 않음
 if(!Array.isArray(S.duels)) S.duels=[];
 if(!Array.isArray(S.handledDuels)) S.handledDuels=[];
 let intMigrated=false;
@@ -2761,20 +2772,20 @@ function shopHtml(){
   const h=S.hero, o=h.outfit||{}, cat=ui.scat||'weapon';
   const eq=[['무기',h.weapon?`${h.weapon.name} <small>+${h.weapon.atk}</small>`:'맨주먹',h.weapon?`<button class="mini" data-act="unequip">해제</button>`:'']]
     .concat(['top','bottom','helm','boots','fur'].map(sl=>{ const it=CLOTHES.find(c=>c.slot===sl&&o[sl]===c.id); return [SLOTN[sl],it?it.name:'—',it?`<button class="mini" data-act="strip" data-i="${CLOTHES.indexOf(it)}">벗기</button>`:'']; }));
-  const head=`<div class="shophead">${keeperHtml()}<div class="eqlist">${eq.map(r=>`<div class="eq"><span>${r[0]}</span><b>${r[1]}</b>${r[2]}</div>`).join('')}<div class="eqdef">맷집 +${outfitDef(h)}</div></div></div>`;
+  const head=`<div class="goldbar"><b>${fmtG(S.gold||0)}</b><span>이기면 골드를 번다. 모자라면 <a href="${SUPPORT_URL}" target="_blank" rel="noopener">오딘에게 공물</a></span></div><div class="shophead">${keeperHtml()}<div class="eqlist">${eq.map(r=>`<div class="eq"><span>${r[0]}</span><b>${r[1]}</b>${r[2]}</div>`).join('')}<div class="eqdef">맷집 +${outfitDef(h)}</div></div></div>`;
   const tabs=`<div class="scats">${SHOPCATS.map(([k,l])=>`<button class="sct${cat===k?' on':''}" data-act="scat" data-c="${k}">${l}</button>`).join('')}</div>`;
   const card=(icon,name,sub,price,btn,on)=>`<div class="scard${on?' on':''}">${icon}<b>${name}</b><span>${sub}</span><em>${price}</em>${btn}</div>`;
   let grid='';
   if(['helm','top','bottom','etc'].includes(cat)){
     const own=h.loot||[];
     grid=CLOTHES.map((c,i)=>[c,i]).filter(([c])=>cat==='etc'?(c.slot==='boots'||c.slot==='fur'):c.slot===cat).sort((x,y)=>x[0].tier-y[0].tier).map(([c,i])=>{ const worn=o[c.slot]===c.id;
-      return card(itemIcon(c),`${c.fun?'':`<i class="tierb" style="background:${TIER_C(c.tier)}">${c.tier}</i>`}${c.name}`,`${c.fun?'장난감':cat==='etc'?SLOTN[c.slot]:c.tier+'단계'}${c.def?` · 맷집 +${c.def}`:''}${own.includes(c.slot+':'+c.id)?' · <b class="own">획득</b>':''}`,c.price?`${c.price.toLocaleString('ko-KR')}원`:'무료',`<button class="btn small${worn?'':' primary'}" data-act="${worn?'strip':'wear'}" data-i="${i}">${worn?'벗기':'입기'}</button>`,worn); }).join('');
+      return card(itemIcon(c),`${c.fun?'':`<i class="tierb" style="background:${TIER_C(c.tier)}">${c.tier}</i>`}${c.name}`,`${c.fun?'장난감':cat==='etc'?SLOTN[c.slot]:c.tier+'단계'}${c.def?` · 맷집 +${c.def}`:''}${own.includes(c.slot+':'+c.id)?' · <b class="own">획득</b>':''}`,c.price&&!owns(c.slot+':'+c.id)?fmtG(c.price):(c.price?'보유':'무료'),`<button class="btn small${worn?'':' primary'}" data-act="${worn?'strip':'wear'}" data-i="${i}">${worn?'벗기':(c.price&&!owns(c.slot+':'+c.id)?'사서 입기':'입기')}</button>`,worn); }).join('');
   } else if(cat==='weapon'){
     grid=WEAPONS.map((w,i)=>{ if(w.off) return ''; const eqd=h.weapon&&h.weapon.kind===w.kind;
-      return card(weaponIcon(w.kind),w.name,`공격 +${w.atk}${w.kind==='tank'?' · 받는 피해 -40%':''}`,`${w.price.toLocaleString('ko-KR')}원`,eqd?`<button class="btn small" data-act="unequip">해제</button>`:`<button class="btn small primary" data-act="buy" data-i="${i}">장착</button>`,eqd); }).join('');
+      return card(weaponIcon(w.kind),w.name,`공격 +${w.atk}${w.kind==='tank'?' · 받는 피해 -40%':''}`,owns('w:'+w.kind)?'보유':fmtG(w.price),eqd?`<button class="btn small" data-act="unequip">해제</button>`:`<button class="btn small primary" data-act="buy" data-i="${i}">${owns('w:'+w.kind)?'장착':'사서 장착'}</button>`,eqd); }).join('');
   }
-  const nameBox=`<div class="item namebox"><div class="info"><b>이름 바꾸기</b><span>내가 원하는 이름으로 (최대 12자) · 1,000원</span></div><div class="namerow"><input id="nameInput" maxlength="12" placeholder="새 이름" autocomplete="off"><button class="btn small" data-act="rename">바꾸기</button></div>${ui.msg?`<span class="note">${esc(ui.msg)}</span>`:''}</div>`;
-  return `<section class="card panel shop2"><h2>비겁한 겁쟁이들의 집</h2>${head}${tabs}`+(cat==='name'?nameBox:`<div class="sgrid">${grid}</div>`)+`<p class="note">진짜 전사는 맨주먹으로 싸운다. 여긴 돈으로 강해지려는 겁쟁이들의 소굴이다. (데모라 공짜)</p></section>`;
+  const nameBox=`<div class="item namebox"><div class="info"><b>이름 바꾸기</b><span>이름 변경권 ${S.renameT||0}장 · 1만원 이상 공물을 바친 자만 받는다 (최대 12자)</span></div><div class="namerow"><input id="nameInput" maxlength="12" placeholder="새 이름" autocomplete="off"><button class="btn small" data-act="rename">바꾸기</button></div>${ui.msg?`<span class="note">${esc(ui.msg)}</span>`:''}</div>`;
+  return `<section class="card panel shop2"><h2>비겁한 겁쟁이들의 집</h2>${head}${tabs}`+(cat==='name'?nameBox:`<div class="sgrid">${grid}</div>`)+`${ui.msg&&cat!=='name'?`<p class="note shopmsg">${esc(ui.msg)}</p>`:''}<p class="note">진짜 전사는 맨주먹으로 싸운다. 여긴 골드로 강해지려는 겁쟁이들의 소굴이다.</p></section>`;
 }
 const BOX=340;
 function figBox(h,dead){
@@ -2795,7 +2806,7 @@ function profile(h,opts){
     (opts.weapon?`<div class="wrow">${weaponLine(h)}</div>`:'')+`<div class="wrow">${outfitLine(h)}</div>`+statSheet(h)+`</section>`+
     `<details class="card"><summary>낯짝 수치 (1~10)</summary>${looksSheet(h)}</details>`;
 }
-const SUBTABS=[['stat','전사의 육신'],['shop','비겁한 겁쟁이들의 집'],['record','전사의 여정'],['set','오딘에게 민원']];
+const SUBTABS=[['stat','전사의 육신'],['shop','비겁한 겁쟁이들의 집'],['record','전사의 여정'],['set','오딘에게 청원']];
 function subtabs(){ const t=ui.tab||'stat'; return `<nav class="subtabs" aria-label="내 전사 메뉴">${SUBTABS.map(([k,l])=>`<button class="st${t===k?' on':''}" data-act="tab" data-t="${k}">${l}</button>`).join('')}</nav>`; }
 function recordHtml(){
   const h=S.hero, best=Math.max(h?h.wins:0,...S.yard.map(y=>y.wins||0),0);
@@ -2806,7 +2817,10 @@ function recordHtml(){
     `<div class="stone"><div>${fig3d({g:y.g,name:y.name,weapon:null,outfit:y.outfit},true,Math.round(hfrac(y.cm||175)*110),'static')}</div><div><b>${S.yard.length-i}대 · ${esc(y.name)}</b><span>${y.wins}킬 · ${esc(y.cause)}</span></div></div>`).join('')+`</section>`;
 }
 function settingsHtml(){
-  return `<section class="card panel"><h2>오딘에게 민원</h2><p class="note">오딘은 불평 따위 듣지 않는다. 대신 세상을 통째로 불태워 줄 수는 있다.</p><div class="setrow"><div><b>세상을 불태우기</b><span>전사, 묘지, 전적, 국기, 랭킹 전부 잿더미가 된다. 되돌릴 수 없다.</span></div>`+
+  return `<section class="card panel"><h2>오딘에게 청원</h2><p class="note">후원하면 골드와 이름 변경권을 담은 보상 코드를 받는다. 1,000원 = 1,000 골드, 1만원 이상이면 이름 변경권 1장.</p>`+
+    (ui.askSupport?`<div class="confirm2"><b>후원 링크로 이동하시겠습니까?</b><div class="confirm"><button class="btn primary" data-act="gosupport">간다</button><button class="btn" data-act="nosupport">아니</button></div></div>`:`<button class="btn primary sacrifice" data-act="asksupport">오딘에게 제물을 바친다</button>`)+
+    `<div class="redeem"><input id="codeRedeem" maxlength="16" placeholder="보상 코드 입력" autocomplete="off" autocapitalize="characters"><button class="btn" data-act="redeem">받기</button></div><div class="note" id="redeemMsg">${esc(ui.rmsg||'')}</div><p class="note">지금 골드 ${fmtG(S.gold||0)} · 이름 변경권 ${S.renameT||0}장</p></section>`+
+    `<section class="card panel"><h2>세상을 불태우기</h2><p class="note">오딘은 불평 따위 듣지 않는다. 대신 세상을 통째로 불태워 줄 수는 있다.</p><div class="setrow"><div><b>세상을 불태우기</b><span>전사, 묘지, 전적, 국기, 랭킹 전부 잿더미가 된다. 되돌릴 수 없다.</span></div>`+
     (ui.confirmReset?`<div class="confirm"><button class="btn danger" data-act="reset">불태워라</button><button class="btn" data-act="noreset">취소</button></div>`:`<button class="btn" data-act="askreset">불태우기</button>`)+`</div></section>`;
 }
 const FIGHT_LINES=['적에게 죽음을','진정한 전사의 시간','놈의 두개골을 술잔으로','피로 목욕할 시간이다','놈의 이빨을 세어주마','발할라가 네 자리를 비워뒀다','도끼가 굶주렸다','오늘 밤 까마귀가 배부르다','자비는 집에 두고 와라','뼈를 부수고 이름을 새겨라','살육의 신이 부른다','겁쟁이의 피는 묽다','오늘은 죽기 좋은 날이다','피를 보기 전엔 돌아오지 않는다','적의 목을 전리품으로','무릎 꿇는 건 시체뿐이다','적의 해골에 꿀술을 부어라','적의 가문이 울게 하라','갈비뼈 몇 개쯤은 각오해라','전장이 너를 부른다']
@@ -3027,7 +3041,7 @@ function startFight(foeIn){
   const res=fight(A,B);
   const win=res.winner==='A';
   const rep={me:snapMe,foe,log:res.log,win,broke:null,gain:null,fled:res.fled||null};
-  if(win){ rep.gain=grow(me); rep.plunder=res.fled?null:plunderHelm(me,foe); rep.wins=me.wins; sync(me,true); }
+  if(win){ rep.gain=grow(me); rep.gold=winGold(me); rep.plunder=res.fled?null:plunderHelm(me,foe); rep.wins=me.wins; sync(me,true); }
   else if(res.fled==='A'){ cowardize(me); sync(me,true); }
   else {
     const last=res.log[res.log.length-1];
@@ -3224,7 +3238,7 @@ function finish(){
   if(r.win){
     const top=Object.entries(r.gain).filter(([k])=>k!=='bulk'&&k!=='loot').sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>{
       const nm=SGROUPS.flatMap(g=>g[1]).find(x=>x[0]===k)[1]; return `${nm} +${v}`; });
-    h+=`<div class="verdict win"><b>${r.fled?'놈이 꽁무니를 뺐다.':r.vline||(r.vline=pick(WIN_LINES))}</b><span>${r.wins}킬 · ${top.join(' · ')}</span></div>`;
+    h+=`<div class="verdict win"><b>${r.fled?'놈이 꽁무니를 뺐다.':r.vline||(r.vline=pick(WIN_LINES))}</b><span>${r.wins}킬 · ${top.join(' · ')}${r.gold?` · <b class="gold">+${fmtG(r.gold)}</b>`:''}</span></div>`;
     if(r.plunder){ const it=gearOf(r.plunder.slot,r.plunder.id); if(it) h+=`<div class="plunder">${itemIcon(it)}<div><b>놈의 투구를 빼앗았다</b><span><i class="tierb" style="background:${TIER_C(it.tier)}">${it.tier}</i>${esc(it.name)} · ${r.plunder.worn?'바로 썼다':'창고에 넣었다 (지금 것이 더 좋다)'}</span></div></div>`; }
   } else if(r.fled==='A'){
     h+=`<div class="verdict lose"><b>도망쳤다. 살긴 살았다.</b><span>이제부터 너의 이름은 '비겁한 겁쟁이'다. 전사들이 손가락질한다.</span></div>`;
@@ -3296,13 +3310,22 @@ app.addEventListener('click',e=>{
   else if(a==='tab'){ ui.tab=b.dataset.t; ui.msg=''; ui.confirmReset=false; render(); window.scrollTo(0,0); }
   else if(a==='askreset'){ ui.confirmReset=true; render(); }
   else if(a==='noreset'){ ui.confirmReset=false; render(); }
-  else if(a==='buy'){ const w=WEAPONS[+b.dataset.i]; S.hero.weapon={...w}; sync(S.hero,true); saveState(); render(); }
-  else if(a==='wear'){ const c=CLOTHES[+b.dataset.i]; S.hero.outfit[c.slot]=c.id; sync(S.hero,true); saveState(); render(); }
+  else if(a==='buy'){ const w=WEAPONS[+b.dataset.i]; if(!w||w.off) return; const k='w:'+w.kind;
+    if(!owns(k)){ if((S.gold||0)<w.price){ ui.msg=`골드가 ${fmtG(w.price-(S.gold||0))} 모자라다. 더 죽이고 와라.`; render(); return; } S.gold-=w.price; S.owned.push(k); ui.msg=`${w.name}을(를) 샀다. -${fmtG(w.price)}`; }
+    S.hero.weapon={...w}; sync(S.hero,true); saveState(); render(); }
+  else if(a==='wear'){ const c=CLOTHES[+b.dataset.i]; const k=c.slot+':'+c.id;
+    if(c.price&&!owns(k)){ if((S.gold||0)<c.price){ ui.msg=`골드가 ${fmtG(c.price-(S.gold||0))} 모자라다. 더 죽이고 와라.`; render(); return; } S.gold-=c.price; S.owned.push(k); ui.msg=`${c.name}을(를) 샀다. -${fmtG(c.price)}`; }
+    S.hero.outfit[c.slot]=c.id; sync(S.hero,true); saveState(); render(); }
   else if(a==='strip'){ const c=CLOTHES[+b.dataset.i]; S.hero.outfit[c.slot]=0; sync(S.hero,true); saveState(); render(); }
+  else if(a==='asksupport'){ ui.askSupport=true; render(); }
+  else if(a==='nosupport'){ ui.askSupport=false; render(); }
+  else if(a==='gosupport'){ ui.askSupport=false; location.href=SUPPORT_URL; }
+  else if(a==='redeem'){ const v=(($('#codeRedeem')||{}).value||'').toUpperCase().replace(/[^A-Z0-9]/g,''); if(window.DuelOnline&&DuelOnline.redeem) DuelOnline.redeem(v); }
   else if(a==='rename'){
     const inp=$('#nameInput'); const v=(inp?inp.value:'').replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,12);
     if(!v){ ui.msg='바꿀 이름을 입력해 주세요.'; render(); return; }
-    S.hero.name=v; sync(S.hero,true); saveState(); ui.msg='이름을 바꿨어요.'; render();
+    if(!(S.renameT>0)){ ui.msg='이름 변경권이 없다. 1만원 이상 공물을 바치면 받는다.'; render(); return; }
+    S.renameT--; S.hero.name=v; sync(S.hero,true); saveState(); ui.msg='이름을 바꿨다. 남은 변경권 '+S.renameT+'장'; render();
   }
   else if(a==='invite'){ ui.code='#'+Array.from({length:4},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[RI(0,31)]).join(''); view='invite'; render(); }
   else if(a==='accept') startFight();
@@ -3327,7 +3350,7 @@ app.addEventListener('click',e=>{
   }
   else if(a==='back'){ view=S.hero?'card':'home'; render(); }
   else if(a==='skip') skip();
-  else if(a==='reset'){ S={hero:null,yard:[],fights:0,board:[],seeded:true,flag:'',duels:[],handledDuels:[]}; ui.confirmReset=false; ui.tab='stat'; view='home'; render(); }
+  else if(a==='reset'){ S={hero:null,yard:[],fights:0,board:[],seeded:true,flag:'',duels:[],handledDuels:[],gold:S.gold||0,owned:S.owned||[],renameT:S.renameT||0,redeemed:S.redeemed||[]}; ui.confirmReset=false; ui.tab='stat'; view='home'; render(); }
 });
 try{ const m=/[#&]duel=([A-Za-z0-9_-]+)/.exec(location.hash); if(m){ const f=unpackDuel(m[1]); if(f){ ui.incoming=f; view='incoming'; } } }catch(_){}
 /* ---- 3D 연결 ---- */

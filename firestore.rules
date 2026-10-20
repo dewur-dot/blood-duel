@@ -49,6 +49,37 @@ service cloud.firestore {
         );
     }
 
+    // ---- 후원 (오딘의 제단) ----
+    // 관리자 ID: support.html?admin 을 열면 보이는 'ID'를 아래 목록에 넣고 규칙을 다시 게시하세요.
+    function isAdmin() {
+      return request.auth != null && request.auth.uid in ['REPLACE_WITH_ADMIN_UID'];
+    }
+    // 후원 신청: 누구나 자기 이름으로 '확인 대기' 신청만 만들 수 있음. 확인/거절은 관리자만.
+    match /donations/{id} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['uid', 'name', 'amount', 'msg', 'status', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 20
+        && request.resource.data.amount is int && request.resource.data.amount >= 1000 && request.resource.data.amount <= 10000000
+        && request.resource.data.msg is string && request.resource.data.msg.size() <= 200;
+      allow get, list: if resource.data.status == 'done'
+        || (request.auth != null && resource.data.uid == request.auth.uid)
+        || isAdmin();
+      allow update, delete: if isAdmin();
+    }
+    // 보상 코드: 관리자만 만들고, 코드를 아는 사람이 딱 한 번 '사용함'으로 바꿀 수 있음
+    match /codes/{code} {
+      allow get: if request.auth != null;
+      allow list: if request.auth != null && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isAdmin();
+      allow update: if request.auth != null
+        && resource.data.redeemedBy == null
+        && request.resource.data.redeemedBy == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['redeemedBy', 'redeemedAt']);
+      allow delete: if isAdmin();
+    }
+
     // 명예의 전당: 실제로 플레이한 전사들. 누구나 읽고, 자기 전사만 쓴다
     match /heroes/{heroId} {
       function valid() {

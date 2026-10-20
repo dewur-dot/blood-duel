@@ -188,7 +188,7 @@
     const myId=isOwner?'B':'A', iFled=result.fled===myId, theyFled=!!result.fled&&!iFled;
     const rep={me:clone(me),foe:opponent,log:isOwner?flipLog(result.log):result.log,
       win:won,broke:null,gain:null,fled:result.fled?(isOwner?(result.fled==='A'?'B':'A'):result.fled):null};
-    if(won){ rep.gain=grow(me); rep.plunder=theyFled?null:(typeof plunderHelm==='function'?plunderHelm(me,opponent):null); rep.wins=me.wins; sync(me,true); }
+    if(won){ rep.gain=grow(me); rep.gold=typeof winGold==='function'?winGold(me):0; rep.plunder=theyFled?null:(typeof plunderHelm==='function'?plunderHelm(me,opponent):null); rep.wins=me.wins; sync(me,true); }
     else if(iFled&&typeof cowardize==='function'){ cowardize(me); sync(me,true); }
     else{
       const last=result.log[result.log.length-1];
@@ -340,8 +340,29 @@
     }catch(error){ console.warn('랭킹 불러오기 실패',error&&error.code||error); ui.boardErr=true; }
     if(view==='rank') render();
   }
+  /* 후원 보상 코드: 서버에서 한 번만 쓸 수 있게 확인 */
+  async function redeem(code){
+    const show=m=>{ ui.rmsg=m; const e=document.getElementById('redeemMsg'); if(e) e.textContent=m; };
+    if(!/^[A-Z0-9]{8,16}$/.test(code||'')){ show('코드를 다시 확인해라. 영어 대문자와 숫자다.'); return; }
+    show('오딘이 공물을 확인하는 중…');
+    try{
+      const db=await ready, ref=db.collection('codes').doc(code), uid=firebase.auth().currentUser.uid;
+      const data=await db.runTransaction(async t=>{
+        const shot=await t.get(ref);
+        if(!shot.exists) throw new Error('no-code');
+        const d=shot.data(); if(d.redeemedBy) throw new Error('used');
+        t.update(ref,{redeemedBy:uid,redeemedAt:firebase.firestore.FieldValue.serverTimestamp()});
+        return d;
+      });
+      const g=Math.max(0,data.gold|0), r=data.rename?1:0;
+      S.gold=(S.gold||0)+g; S.renameT=(S.renameT||0)+r; S.redeemed=(S.redeemed||[]).concat(code).slice(-50); saveState();
+      ui.rmsg=`공물이 받아들여졌다. +${g.toLocaleString('ko-KR')} 골드${r?' · 이름 변경권 +1장':''}`; render();
+    }catch(error){
+      show(error.message==='no-code'?'그런 코드는 없다.':error.message==='used'?'이미 누군가 써버린 코드다.':reason(error));
+    }
+  }
   const isLocked=action=>!!S.pendingDuel&&['roll','reset','accept','buy','wear','rename'].includes(action);
-  window.DuelOnline={send,open,accept,decline,cancel,checkDuels,isLocked,pushHero,loadBoard};
+  window.DuelOnline={send,open,accept,decline,cancel,checkDuels,isLocked,pushHero,loadBoard,redeem};
   if(S.hero) pushHero(S.hero,true);
   const match=/#(?:[^#]*&)?duel-id=([A-Za-z0-9]{20})/.exec(location.hash);
   if(match) open(match[1]);
