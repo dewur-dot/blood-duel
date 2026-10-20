@@ -2440,7 +2440,7 @@ function build3(h,dead){
   // 목 (턱 밑에서 몸통 속으로)
   const nw=D.nW/2, NL=D.neckL+D.hH*0.2+T*0.02;
   const cT=Math.min(0.45,(D.hH*0.2)/NL); // 턱 높이 (목 위쪽에서부터의 비율)
-  const nk=add3(spine,loft(skin,[{t:0,w:nw*0.45,f:nw*0.45,b:nw*0.6},{t:cT*0.6,w:nw*0.62,f:nw*0.6,b:nw*0.8},{t:cT+0.06,w:nw*0.92,f:nw*0.9,b:nw*0.92},{t:0.6,w:nw,f:nw*0.92,b:nw},{t:1,w:nw*1.05,f:nw*0.8,b:nw*1.05}],NL,{steps:10,cap1:0.5}));
+  const nk=add3(spine,loft(skin,[{t:0,w:nw*0.78,f:nw*0.75,b:nw*0.85},{t:cT,w:nw*0.88,f:nw*0.86,b:nw*0.92},{t:cT+0.15,w:nw*0.95,f:nw*0.92,b:nw*0.96},{t:0.6,w:nw,f:nw*0.92,b:nw},{t:1,w:nw*1.05,f:nw*0.8,b:nw*1.05}],NL,{steps:10,cap1:0.5}));
   nk.T=[0,D.neckL+D.hH*0.2,-nw*0.12];
   J.chin=add3(spine,N3(null)); J.chin.T=[0,D.neckL,0]; J.chin.cap=1;
   // 다리
@@ -2547,8 +2547,12 @@ function drawNode(n,parent,des,list){
 }
 // figs: [{J, M(world matrix of root), des}], cam: {l,r,b,t}, w,h px
 function g3render(figs,cam,w,h){
-  const gl=G3.gl; if(G3.cv.width!==w||G3.cv.height!==h){ G3.cv.width=w; G3.cv.height=h; }
-  gl.viewport(0,0,w,h); gl.clearColor(0,0,0,0); gl.clear(cam.keep?gl.DEPTH_BUFFER_BIT:(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT));
+  const gl=G3.gl;
+  // 폰(특히 카톡 안 브라우저)은 메모리가 부족하면 WebGL 그림판을 몰래 줄임. 그때 원래 크기로 그리면 한 귀퉁이만 확대돼
+  // 사람이 거대한 살덩어리로 보였음 → 너무 큰 그림판은 미리 줄이고, 실제로 받은 크기(drawingBuffer)에 맞춰 그림
+  const k=Math.min(1,Math.sqrt(1800000/Math.max(1,w*h))), W2=Math.max(2,Math.round(w*k)), H2=Math.max(2,Math.round(h*k));
+  if(G3.cv.width!==W2||G3.cv.height!==H2){ G3.cv.width=W2; G3.cv.height=H2; }
+  gl.viewport(0,0,gl.drawingBufferWidth||W2,gl.drawingBufferHeight||H2); gl.clearColor(0,0,0,0); gl.clear(cam.keep?gl.DEPTH_BUFFER_BIT:(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT));
   gl.enable(gl.DEPTH_TEST); gl.disable(gl.BLEND); gl.disable(gl.CULL_FACE);
   const PV=cam.PV||M4.ortho(cam.l,cam.r,cam.b,cam.t,-5000,5000);
   gl.useProgram(G3.prog); const U=G3.u; gl.uniformMatrix4fv(U.PV,false,PV);
@@ -2575,7 +2579,7 @@ function g3render(figs,cam,w,h){
   sprites.forEach(sp=>{
     const hH=sp.f.J.D.hH*sp.s, W=2*hH, H2=2.6*hH, cy=sp.cy+(1.0-0.2)*hH*1.0-0.18*hH;
     // 텍스처 안에서 턱은 y=162/260 → 스프라이트 중심과 턱 차이 (162-130)/100*hH
-    const rot=sp.f.roll||0, off=(162-130)/100*hH, ccx=sp.cx-Math.sin(rot)*off, cyy=sp.cy+Math.cos(rot)*off;
+    const rot=sp.f.roll||0, off=(162-130)/100*hH-0.13*hH, ccx=sp.cx-Math.sin(rot)*off, cyy=sp.cy+Math.cos(rot)*off; // 머리를 조금 내려 턱이 목에 얹히게
     [['back',-0.35],['front',0.45]].forEach(([part,dz])=>{ const t=headTex(sp.f.J.h,sp.f.J.dead,part); if(!t.ready) return;
       gl.bindTexture(gl.TEXTURE_2D,t.tex); gl.uniform1f(SU.Rot,rot); gl.uniform3f(SU.Ctr,ccx,cyy,sp.cz+dz*hH*1.2+(part==='front'?hH*0.6:-hH*0.3)); gl.uniform2f(SU.Sz,W,H2); gl.uniform1f(SU.Des,sp.f.des?0.75:0);
       gl.drawArrays(gl.TRIANGLES,0,6); });
@@ -3366,11 +3370,11 @@ function viewRender(v,now){
   J.root.R=[0,vv.mode==='static'?0.25:vv.mode==='bust'?0.12:0.42,0];
   if(vv.mode==='bust'){ // 초상화: 실제 3D 몸의 가슴 위쪽을 크게
     const y0=0.6, y1=1.09, k2=ch/(y1-y0), cam2={l:-cw/(2*k2),r:cw/(2*k2),b:y0,t:y1};
-    g3render([{J,M:M4.I(),des:vv.dead}],cam2,cw,ch); const c2=cv.getContext('2d'); c2.clearRect(0,0,cw,ch); c2.drawImage(G3.cv,0,0); return; }
+    g3render([{J,M:M4.I(),des:vv.dead}],cam2,cw,ch); const c2=cv.getContext('2d'); c2.clearRect(0,0,cw,ch); c2.drawImage(G3.cv,0,0,cw,ch); return; }
   const tank=!!J.tank, k=ch/(tank?1.25:1.1), sh=tank?0.35:0;
   const cam={l:-cw/(2*k)+sh,r:cw/(2*k)+sh,b:-0.03,t:ch/k-0.03};
   g3render([{J,M:M4.I(),des:vv.dead}],cam,cw,ch);
-  const ctx=cv.getContext('2d'); ctx.clearRect(0,0,cw,ch); ctx.drawImage(G3.cv,0,0);
+  const ctx=cv.getContext('2d'); ctx.clearRect(0,0,cw,ch); ctx.drawImage(G3.cv,0,0,cw,ch);
 }
 // 공유 카드용: 실제 3D 몸 상반신을 그린 캔버스 (얼굴 텍스처가 준비될 때까지 잠깐 기다림)
 async function bustCanvas(h,w,hh){
@@ -3379,7 +3383,7 @@ async function bustCanvas(h,w,hh){
   const J=build3(h,false); pose3(J,REST3,0); J.root.R=[0,0.12,0];
   const y0=0.6, y1=1.09, k=hh/(y1-y0);
   g3render([{J,M:M4.I(),des:false}],{l:-w/(2*k),r:w/(2*k),b:y0,t:y1},w,hh);
-  const c=document.createElement('canvas'); c.width=w; c.height=hh; c.getContext('2d').drawImage(G3.cv,0,0); return c;
+  const c=document.createElement('canvas'); c.width=w; c.height=hh; c.getContext('2d').drawImage(G3.cv,0,0,w,hh); return c;
 }
 /* ---- 3D 결투장: 땅, 산, 숲, 롱하우스, 화톳불, 바위 (픽셀 단위 월드, 무대 바닥 = gy) ---- */
 function arena3d(W,gy){
@@ -3502,7 +3506,7 @@ function battle3d(now){
   // 2) 사람은 정사영으로 그 위에 그림 (어떤 경우에도 화면을 뚫고 커지지 않음)
   const Z=1+1.3*Math.pow(1-u,1.4);
   g3render(figs,{l:W/2-W/2*Z,r:W/2+W/2*Z,b:0,t:Hs*Z,keep:1},cw,ch);
-  const ctx=cv.getContext('2d'); ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cw,ch); ctx.drawImage(G3.cv,0,0);
+  const ctx=cv.getContext('2d'); ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cw,ch); ctx.drawImage(G3.cv,0,0,cw,ch);
 }
 function g3frame(now){
   if(view==='battle') battle3d(now);
