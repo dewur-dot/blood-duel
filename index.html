@@ -686,9 +686,9 @@ const NICK={muscle:['흐물흐물','근육맨'],build:['뼈 없는','황소'],he
 const SKIN=['#F6DCCB','#EFC9AE','#E5B48F','#D79F76','#C48560','#A96B47','#8A5336','#5E3624','#46291C','#362117'];
 const EYEC=[['#3A2415',6],['#6A4420',5],['#8A6A2F',2],['#4E6E3E',2],['#4A7AA8',3],['#7F8B94',3]];
 const HAIRC=[['#17130F',5],['#2E1F14',5],['#5A3C25',4],['#8A6A3A',3],['#C8A765',3],['#8E3B1E',2],['#8C8C88',2],['#D8D4CC',1]];
-const HAIRN=['대머리','짧은 머리','중간 길이 머리','긴 머리','땋은 머리','상투머리','옆을 민 머리','벗겨진 이마와 긴 옆머리','케파츠 (일본 고리 묶음)','타레가미 (늘어뜨린 긴 머리)','쌍고리 올림머리','감아 올린 쪽머리','궁중 틀어올린 머리','무사 상투 (붉은 끈)','반묶음 장발 (은관)','높이 묶은 꽁지머리','변발','조선 상투 (망건)','댕기머리'];
-const KHATN=['','흑립 (갓)','탕건','사모','삿갓','패랭이','정자관','복건'];
-const BEARDN=['수염 없음','까칠한 수염','짧은 수염','덥수룩한 수염','긴 수염','콧수염'];
+const HAIRN=['대머리','짧은 머리','중간 길이 머리','긴 머리','땋은 머리','상투머리','옆을 민 머리','벗겨진 이마와 긴 옆머리','케파츠 (일본 고리 묶음)','타레가미 (늘어뜨린 긴 머리)','쌍고리 올림머리','감아 올린 쪽머리','궁중 틀어올린 머리','무사 상투 (붉은 끈)','반묶음 장발 (은관)','높이 묶은 꽁지머리','변발','조선 상투 (망건)','댕기머리','곱슬머리','헝클어진 장발','짧게 깎은 머리'];
+const KHATN=['','흑립 (갓)','탕건','사모','삿갓','패랭이','정자관','복건','진가사 (무사 갓)','에보시','두립 (대나무 갓)','논라 (잎 삿갓)','솜브레로','페즈','쿠피예와 이갈','터번','우샨카','베레모','카우보이 모자','티롤 모자','몽골 털모자','볼러 모자','겔레 (머리 두건)','쿠피 모자','부시 모자','어부 모자','코르도베스 모자','털실 방울모자','하얀 레이스 두건','송콕'];
+const BEARDN=['수염 없음','까칠한 수염','짧은 수염','덥수룩한 수염','긴 수염','콧수염','팔자 콧수염과 염소수염','길게 늘어진 염소수염'];
 const TUNIC=['#A99C80','#6B5338','#5E6266','#7A2E2A','#59603F','#3E5063','#8A7452'];
 const PANTS=['#4A3A2A','#3B3F42','#5A4630','#2F3A2E'];
 const FURC=['#6E6256','#8A7F72','#4A4036'];
@@ -847,6 +847,12 @@ function nameFor(flag,sex){
   const full=gv+' '+sn; return full.length<=12?full:gv;
 }
 let LASTNAT='';
+// 나라별 전통 모자: 태어날 때 2.5% 확률. 상점에서는 못 삼
+const NATHAT={'🇰🇷':{m:[[1,30],[2,15],[3,10],[4,15],[5,15],[6,8],[7,7]]},'🇯🇵':{m:[[8,1],[9,1]]},'🇨🇳':{m:[[10,1]]},'🇻🇳':{m:[[11,1]],f:[[11,1]]},'🇹🇭':{m:[[11,1]],f:[[11,1]]},
+ '🇲🇽':{m:[[12,1]]},'🇹🇷':{m:[[13,1]]},'🇪🇬':{m:[[13,1]]},'🇲🇦':{m:[[13,1]]},'🇸🇦':{m:[[14,1]]},'🇮🇶':{m:[[14,1]]},'🇮🇳':{m:[[15,1]]},'🇷🇺':{m:[[16,1]],f:[[16,1]]},
+ '🇫🇷':{m:[[17,1]],f:[[17,1]]},'🇺🇸':{m:[[18,1]]},'🇨🇦':{m:[[18,1]]},'🇩🇪':{m:[[19,1]]},'🇲🇳':{m:[[20,1]]},'🇰🇿':{m:[[20,1]]},'🇧🇴':{f:[[21,1]]},'🇬🇧':{m:[[21,1]]},
+ '🇳🇬':{f:[[22,1]],m:[[23,1]]},'🇬🇭':{f:[[22,1]],m:[[23,1]]},'🇸🇳':{m:[[23,1]]},'🇦🇺':{m:[[24,1]]},'🇬🇷':{m:[[25,1]]},'🇪🇸':{m:[[26,1]]},'🇳🇴':{m:[[27,1]],f:[[27,1]]},'🇸🇪':{m:[[27,1]],f:[[27,1]]},'🇩🇰':{m:[[27,1]],f:[[27,1]]},'🇮🇸':{m:[[27,1]],f:[[27,1]]},'🇳🇱':{f:[[28,1]]},'🇮🇷':{m:[[23,1]]},'🇮🇩':{m:[[29,1]]},'🇵🇱':{m:[[19,1]]}};
+function tradHat(g,nat){ const t=NATHAT[nat], l=t&&t[g.sex==='f'?'f':'m']; if(!l||Math.random()>=0.025) return; g.khat=wpick(l); if(nat==='🇰🇷') g.hairStyle=17; }
 // 한·중·일 전통 머리와 조선 갓: 태어난 나라를 따라감 (갓은 상점에서 못 삼)
 function asiaLook(g,nat){
   const F=g.sex==='f', r=Math.random();
@@ -854,7 +860,7 @@ function asiaLook(g,nat){
   else if(nat==='🇨🇳'&&!F&&r<0.6) g.hairStyle=pick([13,14,14,15,15,16]);
   else if(nat==='🇨🇳'&&F&&r<0.35) g.hairStyle=pick([14,15]);
   else if(nat==='🇰🇷'&&F&&r<0.55) g.hairStyle=pick([18,18,9,10]);
-  else if(nat==='🇰🇷'&&!F){ if(r<0.5) g.hairStyle=17; if(Math.random()<0.35){ g.khat=wpick([[1,30],[2,15],[3,10],[4,15],[5,15],[6,8],[7,7]]); g.hairStyle=17; } }
+  else if(nat==='🇰🇷'&&!F){ if(r<0.5) g.hairStyle=17; }
   if(g.hairStyle>=8) g.hairColor=g.p.hairVol>8&&Math.random()<0.1?'#2E1F14':'#17130F';
 }
 function makeName(sex,eth){
@@ -886,16 +892,23 @@ function newGenes(sex,eth){
   const br=Math.random(), blessed=br<0.03, pretty=!blessed&&br<0.12; // 미남·미녀 3%, 반반한 얼굴 9%
   if(blessed||pretty){ const I=FACE_IDEAL[sex]; FACEK.forEach(k=>{ const r=I[k]; if(r&&(blessed||Math.random()<0.75)) p[k]=RI(r[0],r[1]); }); }
   let hairStyle;
-  if(F) hairStyle=wpick([[1,1],[2,3],[3,5],[4,3],[5,2],[6,1]]);
-  else hairStyle=wpick([[0,1.2],[1,3],[2,2],[3,1.5],[4,1],[5,1],[6,1.3],[7,0.8]]);
-  const grey=!F&&Math.random()<0.05;
+  if(F) hairStyle=wpick([[1,1],[2,3],[3,5],[4,3],[5,2],[6,1],[19,0.8],[20,0.5],[21,0.25]]);
+  else hairStyle=wpick([[0,1.2],[1,3],[2,2],[3,1.5],[4,1],[5,1],[6,1.3],[7,0.6],[19,1],[20,0.8],[21,1.4]]);
+  if(eth==='af'&&Math.random()<0.5) hairStyle=F?pick([19,19,21,5]):pick([19,21,21,0]);
+  if((eth==='ea'||eth==='sea')&&hairStyle===19&&Math.random()<0.7) hairStyle=F?3:1;
+  // 나이: 대부분 20~40대, 가끔 노인. 미남·미녀는 젊게
+  let age=wpick([[RI(18,29),35],[RI(30,44),33],[RI(45,59),17],[RI(60,74),10],[RI(75,90),5]]);
+  if(blessed||pretty) age=RI(18,34);
+  const grey=age>=45&&Math.random()<Math.min(0.95,(age-42)/28);
+  if(!F&&age>=45&&Math.random()<Math.min(0.6,(age-40)/55)) hairStyle=pick([0,7,7,21]);
+  if(F&&age>=62&&Math.random()<0.6) hairStyle=pick([1,2,5,5]);
   let cm=rollCm(); if(F&&cm>=100) cm=Math.round(cm*0.93);
   // 근육 괴물: 2.5% 확률로 태어날 때부터 터질 듯한 근육. 근육량 9~10이면 약간의 덤
   let bulk=0;
   if(Math.random()<0.025){ bulk=R(3,6.5); p.muscle=10; p.build=Math.max(p.build,RI(7,9)); p.shoulder=Math.max(p.shoulder,RI(7,10)); }
   else if(p.muscle>=9) bulk=R(0,1.4);
-  return {sex,eth:eth||'eu',p,blessed,pretty,cm,skin:wpick(E.skin.map(x=>[x[0],x[1]])),eyeColor:wpick(E.eye),hairColor:grey?pick(['#8C8C88','#D8D4CC']):wpick(E.hair),hairStyle,
-    beard:F?0:(Math.random()<E.beard?((eth==='ea'||eth==='sea')?pick([1,1,2,5]):RI(1,5)):0),mono:Math.random()<E.mono,bust:F?R(0.85,1.25):0,uw:pick(F?['#1C1A1D','#E7DCCF','#6E1F2A','#2B3550','#D9D3CA']:['#1E1E22','#2E3440','#D9D3CA','#4A4F55','#5B2A2A']),
+  return {sex,eth:eth||'eu',p,blessed,pretty,cm,skin:wpick(E.skin.map(x=>[x[0],x[1]])),eyeColor:wpick(E.eye),hairColor:grey?(age>=64?pick(['#E8E6E0','#D8D4CC','#E8E6E0']):pick(['#8C8C88','#A8A49C'])):wpick(E.hair),hairStyle,age,freck:eth==='eu'&&Math.random()<0.12?1:0,
+    beard:F?0:(Math.random()<E.beard+(age>=58?(eth==='ea'||eth==='sea'?0.15:0.25):0)?((eth==='ea'||eth==='sea')?(age>=58?pick([6,7,7,4,5]):pick([1,1,2,5,6])):(age>=58?pick([3,4,4,5,7,2]):pick([1,2,3,4,5,1,2,7]))):0),mono:Math.random()<E.mono,bust:F?R(0.85,1.25):0,uw:pick(F?['#1C1A1D','#E7DCCF','#6E1F2A','#2B3550','#D9D3CA']:['#1E1E22','#2E3440','#D9D3CA','#4A4F55','#5B2A2A']),
     bulk:Math.round(bulk*100)/100,expr:wpick([['stern',45],['angry',30],['snarl',7],['smirk',10],['calm',8]]),oddEye:Math.random()<0.04?RI(1,2):0,eye2:(eth!=='ea'&&eth!=='sea')&&Math.random()<0.015?pick(['#4A7AA8','#4E6E3E','#8A6A2F','#7F8B94','#6A4420'].filter(c=>c!==E.eye[0][0])):'',
     scar:Math.random()<(F?0.1:0.22),tattoo:Math.random()<0.07?RI(1,3):0,tunic:pick(TUNIC),pants:pick(PANTS),furC:pick(FURC),
     armPose:[RI(7,20),RI(7,20)],legPose:[RI(2,7),RI(2,7)],armOk:[Math.random()>0.025,Math.random()>0.025],legOk:[Math.random()>0.025,Math.random()>0.025]};
@@ -926,6 +939,8 @@ function calcStats(g){
     head:cl(45+20*L(hM)+8*L(k)+(p.jaw-5.5)*2+RI(-8,8)),
     slam:cl(40+14*L(massK)+RI(-8,8))
   };
+  const A=g.age||30;
+  if(A>=55){ const k=Math.min(1,(A-55)/30); st.spd=cl(st.spd*(1-0.18*k)); st.sta=cl(st.sta*(1-0.15*k)); st.reflex=cl(st.reflex*(1-0.12*k)); st.int=Math.min(100,st.int+Math.round(12*k)); st.guts=cl(st.guts+Math.round(15*k)); }
   return {st,cm,kg};
 }
 function makeTags(g){
@@ -941,6 +956,7 @@ function makeTags(g){
   if(g.oddEye) t.push(['레어 · 짝눈',1]);
   if(g.eye2&&g.eye2!==g.eyeColor) t.push(['레어 · 오드아이',1]);
   if(g.scar) t.push(['얼굴의 흉터',0]);
+  if((g.age||30)>=75) t.push(['살아남은 노장 · '+g.age+'세',1]); else if((g.age||30)>=60) t.push(['백발 노장 · '+g.age+'세',0]);
   if(g.tattoo) t.push([['','푸른 바이킹 문신 · 어깨','푸른 바이킹 문신 · 가슴','푸른 바이킹 문신 · 전신'][g.tattoo],1]);
   return t;
 }
@@ -955,6 +971,7 @@ function makeNick(g){
 function newHero(){
   const sex=Math.random()<0.45?'f':'m', eth=wpick(ETHW), g=newGenes(sex,eth), c=calcStats(g), nm=[makeName(sex,eth),''];
   if(eth==='ea') asiaLook(g,LASTNAT);
+  tradHat(g,LASTNAT);
   const tags=makeTags(g); if(c.st.int<=10) tags.push(['야수 지능 · 네발 보행',1]);
   return {id:uid(),name:nm[0],flag:nm[1],nick:makeNick(g),g,st:c.st,cm:c.cm,kg:c.kg,hp:c.st.hp,maxhp:c.st.hp,wins:0,weapon:null,outfit:{top:0,bottom:0,boots:0,fur:0,helm:0},tags};
 }
@@ -1062,6 +1079,101 @@ function korHat(cx,yT,hH,fW,k){
   if(k===7){ // 복건: 머리를 감싸는 검은 두건
     return [-1,1].map(sd=>`<path d="M${P(cx+sd*fW*0.5,yT+hH*0.2)} C${P(cx+sd*fW*0.62,yT+hH*0.45)} ${P(cx+sd*fW*0.66,yT+hH*0.8)} ${P(cx+sd*fW*0.6,yT+hH*1.05)} L${P(cx+sd*fW*0.48,yT+hH*1.0)} C${P(cx+sd*fW*0.52,yT+hH*0.7)} ${P(cx+sd*fW*0.5,yT+hH*0.5)} ${P(cx+sd*fW*0.44,yT+hH*0.32)} Z" fill="#161616"/>`).join('')+
       `<path d="M${P(cx-fW*0.54,yT+hH*0.34)} C${P(cx-fW*0.6,yT-hH*0.2)} ${P(cx+fW*0.6,yT-hH*0.2)} ${P(cx+fW*0.54,yT+hH*0.34)} Q${P(cx,yT+hH*0.12)} ${P(cx-fW*0.54,yT+hH*0.34)} Z" fill="#1a1a1a" stroke="${st}" stroke-width=".6"/><path d="M${P(cx,yT-hH*0.08)} L${P(cx,yT+hH*0.17)}" stroke="#333" stroke-width="1"/>`;
+  }
+  let defs2='';
+  // ---- 다른 나라 전통 모자 ----
+  const Y=v=>yT+hH*v, X=v=>cx+fW*v, sh=(c,f)=>mix(c,'#000000',f), hl=(c,f)=>mix(c,'#ffffff',f);
+  const strap=(y0,c)=>[-1,1].map(sd=>`<path d="M${P(X(sd*0.48),y0)} C${P(X(sd*0.52),Y(0.6))} ${P(X(sd*0.32),Y(0.98))} ${P(X(sd*0.05),Y(1.05))}" stroke="${c||'#2a1c10'}" stroke-width="${n1(hH*0.01)}" fill="none"/>`).join('');
+  const dome=(y0,top,w,c)=>`<path d="M${P(X(-w),Y(y0))} C${P(X(-w),Y(top))} ${P(X(w),Y(top))} ${P(X(w),Y(y0))} Q${P(cx,Y(y0-0.06))} ${P(X(-w),Y(y0))} Z" fill="${c}" stroke="${st}" stroke-width=".7"/>`;
+  if(k===8){ // 진가사: 납작한 원뿔형 옻칠 갓 + 붉은 문양
+    return `<path d="M${P(cx,Y(-0.2))} C${P(X(0.4),Y(-0.16))} ${P(X(0.7),Y(0.02))} ${P(X(1.02),Y(0.22))} Q${P(cx,Y(0.3))} ${P(X(-1.02),Y(0.22))} C${P(X(-0.7),Y(0.02))} ${P(X(-0.4),Y(-0.16))} ${P(cx,Y(-0.2))} Z" fill="#1b1512" stroke="${st}" stroke-width=".7"/><path d="M${P(X(-0.3),Y(-0.12))} Q${P(cx,Y(-0.2))} ${P(X(0.4),Y(-0.08))}" stroke="#4a3a30" stroke-width="1" fill="none"/><circle cx="${n1(cx)}" cy="${n1(Y(0.06))}" r="${n1(hH*0.05)}" fill="#A8231F"/><circle cx="${n1(cx)}" cy="${n1(Y(0.06))}" r="${n1(hH*0.022)}" fill="#D9B44A"/>`+strap(Y(0.24),'#5a1a14');
+  }
+  if(k===9){ // 에보시: 뒤로 휘어 높이 솟은 검은 관모
+    return `<path d="M${P(X(-0.56),Y(0.27))} C${P(X(-0.6),Y(-0.05))} ${P(X(-0.4),Y(-0.3))} ${P(X(-0.15),Y(-0.42))} C${P(X(0.15),Y(-0.46))} ${P(X(0.45),Y(-0.3))} ${P(X(0.4),Y(-0.12))} C${P(X(0.56),Y(-0.02))} ${P(X(0.6),Y(0.12))} ${P(X(0.56),Y(0.27))} Q${P(cx,Y(0.18))} ${P(X(-0.56),Y(0.27))} Z" fill="#141210" stroke="${st}" stroke-width=".7"/><path d="M${P(X(-0.35),Y(-0.2))} Q${P(cx,Y(-0.1))} ${P(X(0.38),Y(-0.15))}" stroke="#3a3530" stroke-width="1" fill="none"/>`+strap(Y(0.26),'#e8e0d0');
+  }
+  if(k===10){ // 두립: 가파른 대나무 갓
+    let ln=''; for(let i=-4;i<=4;i++) ln+=`M${P(cx,Y(-0.36))} L${P(X(i*0.22),Y(0.24))} `;
+    return `<path d="M${P(cx,Y(-0.38))} L${P(X(0.95),Y(0.22))} Q${P(cx,Y(0.32))} ${P(X(-0.95),Y(0.22))} Z" fill="#B8925A" stroke="#5e4320" stroke-width=".8"/><path d="${ln}" stroke="#7e6033" stroke-width=".6" opacity=".6"/><circle cx="${n1(cx)}" cy="${n1(Y(-0.36))}" r="${n1(hH*0.02)}" fill="#5e4320"/>`+strap(Y(0.25));
+  }
+  if(k===11){ // 논라: 흰빛 잎으로 엮은 뾰족한 원뿔 + 턱끈 리본
+    let ln=''; for(let i=1;i<=4;i++){ const t=i/5; ln+=`M${P(cx-fW*1.02*t,Y(-0.4+0.62*t))} Q${P(cx,Y(-0.4+0.68*t))} ${P(cx+fW*1.02*t,Y(-0.4+0.62*t))} `; }
+    return `<path d="M${P(cx,Y(-0.42))} L${P(X(1.02),Y(0.22))} Q${P(cx,Y(0.3))} ${P(X(-1.02),Y(0.22))} Z" fill="#E9DFC4" stroke="#8a7b55" stroke-width=".8"/><path d="${ln}" stroke="#b5a57a" stroke-width=".7" fill="none"/>`+strap(Y(0.25),'#C2364A');
+  }
+  if(k===12){ // 솜브레로: 아주 넓은 챙과 높은 몸통, 장식띠
+    return `<ellipse cx="${n1(cx)}" cy="${n1(Y(0.18))}" rx="${n1(fW*1.25)}" ry="${n1(hH*0.1)}" fill="#C79B55" stroke="#6a4c22" stroke-width=".8"/><path d="M${P(X(-1.2),Y(0.12))} Q${P(X(-1.3),Y(0.02))} ${P(X(-1.15),Y(0.0))} M${P(X(1.2),Y(0.12))} Q${P(X(1.3),Y(0.02))} ${P(X(1.15),Y(0.0))}" stroke="#6a4c22" stroke-width="1.5" fill="none"/>`+
+      `<path d="M${P(X(-0.55),Y(0.2))} C${P(X(-0.5),Y(-0.2))} ${P(X(-0.3),Y(-0.38))} ${P(cx,Y(-0.38))} C${P(X(0.3),Y(-0.38))} ${P(X(0.5),Y(-0.2))} ${P(X(0.55),Y(0.2))} Q${P(cx,Y(0.12))} ${P(X(-0.55),Y(0.2))} Z" fill="#D4A962" stroke="#6a4c22" stroke-width=".8"/><path d="M${P(X(-0.54),Y(0.08))} Q${P(cx,Y(0.0))} ${P(X(0.54),Y(0.08))}" stroke="#B3262F" stroke-width="${n1(hH*0.04)}" fill="none"/><path d="M${P(X(-0.5),Y(0.08))} Q${P(cx,Y(0.0))} ${P(X(0.5),Y(0.08))}" stroke="#1F7A3A" stroke-width="${n1(hH*0.012)}" stroke-dasharray="3 3" fill="none"/>`;
+  }
+  if(k===13){ // 페즈: 붉은 원뿔대 + 검은 술
+    return `<path d="M${P(X(-0.44),Y(0.2))} L${P(X(-0.34),Y(-0.26))} Q${P(cx,Y(-0.3))} ${P(X(0.34),Y(-0.26))} L${P(X(0.44),Y(0.2))} Q${P(cx,Y(0.14))} ${P(X(-0.44),Y(0.2))} Z" fill="#A8161E" stroke="${st}" stroke-width=".7"/><ellipse cx="${n1(cx)}" cy="${n1(Y(-0.27))}" rx="${n1(fW*0.34)}" ry="${n1(hH*0.03)}" fill="#C42630"/><path d="M${P(X(-0.18),Y(-0.15))} L${P(X(-0.18),Y(0.08))}" stroke="#8a1018" stroke-width="1" opacity=".6"/>`+
+      `<path d="M${P(cx,Y(-0.28))} Q${P(X(0.3),Y(-0.24))} ${P(X(0.4),Y(-0.05))}" stroke="#111" stroke-width="1.2" fill="none"/><path d="M${P(X(0.36),Y(-0.08))} L${P(X(0.44),Y(0.12))} L${P(X(0.34),Y(0.12))} Z" fill="#111"/>`;
+  }
+  if(k===14){ // 쿠피예(붉은 체크 천) + 검은 이갈 고리
+    defs2=`<pattern id="kf${hH|0}${k}" width="${n1(hH*0.05)}" height="${n1(hH*0.05)}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="${n1(hH*0.05)}" height="${n1(hH*0.05)}" fill="#F2EEE6"/><path d="M0 0H${n1(hH*0.05)}M0 0V${n1(hH*0.05)}" stroke="#B3262F" stroke-width="${n1(hH*0.014)}"/></pattern>`;
+    return `<defs>${defs2}</defs>`+[-1,1].map(sd=>`<path d="M${P(X(sd*0.45),Y(0.2))} C${P(X(sd*0.62),Y(0.5))} ${P(X(sd*0.7),Y(0.95))} ${P(X(sd*0.75),Y(1.35))} L${P(X(sd*0.48),Y(1.3))} C${P(X(sd*0.55),Y(0.9))} ${P(X(sd*0.52),Y(0.55))} ${P(X(sd*0.42),Y(0.3))} Z" fill="url(#kf${hH|0}${k})" stroke="${st}" stroke-width=".6"/>`).join('')+
+      `<path d="M${P(X(-0.58),Y(0.3))} C${P(X(-0.66),Y(-0.24))} ${P(X(0.66),Y(-0.24))} ${P(X(0.58),Y(0.3))} Q${P(cx,Y(0.16))} ${P(X(-0.58),Y(0.3))} Z" fill="url(#kf${hH|0}${k})" stroke="${st}" stroke-width=".7"/>`+
+      `<path d="M${P(X(-0.54),Y(0.04))} Q${P(cx,Y(-0.08))} ${P(X(0.54),Y(0.04))}" stroke="#111" stroke-width="${n1(hH*0.035)}" fill="none"/><path d="M${P(X(-0.52),Y(-0.02))} Q${P(cx,Y(-0.14))} ${P(X(0.52),Y(-0.02))}" stroke="#111" stroke-width="${n1(hH*0.03)}" fill="none"/>`;
+  }
+  if(k===15){ // 터번: 비스듬히 감은 천 주름
+    const c='#D9822B'; let f='';
+    for(let i=0;i<5;i++){ const y=0.22-i*0.1; f+=`<path d="M${P(X(-0.6+i*0.04),Y(y))} Q${P(cx,Y(y-0.16))} ${P(X(0.6-i*0.04),Y(y-0.08))}" stroke="${sh(c,0.25)}" stroke-width="${n1(hH*0.008)}" fill="none"/>`; }
+    return `<path d="M${P(X(-0.6),Y(0.26))} C${P(X(-0.72),Y(-0.2))} ${P(X(-0.3),Y(-0.36))} ${P(cx,Y(-0.32))} C${P(X(0.4),Y(-0.36))} ${P(X(0.72),Y(-0.2))} ${P(X(0.6),Y(0.26))} Q${P(cx,Y(0.12))} ${P(X(-0.6),Y(0.26))} Z" fill="${c}" stroke="${st}" stroke-width=".7"/>`+f+`<path d="M${P(cx,Y(0.16))} L${P(X(0.12),Y(-0.2))}" stroke="${hl(c,0.35)}" stroke-width="${n1(hH*0.02)}"/><circle cx="${n1(X(0.06))}" cy="${n1(Y(0.04))}" r="${n1(hH*0.025)}" fill="#C8102E" stroke="#D9B44A" stroke-width="1"/>`;
+  }
+  if(k===16){ // 우샨카: 털모자, 귀덮개는 위로 묶음
+    const fur='#6B5444';
+    let fz=''; for(let i=0;i<9;i++){ const a=Math.PI*(1.1+0.8*i/8); fz+=`M${P(cx+Math.cos(a)*fW*0.5,Y(0.05)+Math.sin(a)*hH*0.22)} l${n1(Math.cos(a)*2)} ${n1(Math.sin(a)*3)} `; }
+    return dome(0.2,-0.4,0.6,sh(fur,0.2))+`<path d="${fz}" stroke="${hl(fur,0.3)}" stroke-width="1"/>`+
+      `<path d="M${P(X(-0.7),Y(0.32))} C${P(X(-0.76),Y(0.0))} ${P(X(-0.4),Y(-0.06))} ${P(cx,Y(-0.06))} C${P(X(0.4),Y(-0.06))} ${P(X(0.76),Y(0.0))} ${P(X(0.7),Y(0.32))} Q${P(cx,Y(0.22))} ${P(X(-0.7),Y(0.32))} Z" fill="${hl(fur,0.12)}" stroke="${st}" stroke-width=".6"/><path d="M${P(X(-0.6),Y(0.06))} Q${P(cx,Y(-0.02))} ${P(X(0.6),Y(0.06))} M${P(X(-0.64),Y(0.18))} Q${P(cx,Y(0.1))} ${P(X(0.64),Y(0.18))}" stroke="${sh(fur,0.25)}" stroke-width=".8" fill="none" opacity=".6"/>`+
+      `<path d="M${P(X(-0.5),Y(0.2))} l2 -4 M${P(X(-0.3),Y(0.18))} l2 -4 M${P(X(-0.1),Y(0.17))} l2 -4 M${P(X(0.1),Y(0.17))} l2 -4 M${P(X(0.3),Y(0.18))} l2 -4 M${P(X(0.5),Y(0.2))} l2 -4" stroke="${hl(fur,0.35)}" stroke-width=".8"/><circle cx="${n1(cx)}" cy="${n1(Y(0.18))}" r="${n1(hH*0.025)}" fill="#C9A23C"/>`;
+  }
+  if(k===17){ // 베레모: 한쪽으로 기운 납작한 모자
+    return `<path d="M${P(X(-0.56),Y(0.16))} C${P(X(-0.8),Y(-0.02))} ${P(X(-0.3),Y(-0.28))} ${P(X(0.2),Y(-0.24))} C${P(X(0.75),Y(-0.2))} ${P(X(0.8),Y(0.08))} ${P(X(0.5),Y(0.15))} Q${P(cx,Y(0.1))} ${P(X(-0.56),Y(0.16))} Z" fill="#1F2733" stroke="${st}" stroke-width=".7"/><path d="M${P(X(0.05),Y(-0.24))} l1 -5" stroke="#1F2733" stroke-width="2"/>`;
+  }
+  if(k===18){ // 카우보이 모자
+    const c='#7A4E2A';
+    return `<path d="M${P(X(-1.1),Y(0.08))} Q${P(X(-1.05),Y(0.24))} ${P(cx,Y(0.24))} Q${P(X(1.05),Y(0.24))} ${P(X(1.1),Y(0.08))} Q${P(X(0.9),Y(0.18))} ${P(cx,Y(0.16))} Q${P(X(-0.9),Y(0.18))} ${P(X(-1.1),Y(0.08))} Z" fill="${sh(c,0.1)}" stroke="${st}" stroke-width=".7"/>`+
+      `<path d="M${P(X(-0.5),Y(0.17))} C${P(X(-0.55),Y(-0.2))} ${P(X(-0.3),Y(-0.3))} ${P(X(-0.12),Y(-0.24))} Q${P(cx,Y(-0.16))} ${P(X(0.12),Y(-0.24))} C${P(X(0.3),Y(-0.3))} ${P(X(0.55),Y(-0.2))} ${P(X(0.5),Y(0.17))} Z" fill="${c}" stroke="${st}" stroke-width=".7"/><path d="M${P(X(-0.5),Y(0.1))} L${P(X(0.5),Y(0.1))}" stroke="#2a1a0e" stroke-width="${n1(hH*0.03)}"/>`;
+  }
+  if(k===19){ // 티롤 모자: 초록 펠트 + 깃털
+    const c='#3E5B34';
+    return `<ellipse cx="${n1(cx)}" cy="${n1(Y(0.16))}" rx="${n1(fW*0.82)}" ry="${n1(hH*0.06)}" fill="${sh(c,0.15)}" stroke="${st}" stroke-width=".7"/>`+
+      `<path d="M${P(X(-0.5),Y(0.17))} C${P(X(-0.5),Y(-0.18))} ${P(X(-0.2),Y(-0.3))} ${P(cx,Y(-0.26))} C${P(X(0.25),Y(-0.3))} ${P(X(0.5),Y(-0.15))} ${P(X(0.5),Y(0.17))} Z" fill="${c}" stroke="${st}" stroke-width=".7"/><path d="M${P(X(-0.5),Y(0.1))} L${P(X(0.5),Y(0.1))}" stroke="#7a2a1a" stroke-width="${n1(hH*0.025)}"/>`+
+      `<path d="M${P(X(0.35),Y(0.08))} C${P(X(0.55),Y(-0.15))} ${P(X(0.7),Y(-0.3))} ${P(X(0.8),Y(-0.4))} C${P(X(0.65),Y(-0.2))} ${P(X(0.5),Y(-0.05))} ${P(X(0.38),Y(0.1))} Z" fill="#E8E2D2" stroke="#6a6458" stroke-width=".6"/>`;
+  }
+  if(k===20){ // 몽골 털모자: 뾰족한 꼭대기 + 털 테두리
+    return `<path d="M${P(X(-0.5),Y(0.15))} C${P(X(-0.45),Y(-0.15))} ${P(X(-0.15),Y(-0.3))} ${P(cx,Y(-0.4))} C${P(X(0.15),Y(-0.3))} ${P(X(0.45),Y(-0.15))} ${P(X(0.5),Y(0.15))} Z" fill="#B3262F" stroke="${st}" stroke-width=".7"/><path d="M${P(cx,Y(-0.4))} L${P(cx,Y(0.1))} M${P(X(-0.25),Y(-0.2))} L${P(X(-0.3),Y(0.1))} M${P(X(0.25),Y(-0.2))} L${P(X(0.3),Y(0.1))}" stroke="#D9B44A" stroke-width="1"/><circle cx="${n1(cx)}" cy="${n1(Y(-0.42))}" r="${n1(hH*0.025)}" fill="#D9B44A"/>`+
+      `<path d="M${P(X(-0.66),Y(0.28))} C${P(X(-0.7),Y(0.06))} ${P(X(0.7),Y(0.06))} ${P(X(0.66),Y(0.28))} Q${P(cx,Y(0.2))} ${P(X(-0.66),Y(0.28))} Z" fill="#5E4A38" stroke="${st}" stroke-width=".6"/>`;
+  }
+  if(k===21){ // 볼러 모자: 작고 동그란 중절모 (볼리비아 촐리타는 정수리에 얹음)
+    return `<ellipse cx="${n1(cx)}" cy="${n1(Y(-0.06))}" rx="${n1(fW*0.5)}" ry="${n1(hH*0.045)}" fill="#2B2420" stroke="${st}" stroke-width=".6"/><path d="M${P(X(-0.34),Y(-0.06))} C${P(X(-0.36),Y(-0.38))} ${P(X(0.36),Y(-0.38))} ${P(X(0.34),Y(-0.06))} Z" fill="#3A302A" stroke="${st}" stroke-width=".6"/><path d="M${P(X(-0.34),Y(-0.1))} L${P(X(0.34),Y(-0.1))}" stroke="#111" stroke-width="${n1(hH*0.02)}"/>`;
+  }
+  if(k===22){ // 겔레: 크게 부채처럼 접은 화려한 머리 두건
+    const c='#D4462B', c2='#E8B23A';
+    return `<path d="M${P(X(-0.58),Y(0.3))} C${P(X(-0.9),Y(0.0))} ${P(X(-0.8),Y(-0.36))} ${P(X(-0.3),Y(-0.4))} C${P(X(0.1),Y(-0.5))} ${P(X(0.75),Y(-0.36))} ${P(X(0.85),Y(-0.1))} C${P(X(0.9),Y(0.1))} ${P(X(0.75),Y(0.25))} ${P(X(0.58),Y(0.3))} Q${P(cx,Y(0.18))} ${P(X(-0.58),Y(0.3))} Z" fill="${c}" stroke="${st}" stroke-width=".7"/>`+
+      [0,1,2,3].map(i=>`<path d="M${P(X(-0.6+i*0.3),Y(0.22))} Q${P(X(-0.5+i*0.32),Y(-0.15))} ${P(X(-0.35+i*0.35),Y(-0.38))}" stroke="${c2}" stroke-width="${n1(hH*0.014)}" fill="none"/>`).join('');
+  }
+  if(k===23){ // 쿠피: 둥근 무늬 모자
+    return dome(0.14,-0.24,0.5,'#2A5C8A')+`<path d="M${P(X(-0.48),Y(0.06))} Q${P(cx,Y(-0.04))} ${P(X(0.48),Y(0.06))}" stroke="#E8B23A" stroke-width="${n1(hH*0.02)}" fill="none" stroke-dasharray="4 3"/><path d="M${P(X(-0.38),Y(-0.08))} Q${P(cx,Y(-0.18))} ${P(X(0.38),Y(-0.08))}" stroke="#E8E2D2" stroke-width="${n1(hH*0.012)}" fill="none" stroke-dasharray="2 3"/>`;
+  }
+  if(k===24){ // 부시 모자: 한쪽 챙을 올려 고정
+    const c='#8A6E4A';
+    return `<path d="M${P(X(-0.95),Y(0.16))} Q${P(cx,Y(0.3))} ${P(X(0.6),Y(0.18))} L${P(X(0.62),Y(-0.15))} Q${P(X(0.7),Y(0.0))} ${P(X(0.58),Y(0.12))} Q${P(cx,Y(0.14))} ${P(X(-0.95),Y(0.16))} Z" fill="${sh(c,0.1)}" stroke="${st}" stroke-width=".7"/>`+
+      `<path d="M${P(X(-0.5),Y(0.16))} C${P(X(-0.52),Y(-0.2))} ${P(X(0.5),Y(-0.2))} ${P(X(0.52),Y(0.16))} Z" fill="${c}" stroke="${st}" stroke-width=".7"/><path d="M${P(X(-0.5),Y(0.1))} L${P(X(0.5),Y(0.1))}" stroke="#3a2a18" stroke-width="${n1(hH*0.025)}"/><circle cx="${n1(X(0.6))}" cy="${n1(Y(-0.04))}" r="${n1(hH*0.022)}" fill="#C9A23C"/>`;
+  }
+  if(k===25){ // 어부 모자: 남색 모자 + 짧은 챙
+    return dome(0.16,-0.18,0.54,'#1F2A44')+`<path d="M${P(X(-0.46),Y(0.16))} Q${P(cx,Y(0.32))} ${P(X(0.46),Y(0.16))} Q${P(cx,Y(0.2))} ${P(X(-0.46),Y(0.16))} Z" fill="#111" stroke="${st}" stroke-width=".6"/><path d="M${P(X(-0.48),Y(0.12))} Q${P(cx,Y(0.04))} ${P(X(0.48),Y(0.12))}" stroke="#C9A23C" stroke-width="1.2" fill="none"/>`;
+  }
+  if(k===26){ // 투우사 모자 (몬테라): 양쪽으로 불룩한 검은 모자
+    return `<path d="M${P(X(-0.5),Y(0.16))} L${P(X(-0.5),Y(-0.22))} L${P(X(0.5),Y(-0.22))} L${P(X(0.5),Y(0.16))} Z" fill="#161616" stroke="${st}" stroke-width=".7"/><path d="M${P(X(-0.5),Y(0.1))} L${P(X(0.5),Y(0.1))}" stroke="#333" stroke-width="${n1(hH*0.025)}"/><ellipse cx="${n1(cx)}" cy="${n1(Y(0.17))}" rx="${n1(fW*1.0)}" ry="${n1(hH*0.05)}" fill="#111" stroke="${st}" stroke-width=".7"/>`;
+  }
+  if(k===27){ // 털실 방울모자 (북유럽 무늬)
+    const c='#9C2B2B';
+    return dome(0.2,-0.3,0.57,c)+`<path d="M${P(X(-0.56),Y(0.1))} Q${P(cx,Y(0.0))} ${P(X(0.56),Y(0.1))}" stroke="#F2EEE6" stroke-width="${n1(hH*0.035)}" fill="none" stroke-dasharray="${n1(hH*0.03)} ${n1(hH*0.02)}"/><path d="M${P(X(-0.46),Y(-0.02))} Q${P(cx,Y(-0.1))} ${P(X(0.46),Y(-0.02))}" stroke="#F2EEE6" stroke-width="${n1(hH*0.015)}" fill="none"/><circle cx="${n1(cx)}" cy="${n1(Y(-0.2))}" r="${n1(hH*0.065)}" fill="#F2EEE6" stroke="${st}" stroke-width=".6"/>`;
+  }
+  if(k===28){ // 하얀 레이스 두건 (네덜란드): 양옆이 뾰족하게 접힘
+    return [-1,1].map(sd=>`<path d="M${P(X(sd*0.48),Y(0.12))} Q${P(X(sd*0.78),Y(0.02))} ${P(X(sd*0.74),Y(0.2))} L${P(X(sd*0.56),Y(0.3))} Z" fill="#F7F4EC" stroke="#9a9488" stroke-width=".6"/>`).join('')+dome(0.28,-0.22,0.58,'#FAF7F0')+`<path d="M${P(X(-0.56),Y(0.22))} Q${P(cx,Y(0.1))} ${P(X(0.56),Y(0.22))}" stroke="#c9c2b4" stroke-width="1" stroke-dasharray="2 2" fill="none"/>`;
+  }
+  if(k===29){ // 송콕: 검은 벨벳 원통 모자
+    return `<path d="M${P(X(-0.5),Y(0.16))} L${P(X(-0.46),Y(-0.2))} Q${P(cx,Y(-0.26))} ${P(X(0.46),Y(-0.2))} L${P(X(0.5),Y(0.16))} Q${P(cx,Y(0.1))} ${P(X(-0.5),Y(0.16))} Z" fill="#141414" stroke="${st}" stroke-width=".7"/><ellipse cx="${n1(cx)}" cy="${n1(Y(-0.21))}" rx="${n1(fW*0.46)}" ry="${n1(hH*0.04)}" fill="#222"/>`;
   }
   return '';
 }
@@ -1205,7 +1317,7 @@ function hairBack(g,k){
       ` C${P2(cx-fW*w-8,yb-hH*0.35)} ${P2(cx-fW*w-6,yT+hH*0.55)} ${P2(cx-fW*0.5,yT+hH*0.18)}`;
   };
   if(s===3||s===7||(F&&(s===2||s===1))){
-    const w=(s===3?0.7:s===7?0.6:s===2?0.66:0.6)*v, yb=s===3?shY+hH*(F?0.8:0.6):s===7?shY+hH*0.4:s===2?yT+hH*1.12:yT+hH*0.85;
+    const w=(s===3?0.7:s===7?0.54:s===2?0.66:0.6)*v, yb=s===3?shY+hH*(F?0.8:0.6):s===7?yT+hH*0.62:s===2?yT+hH*1.12:yT+hH*0.85;
     const pts=[]; for(let i=0;i<=8;i++) pts.push([cx+fW*w-(2*fW*w)*i/8, yb]);
     const d=`M${P2(cx-fW*0.5,yT+hH*0.16)} C${P2(cx-fW*w-6,yT+hH*0.5)} ${P2(cx-fW*w-7,yb-hH*0.3)} ${P2(cx-fW*w,yb)} L${P2(cx+fW*w,yb)}`.replace(` L${P2(cx+fW*w,yb)}`,'');
     // 왼쪽 위 → 왼쪽 아래 → (빗살 모양 아래 끝) → 오른쪽 아래 → 오른쪽 위
@@ -1233,6 +1345,13 @@ function hairBack(g,k){
     if(s===15) return hairFill(u,`M${P2(cx+fW*0.05,yT-hH*0.12)} C${P2(cx+fW*0.6,yT-hH*0.05)} ${P2(cx+fW*0.75,yT+hH*0.6)} ${P2(cx+fW*0.68,shY+hH*0.55)} L${P2(cx+fW*0.58,shY+hH*0.62)} C${P2(cx+fW*0.6,yT+hH*0.7)} ${P2(cx+fW*0.45,yT+hH*0.05)} ${P2(cx-fW*0.02,yT-hH*0.06)} Z`);
     if(s===16) return hairFill(u,`M${P2(cx-fW*0.5,yT+hH*0.35)} C${P2(cx-fW*0.52,yT+hH*0.6)} ${P2(cx-fW*0.3,yT+hH*0.7)} ${P2(cx,yT+hH*0.7)} C${P2(cx+fW*0.3,yT+hH*0.7)} ${P2(cx+fW*0.52,yT+hH*0.6)} ${P2(cx+fW*0.5,yT+hH*0.35)} Z`)+braid(cx+fW*0.42,yT+hH*0.68,cx+fW*0.58,shY+hH*1.05,null);
     if(s===18) return braid(cx+fW*0.45,yT+hH*0.62,cx+fW*0.6,shY+hH*0.95,'#B32632');
+    if(s===20) return longB(F?0.66:0.62,shY+hH*(F?0.6:0.35));
+    if(s===19&&F){ // 곱슬 여자: 어깨까지 부푼 곱슬 덩어리
+      let o=hairFill(u,`M${P2(cx-fW*0.52,yT+hH*0.15)} C${P2(cx-fW*0.85,yT+hH*0.45)} ${P2(cx-fW*0.85,shY)} ${P2(cx-fW*0.6,shY+hH*0.15)} L${P2(cx+fW*0.6,shY+hH*0.15)} C${P2(cx+fW*0.85,shY)} ${P2(cx+fW*0.85,yT+hH*0.45)} ${P2(cx+fW*0.52,yT+hH*0.15)} Z`);
+      for(let i=0;i<26;i++){ const t=(i>>1)/12, sd=i%2?1:-1, y=yT+hH*0.28+t*(shY+hH*0.1-yT-hH*0.28), x=cx+sd*fW*(0.7+0.07*Math.sin(i*1.7)), r=hH*(0.045+0.015*((i*7)%3)/2);
+        o+=`<circle cx="${n1(x)}" cy="${n1(y)}" r="${n1(r)}" fill="url(#hg${u})" stroke="${HAIR_EDGE}" stroke-width=".6"/><path d="M${P2(x-r*0.45,y+r*0.1)} a${n1(r*0.45)} ${n1(r*0.45)} 0 1 1 ${n1(r*0.6)} ${n1(r*0.3)}" stroke="${mix(g.hairColor,'#000000',0.45)}" stroke-width=".6" fill="none" opacity=".6"/>`; }
+      return o; }
+    return '';
     return '';
   }
   if(s===6) return hairFill(u,`M${P2(cx-fW*0.12,yT+hH*0.5)} C${P2(cx-fW*0.2,yT+hH*1.1)} ${P2(cx-fW*0.16,shY+hH*0.5)} ${P2(cx,shY+hH*0.65)} C${P2(cx+fW*0.16,shY+hH*0.5)} ${P2(cx+fW*0.2,yT+hH*1.1)} ${P2(cx+fW*0.12,yT+hH*0.5)} Z`);
@@ -1287,7 +1406,13 @@ function hairFront(g,k){
     o+=hairFill(u,`M${P2(cx-fW*0.32,yT+hH*0.2)} C${P2(cx-fW*0.38,yT-hH*0.06)} ${P2(cx-fW*0.2,yT-hH*0.17)} ${P2(cx,yT-hH*0.17)} C${P2(cx+fW*0.2,yT-hH*0.17)} ${P2(cx+fW*0.38,yT-hH*0.06)} ${P2(cx+fW*0.32,yT+hH*0.2)}${wispy(bez([cx+fW*0.32,yT+hH*0.2],[cx+fW*0.15,yT+hH*0.15],[cx-fW*0.15,yT+hH*0.15],[cx-fW*0.32,yT+hH*0.2],5),hH*0.02)} Z`)+gloss(0.15);
   }
   else if(s===7){
-    [-1,1].forEach(sd=>{ o+=hairFill(u,`M${P2(cx+sd*fW*0.53,yT+hH*0.44)} C${P2(cx+sd*fW*0.58,yT+hH*0.12)} ${P2(cx+sd*fW*0.42,yT-hH*0.02)} ${P2(cx+sd*fW*0.26,yT-hH*0.04)} C${P2(cx+sd*fW*0.34,yT+hH*0.08)} ${P2(cx+sd*fW*0.42,yT+hH*0.18)} ${P2(cx+sd*fW*0.45,yT+hH*0.3)} Z`); });
+    // 정수리는 벗겨지고 옆머리만 부스스하게 남음 (노인)
+    [-1,1].forEach(sd=>{
+      o+=hairSoft(u,`M${P2(cx+sd*fW*0.48,yT+hH*0.56)} C${P2(cx+sd*fW*0.5,yT+hH*0.4)} ${P2(cx+sd*fW*0.47,yT+hH*0.24)} ${P2(cx+sd*fW*0.4,yT+hH*0.14)} C${P2(cx+sd*fW*0.5,yT+hH*0.16)} ${P2(cx+sd*fW*0.57,yT+hH*0.26)} ${P2(cx+sd*fW*0.56,yT+hH*0.36)} C${P2(cx+sd*fW*0.6,yT+hH*0.42)} ${P2(cx+sd*fW*0.58,yT+hH*0.52)} ${P2(cx+sd*fW*0.5,yT+hH*0.6)} Z`);
+      let w=''; for(let i=0;i<4;i++){ const y=yT+hH*(0.2+i*0.09), x=cx+sd*fW*0.55; w+=`M${P2(x,y)} q${n1(sd*fW*0.04)} ${n1(-hH*0.01)} ${n1(sd*fW*0.05)} ${n1(-hH*0.03)} `; }
+      o+=`<path d="${w}" stroke="${hc}" stroke-width="${n1(hH*0.007)}" fill="none" stroke-linecap="round" opacity=".8"/>`; });
+    let st=''; for(let i=-2;i<=2;i++) st+=`M${P2(cx+i*fW*0.1-fW*0.06,yT+hH*0.06+Math.abs(i)*hH*0.03)} Q${P2(cx+i*fW*0.1,yT-hH*0.0+Math.abs(i)*hH*0.02)} ${P2(cx+i*fW*0.12+fW*0.08,yT+hH*0.03+Math.abs(i)*hH*0.03)} `;
+    o+=`<path d="${st}" stroke="${hc}" stroke-width=".6" fill="none" opacity=".45"/>`;
   }
   else if(s>=8){
     const sleek=(hl)=>hairFill(u,cap(hl,hH*0.015,0.38,0,true))+`<path d="M${P2(cx-fW*0.3,yT+hH*(hl+0.02))} Q${P2(cx-fW*0.2,yT-hH*0.02)} ${P2(cx-fW*0.04,yT-hH*0.1)} M${P2(cx+fW*0.3,yT+hH*(hl+0.02))} Q${P2(cx+fW*0.2,yT-hH*0.02)} ${P2(cx+fW*0.04,yT-hH*0.1)} M${P2(cx-fW*0.42,yT+hH*0.22)} Q${P2(cx-fW*0.36,yT+hH*0.02)} ${P2(cx-fW*0.12,yT-hH*0.09)} M${P2(cx+fW*0.42,yT+hH*0.22)} Q${P2(cx+fW*0.36,yT+hH*0.02)} ${P2(cx+fW*0.12,yT-hH*0.09)}" stroke="${dk}" stroke-width=".8" opacity=".45" fill="none"/>`+gloss(hl);
@@ -1306,6 +1431,23 @@ function hairFront(g,k){
     else if(s===15){ o+=sleek(0.14)+bun(cx,yT-hH*0.1,hH*0.06,hH*0.05)+`<rect x="${n1(cx-hH*0.07)}" y="${n1(yT-hH*0.07)}" width="${n1(hH*0.14)}" height="${n1(hH*0.04)}" rx="2" fill="#6E1414"/>`; }
     else if(s===16){ o+=`<path d="M${P2(cx-fW*0.48,yT+hH*0.3)} C${P2(cx-fW*0.5,yT+hH*0.08)} ${P2(cx-fW*0.3,yT-hH*0.0)} ${P2(cx,yT)} C${P2(cx+fW*0.3,yT)} ${P2(cx+fW*0.5,yT+hH*0.08)} ${P2(cx+fW*0.48,yT+hH*0.3)}" fill="none" stroke="${dk}" stroke-width="${n1(hH*0.05)}" opacity=".18"/>`; }
     else if(s===17){ o+=sleek(0.13)+(g.khat&&g.khat!==1?'':bun(cx,yT-hH*0.13,hH*0.065,hH*0.09))+`<path d="M${P2(cx-fW*0.5,yT+hH*0.22)} Q${P2(cx,yT+hH*0.11)} ${P2(cx+fW*0.5,yT+hH*0.22)} L${P2(cx+fW*0.5,yT+hH*0.29)} Q${P2(cx,yT+hH*0.18)} ${P2(cx-fW*0.5,yT+hH*0.29)} Z" fill="#141414" opacity=".88"/><path d="M${P2(cx-fW*0.45,yT+hH*0.24)} Q${P2(cx,yT+hH*0.14)} ${P2(cx+fW*0.45,yT+hH*0.24)}" stroke="#555" stroke-width=".5" stroke-dasharray="1.5 1.5" fill="none"/>`+[-1,1].map(sd=>`<circle cx="${n1(cx+sd*fW*0.47)}" cy="${n1(yT+hH*0.27)}" r="${n1(hH*0.018)}" fill="#D8D2C2" stroke="#555" stroke-width=".5"/>`).join(''); }
+    else if(s===19){ // 곱슬머리: 동글동글한 컬이 머리 윤곽과 헤어라인을 따라 뭉침
+      const th=hH*0.05*v; o+=hairFill(u,cap(0.17,th,0.4,0));
+      const R=hH*0.048; let c='';
+      const curl=(x,y,r)=>`<circle cx="${n1(x)}" cy="${n1(y)}" r="${n1(r)}" fill="url(#hg${u})" stroke="${HAIR_EDGE}" stroke-width=".6"/><path d="M${P2(x-r*0.45,y+r*0.1)} a${n1(r*0.45)} ${n1(r*0.45)} 0 1 1 ${n1(r*0.6)} ${n1(r*0.3)}" stroke="${dk}" stroke-width=".7" fill="none" opacity=".6"/>`;
+      for(let i=0;i<=16;i++){ const a=Math.PI*(1.0+i/16), x=cx+Math.cos(a)*(fW*0.55+th*0.5), y=yT+hH*0.22+Math.sin(a)*(hH*0.31+th); c+=curl(x,y,R*(0.85+0.35*((i*7)%5)/4)); }
+      for(let i=0;i<=11;i++){ const a=Math.PI*(1.08+0.84*i/11), x=cx+Math.cos(a)*fW*0.36, y=yT+hH*0.16+Math.sin(a)*hH*0.2; c+=curl(x,y,R*(0.8+0.3*((i*3)%4)/3)); }
+      for(let i=0;i<=9;i++){ const x=cx-fW*0.44+fW*0.88*i/9, y=yT+hH*(0.17+0.025*((i*5)%3)); c+=curl(x,y,R*0.75); }
+      let sp=''; for(let i=0;i<16;i++){ const a=Math.PI*(1.1+0.8*((i*7)%16)/16), r=0.3+0.6*((i*5)%7)/7, x=cx+Math.cos(a)*fW*0.5*r, y=yT+hH*0.12+Math.sin(a)*hH*0.25*r; sp+=`M${P2(x-R*0.35,y)} a${n1(R*0.35)} ${n1(R*0.35)} 0 1 1 ${n1(R*0.5)} ${n1(R*0.2)} `; }
+      o+=c+`<path d="${sp}" stroke="${dk}" stroke-width=".8" fill="none" opacity=".55"/>`; }
+    else if(s===20){ // 헝클어진 장발: 얼굴 옆으로 흘러내리고 이마에 몇 가닥
+      o+=strands(shY+hH*(F?0.4:0.2),0.06)+hairFill(u,cap(0.15,hH*0.03*v,0.46,0.035,true))+gloss(0.15);
+      [[-0.3,0.26,-1],[0.16,0.22,1],[0.34,0.3,1]].forEach(([x0,L,dir])=>{ const x=cx+fW*x0, y=yT+hH*0.1, w=hH*0.022;
+        o+=hairSoft(u,`M${P2(x-w,y)} Q${P2(x+dir*fW*0.06,y+hH*L*0.55)} ${P2(x+dir*fW*0.05,y+hH*L)} Q${P2(x+dir*fW*0.02,y+hH*L*0.5)} ${P2(x+w,y)} Z`); }); }
+    else if(s===21){ // 짧게 깎은 머리: 두피가 비치는 짧은 털
+      const d=cap(0.16,0,0.36,0);
+      o+=`<defs><pattern id="bz${u}" width="${n1(hH*0.018)}" height="${n1(hH*0.018)}" patternUnits="userSpaceOnUse"><circle cx="${n1(hH*0.005)}" cy="${n1(hH*0.005)}" r="${n1(hH*0.0038)}" fill="${hc}"/><circle cx="${n1(hH*0.014)}" cy="${n1(hH*0.013)}" r="${n1(hH*0.0034)}" fill="${hc}"/></pattern></defs>`;
+      o+=`<path d="${d}" fill="${hc}" opacity=".55"/><path d="${d}" fill="url(#bz${u})"/><path d="${d}" fill="url(#hx${u})" opacity=".5"/>`; }
     else if(s===18){ o+=hairFill(u,cap(0.15,hH*0.012,0.4,0,true))+`<path d="M${P2(cx,yT-hH*0.1)} Q${P2(cx+fW*0.01,yT+hH*0.05)} ${P2(cx,yT+hH*0.14)}" stroke="${dk}" stroke-width="${n1(hH*0.009)}" opacity=".55" fill="none"/>`+gloss(0.15); }
   }
   else if(s===0&&g.p.hairVol>=6){
@@ -1313,7 +1455,7 @@ function hairFront(g,k){
   }
   return o;
 }
-function hairTopExtra(g,hH){ const s=g.hairStyle, hs=({5:0.36,6:0.2,8:0.3,10:0.24,12:0.36,13:0.3,14:0.32,15:0.3,17:0.3})[s]||0.16, ht=[0,0.36,0.26,0.26,0.36,0.3,0.34,0.22][g.khat||0]||0; return hH*Math.max(hs,ht); }
+function hairTopExtra(g,hH){ const s=g.hairStyle, hs=({5:0.36,6:0.2,8:0.3,10:0.24,12:0.36,13:0.3,14:0.32,15:0.3,17:0.3})[s]||0.16, ht=[0,0.36,0.26,0.26,0.36,0.3,0.34,0.22, 0.24,0.44,0.36,0.4,0.42,0.3,0.24,0.3,0.36,0.2,0.32,0.32,0.38,0.4,0.42,0.22,0.3,0.24,0.26,0.4,0.32,0.26][g.khat||0]||0; return hH*Math.max(hs,ht); }
 
 /* ---- 미남·미녀 얼굴: 예쁜 부품 풀에서 눈·눈썹·코·입·얼굴형을 골라 섞음 ----
    비율: 정수리~턱 기준 눈 0.50, 눈썹 0.42, 코끝 0.665, 입 0.77. 눈 폭 = 얼굴폭의 21%, 미간 = 눈 하나 */
@@ -1328,6 +1470,71 @@ function beautyPick(g){
   const FS=F?[{jw:0.64,cw:0.2,jy:0.8},{jw:0.6,cw:0.16,jy:0.82},{jw:0.68,cw:0.23,jy:0.79}]:[{jw:0.86,cw:0.36,jy:0.84},{jw:0.82,cw:0.32,jy:0.85},{jw:0.9,cw:0.4,jy:0.83}];
   const FW=[{jw:0.71,cw:0.24,jy:0.8},{jw:0.68,cw:0.22,jy:0.81},{jw:0.73,cw:0.26,jy:0.8}];
   return Object.assign({eye,face,nose,lip,brow,AS,mwk:[1,1.06,0.94][lip],lk:[1.05,1.18,0.88][lip]},(F&&!AS)?FW[face]:FS[face]);
+}
+/* ---- 나이·살집·마름이 얼굴에 남기는 것: 주름, 처진 볼, 이중턱, 꺼진 볼, 검버섯, 주근깨 ---- */
+function faceAge(c){
+  const {g,u,cx,yT,hH,fW,yE,yB,dx,rx,ry,noseW,nBase,mY,mw,lipT,jw,cwd,jY,cbY,skin,sk,F,AG,FT,TH,ANG,dark}=c;
+  const W=v=>n1(Math.max(0.6,hH*v)), ln=(d,op,w)=>op>0.02?`<path d="${d}" stroke="${sk}" stroke-width="${W(w||0.006)}" fill="none" stroke-linecap="round" opacity="${Math.min(0.75,op).toFixed(2)}"/>`:'';
+  let o='';
+  // 마른 얼굴: 광대 아래가 쑥 꺼지고, 관자놀이가 패이고, 광대뼈가 섬
+  if(TH>0.05) [-1,1].forEach(sd=>{
+    o+=`<ellipse cx="${n1(cx+sd*fW*0.36)}" cy="${n1(cbY+hH*0.11)}" rx="${n1(fW*0.11)}" ry="${n1(hH*0.12)}" fill="url(#sd${u})" opacity="${(0.25+0.55*TH).toFixed(2)}"/>`;
+    o+=`<ellipse cx="${n1(cx+sd*fW*0.44)}" cy="${n1(yE-hH*0.08)}" rx="${n1(fW*0.06)}" ry="${n1(hH*0.07)}" fill="url(#sd${u})" opacity="${(0.35*TH).toFixed(2)}"/>`;
+    o+=ln(`M${P2(cx+sd*fW*0.47,cbY-hH*0.02)} Q${P2(cx+sd*fW*0.34,cbY+hH*0.1)} ${P2(cx+sd*fW*0.36,jY-hH*0.05)}`,0.35*TH,0.006);
+    o+=`<path d="M${P2(cx+sd*fW*0.42,cbY-hH*0.035)} Q${P2(cx+sd*fW*0.3,cbY-hH*0.06)} ${P2(cx+sd*fW*0.2,cbY-hH*0.035)}" stroke="#fff" stroke-width="${W(0.014)}" opacity="${(0.22*TH).toFixed(2)}" fill="none" stroke-linecap="round"/>`;
+  });
+  // 살찐 얼굴: 동그랗게 부푼 볼, 볼 아래 처진 살, 턱 밑 접힘
+  if(FT>0.05) [-1,1].forEach(sd=>{
+    o+=`<ellipse cx="${n1(cx+sd*fW*0.3)}" cy="${n1(cbY+hH*0.06)}" rx="${n1(fW*0.16)}" ry="${n1(hH*0.1)}" fill="url(#hl${u})" opacity="${(0.5*FT).toFixed(2)}"/>`;
+    o+=ln(`M${P2(cx+sd*mw*1.25,mY-hH*0.05)} Q${P2(cx+sd*mw*1.55,mY+hH*0.02)} ${P2(cx+sd*mw*1.3,mY+hH*0.07)}`,0.3*FT,0.006);
+    o+=ln(`M${P2(cx+sd*jw*0.44,jY-hH*0.08)} Q${P2(cx+sd*jw*0.47,jY+hH*0.02)} ${P2(cx+sd*cwd*0.95,yB-hH*0.03)}`,0.35*FT,0.006);
+  });
+  if(FT>0.25) o+=ln(`M${P2(cx-cwd*0.55,yB-hH*0.05)} Q${P2(cx,yB-hH*0.015)} ${P2(cx+cwd*0.55,yB-hH*0.05)}`,0.3*FT,0.006);
+  // 팔자주름: 나이·살·마름 모두 깊어짐
+  const NL=Math.max(AG*0.85,FT*0.38,TH*0.3);
+  [-1,1].forEach(sd=>{ o+=ln(`M${P2(cx+sd*noseW*0.6,nBase-hH*0.035)} Q${P2(cx+sd*(mw*1.35+FT*fW*0.05),mY-hH*0.04)} ${P2(cx+sd*mw*1.2,mY+hH*0.035)}`,NL*0.75,0.008); });
+  if(AG>0.05){
+    // 이마 주름
+    const n=2+Math.round(AG*2.4);
+    for(let i=0;i<n;i++){ const y=yT+hH*(0.2+0.035*i), w=fW*(0.3-0.03*i);
+      o+=ln(`M${P2(cx-w,y+hH*0.006)} Q${P2(cx-w*0.5,y-hH*0.008)} ${P2(cx,y)} T${P2(cx+w,y+hH*0.004)}`,0.2+0.45*AG-i*0.04,0.005); }
+    // 미간 세로 주름
+    if(AG>0.35) [-1,1].forEach(sd=>{ o+=ln(`M${P2(cx+sd*hH*0.012,yE-hH*0.055)} L${P2(cx+sd*hH*0.022,yE-hH*0.1)}`,0.45*AG,0.005); });
+    // 입가에서 턱으로 떨어지는 주름, 처진 턱살
+    if(AG>0.4) [-1,1].forEach(sd=>{
+      o+=ln(`M${P2(cx+sd*mw*1.05,mY+lipT*1.2)} Q${P2(cx+sd*mw*1.15,mY+hH*0.08)} ${P2(cx+sd*mw*0.95,yB-hH*0.035)}`,0.6*(AG-0.3),0.006);
+      o+=ln(`M${P2(cx+sd*jw*0.46,jY-hH*0.07)} Q${P2(cx+sd*jw*0.5,jY+hH*0.03)} ${P2(cx+sd*cwd*0.85,yB-hH*0.01)}`,0.55*(AG-0.3),0.006);
+    });
+    // 입술 위 잔주름
+    if(AG>0.6) for(let i=-2;i<=2;i++){ if(!i) continue; const x=cx+i*mw*0.3; o+=ln(`M${P2(x,mY-lipT*1.2)} l${n1(i*0.3)} ${n1(-hH*0.025)}`,0.4*AG,0.004); }
+    // 검버섯
+    if(AG>0.55){ let h=g.p.faceW*7+g.p.jaw*13+g.p.noseSize*3; for(let i=0;i<5;i++){ h=(h*37+11)%97; const x=cx+(h/97-0.5)*fW*0.75, y=yT+hH*(0.18+((h*7)%23)/23*0.42); if(Math.abs(x-cx)<fW*0.12&&y>yE-hH*0.05) continue;
+      o+=`<ellipse cx="${n1(x)}" cy="${n1(y)}" rx="${n1(hH*(0.008+(h%5)*0.002))}" ry="${n1(hH*0.007)}" fill="${mix(skin,'#6b4226',0.45)}" opacity="${(0.6*AG).toFixed(2)}"/>`; } }
+  }
+  // 주근깨
+  if(g.freck){ let h=g.p.eyeSize*17+g.p.lip*5+3; for(let i=0;i<26;i++){ h=(h*53+29)%211; const sd=i%2?1:-1, x=cx+sd*(fW*0.06+(h/211)*fW*0.3), y=yE+hH*(0.04+((h*3)%41)/41*0.13);
+    o+=`<circle cx="${n1(x)}" cy="${n1(y)}" r="${n1(hH*(0.0045+(h%3)*0.0015))}" fill="${mix(skin,'#8a4a2a',0.5)}" opacity=".55"/>`; } }
+  return o;
+}
+function eyeAge(c){
+  const {u,cx,hH,fW,yE,dx,RX,RY,EY,skin,sk,F,AG,FT,tilt}=c;
+  const ln=(d,op,w)=>op>0.02?`<path d="${d}" stroke="${sk}" stroke-width="${n1(Math.max(0.6,hH*(w||0.005)))}" fill="none" stroke-linecap="round" opacity="${Math.min(0.75,op).toFixed(2)}"/>`:'';
+  let o='';
+  [-1,1].forEach((sd,i)=>{ const ex=cx+sd*dx, rx=RX[i], ry=RY[i], y=yE+EY[i], rot=sd<0?tilt:-tilt;
+    o+=`<g transform="rotate(${n1(rot)} ${n1(ex)} ${n1(y)})">`;
+    // 처진 눈꺼풀: 바깥쪽이 더 덮임
+    if(AG>0.3){ const d=0.25+0.9*(AG-0.3);
+      o+=`<path clip-path="url(#ec${u}${i})" d="M${P2(ex-rx*1.2,y-ry*2.2)} L${P2(ex+rx*1.2,y-ry*2.2)} L${P2(ex+sd*rx*1.1,y-ry*(0.9-d))} Q${P2(ex,y-ry*(1.25-d*0.6))} ${P2(ex-sd*rx*1.1,y-ry*1.2)} Z" fill="${mix(skin,'#000000',0.08)}"/>`;
+      o+=ln(`M${P2(ex-sd*rx*0.6,y-ry*1.45)} Q${P2(ex+sd*rx*0.3,y-ry*(1.6-d*0.5))} ${P2(ex+sd*rx*1.2,y-ry*(0.5-d*0.6))}`,0.55*AG,0.006); }
+    // 눈 밑 처짐(다크서클과 주머니)
+    const bag=Math.max(AG,FT*0.7);
+    if(bag>0.15){ o+=ln(`M${P2(ex-rx*0.85,y+ry*1.35)} Q${P2(ex,y+ry*2.6)} ${P2(ex+rx*0.85,y+ry*1.35)}`,0.45*bag,0.005);
+      if(AG>0.55) o+=ln(`M${P2(ex-rx*0.7,y+ry*2.4)} Q${P2(ex,y+ry*3.4)} ${P2(ex+rx*0.75,y+ry*2.3)}`,0.35*AG,0.0045); }
+    // 눈가 잔주름
+    if(AG>0.2) for(let k=-1;k<=1;k++) o+=ln(`M${P2(ex+sd*rx*1.15,y+k*ry*0.5)} l${n1(sd*rx*0.45)} ${n1(k*ry*0.55)}`,0.5*AG,0.0045);
+    o+=`</g>`;
+  });
+  return o;
 }
 function bzp(a,b,c,d,t){ const u=1-t; return [u*u*u*a[0]+3*u*u*t*b[0]+3*u*t*t*c[0]+t*t*t*d[0],u*u*u*a[1]+3*u*u*t*b[1]+3*u*t*t*c[1]+t*t*t*d[1]]; }
 function beautyEyes(c){
@@ -1432,26 +1639,28 @@ function drawHead(g,u,cx,yT,hH,dead,shY){
   const hc=g.hairColor;
   const EX=dead?'dead':(g.expr||'stern'), ANG=EX==='angry'||EX==='snarl', PR=g.blessed?2:g.pretty?1:0; // PR: 잘생김 단계
   const BV=PR?beautyPick(g):null;
-  const fW=PR?hH*(F?(g.eth==='ea'||g.eth==='sea'?0.68:0.655):0.69)*(0.97+p.faceW*0.006):hH*(0.56+p.faceW*0.022), yB=yT+hH; if(PR&&F) lipC=mix(skin,'#c8344a',dark?0.45:0.68);
+  const AG=PR?0:Math.max(0,Math.min(1,((g.age||30)-38)/42)), bM0=M.build(p.build), FT=PR?0:Math.max(0,Math.min(1,(bM0-1.3)/0.75))*(1-0.45*Math.max(0,Math.min(1,((p.muscle||5)-6)/4))), TH=PR?0:Math.max(0,Math.min(1,(0.92-bM0)/0.36));
+  const fW=PR?hH*(F?(g.eth==='ea'||g.eth==='sea'?0.68:0.655):0.69)*(0.97+p.faceW*0.006):hH*(0.56+p.faceW*0.022)*(1+0.2*FT-0.09*TH), yB=yT+hH; if(PR&&F) lipC=mix(skin,'#c8344a',dark?0.45:0.68);
   const yE=PR?yT+hH*0.5:yT+hH*(0.44+p.eyeHeight*0.013), yE0=yE;
-  const rx=Math.min(hH*(0.05+p.eyeSize*0.0055)*(PR?(F?1.18:1.08):1),fW*(PR?0.19:0.17)), ry=rx*(g.mono?(PR?0.48:0.38):(PR?(F?0.62:0.52):0.5));
+  const rx=Math.min(hH*(0.05+p.eyeSize*0.0055)*(PR?(F?1.18:1.08):1),fW*(PR?0.19:0.17)), ry=rx*(g.mono?(PR?0.48:0.38):(PR?(F?0.62:0.52):0.5))*(1-0.3*FT-0.14*AG);
   const RX=[rx,rx], RY=[ry,ry], EY=[0,0];
   if(g.oddEye){ const k=g.oddEye-1; RX[k]=rx*0.82; RY[k]=ry*0.7; EY[k]=ry*0.25; }
   const dx=PR?fW*0.235:Math.min(fW*(0.15+p.eyeSpace*0.016),fW*0.42-rx), tilt=(p.eyeTilt-5.5)*1.6;
-  const noseLen=hH*(0.06+p.noseSize*0.02), noseW=hH*(0.08+p.noseWidth*0.02);
+  const noseLen=hH*(0.06+p.noseSize*0.02)*(1+0.12*AG+0.1*TH), noseW=hH*(0.08+p.noseWidth*0.02)*(1+0.1*AG+0.2*FT-0.05*TH);
   const nBase=PR?yT+hH*0.665:yE+hH*0.03+noseLen;
   const mY=PR?yT+hH*0.77:Math.min(nBase+hH*(0.055+p.mouthHeight*0.007),yB-hH*0.1);
-  const mw=PR?fW*(F?0.165:0.165)*BV.mwk:fW*(0.12+p.mouthW*0.016), lipT=PR?hH*(F?0.026:0.018)*BV.lk:hH*(0.01+p.lip*0.0045)*(ANG?0.8:1), sm=EX==='calm'?(p.smile-5.5)*hH*0.003:EX==='smirk'?0:ANG?-hH*0.014:-hH*0.006;
-  const jw=PR?fW*BV.jw:fW*(0.56+p.jaw*0.03)*(F?0.94:1), cwd=PR?fW*BV.cw:fW*(0.2+p.jaw*0.02)*(F?0.85:1);
-  const cbY=yT+hH*0.53, jY=PR?yT+hH*BV.jy:yT+hH*(F?0.8:0.78);
+  const mw=PR?fW*(F?0.165:0.165)*BV.mwk:fW*(0.12+p.mouthW*0.016), lipT=PR?hH*(F?0.026:0.018)*BV.lk:hH*(0.01+p.lip*0.0045)*(ANG?0.8:1)*(1-0.4*AG), sm=(AG>0.3?-hH*0.01*AG:0)+EX==='calm'?(p.smile-5.5)*hH*0.003:EX==='smirk'?0:ANG?-hH*0.014:-hH*0.006;
+  const jw=PR?fW*BV.jw:fW*(0.56+p.jaw*0.03)*(F?0.94:1)*(1+0.3*FT+0.1*AG-0.08*TH), cwd=PR?fW*BV.cw:fW*(0.2+p.jaw*0.02)*(F?0.85:1)*(1+0.55*FT-0.12*TH);
+  const cbY=yT+hH*0.53, jY=PR?yT+hH*BV.jy:yT+hH*((F?0.8:0.78)+0.03*FT+0.025*AG);
   let defs=hairDefs(u,hc)+
     `<radialGradient id="fl${u}" cx=".44" cy=".36" r=".72"><stop offset="0" stop-color="#fff" stop-opacity="${dark?0.26:0.2}"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset=".82" stop-color="#000" stop-opacity=".06"/><stop offset="1" stop-color="#000" stop-opacity=".32"/></radialGradient>`+
     `<linearGradient id="fs${u}" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".22"/><stop offset=".28" stop-color="#000" stop-opacity="0"/><stop offset=".72" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".32"/></linearGradient>`+
     softDot(`sd${u}`,'#2a1408',0.28)+softDot(`bl${u}`,'#d9535a',dark?0.16:0.26)+softDot(`hl${u}`,'#ffffff',dark?0.4:0.35)+
     `<linearGradient id="ll${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mix(lipC,'#000000',0.15)}"/><stop offset=".55" stop-color="${lipC}"/><stop offset="1" stop-color="${mix(lipC,'#000000',0.08)}"/></linearGradient>`+
     [-1,1].map((sd,i)=>{ const ex=cx+sd*dx, rx=RX[i], ry=RY[i], yE=yE0+EY[i]; return `<clipPath id="ec${u}${i}"><path d="M${P2(ex-rx,yE)} Q${P2(ex,yE-ry*1.6)} ${P2(ex+rx,yE)} Q${P2(ex,yE+ry*1.3)} ${P2(ex-rx,yE)} Z"/></clipPath>`; }).join('');
-  const side=(sd)=>`C${P2(cx+sd*fW*0.3,yT)} ${P2(cx+sd*fW*0.5,yT+hH*0.12)} ${P2(cx+sd*fW*0.5,yT+hH*0.32)} C${P2(cx+sd*fW*0.5,yT+hH*0.42)} ${P2(cx+sd*fW*0.525,cbY-hH*0.05)} ${P2(cx+sd*fW*0.515,cbY)} C${P2(cx+sd*fW*0.5,cbY+hH*0.12)} ${P2(cx+sd*(jw/2+(F?0:fW*0.02)),jY-hH*0.09)} ${P2(cx+sd*jw/2,jY)} C${P2(cx+sd*(jw/2-jw*(F?0.12:0.03)),jY+hH*(F?0.1:0.08))} ${P2(cx+sd*cwd*(F?0.5:0.62),yB)} ${P2(cx,yB+hH*0.004)}`;
-  const sideR=(sd)=>`C${P2(cx+sd*cwd*(F?0.5:0.62),yB)} ${P2(cx+sd*(jw/2-jw*(F?0.12:0.03)),jY+hH*(F?0.1:0.08))} ${P2(cx+sd*jw/2,jY)} C${P2(cx+sd*(jw/2+(F?0:fW*0.02)),jY-hH*0.09)} ${P2(cx+sd*fW*0.5,cbY+hH*0.12)} ${P2(cx+sd*fW*0.515,cbY)} C${P2(cx+sd*fW*0.525,cbY-hH*0.05)} ${P2(cx+sd*fW*0.5,yT+hH*0.42)} ${P2(cx+sd*fW*0.5,yT+hH*0.32)} C${P2(cx+sd*fW*0.5,yT+hH*0.12)} ${P2(cx+sd*fW*0.3,yT)} ${P2(cx,yT)}`;
+  const CK=0.515+0.06*FT-0.01*TH, CL=0.5+0.09*FT-0.07*TH;
+  const side=(sd)=>`C${P2(cx+sd*fW*0.3,yT)} ${P2(cx+sd*fW*0.5,yT+hH*0.12)} ${P2(cx+sd*fW*0.5,yT+hH*0.32)} C${P2(cx+sd*fW*0.5,yT+hH*0.42)} ${P2(cx+sd*fW*(CK+0.01),cbY-hH*0.05)} ${P2(cx+sd*fW*CK,cbY)} C${P2(cx+sd*fW*CL,cbY+hH*0.12)} ${P2(cx+sd*(jw/2+(F?0:fW*0.02)),jY-hH*0.09)} ${P2(cx+sd*jw/2,jY)} C${P2(cx+sd*(jw/2-jw*(F?0.12:0.03)),jY+hH*(F?0.1:0.08))} ${P2(cx+sd*cwd*(F?0.5:0.62),yB)} ${P2(cx,yB+hH*0.004)}`;
+  const sideR=(sd)=>`C${P2(cx+sd*cwd*(F?0.5:0.62),yB)} ${P2(cx+sd*(jw/2-jw*(F?0.12:0.03)),jY+hH*(F?0.1:0.08))} ${P2(cx+sd*jw/2,jY)} C${P2(cx+sd*(jw/2+(F?0:fW*0.02)),jY-hH*0.09)} ${P2(cx+sd*fW*CL,cbY+hH*0.12)} ${P2(cx+sd*fW*CK,cbY)} C${P2(cx+sd*fW*(CK+0.01),cbY-hH*0.05)} ${P2(cx+sd*fW*0.5,yT+hH*0.42)} ${P2(cx+sd*fW*0.5,yT+hH*0.32)} C${P2(cx+sd*fW*0.5,yT+hH*0.12)} ${P2(cx+sd*fW*0.3,yT)} ${P2(cx,yT)}`;
   const pf=(sd)=>{ const X=v=>cx+sd*fW*v, Y=v=>yT+hH*v; return `C${P2(X(0.3),Y(0))} ${P2(X(0.5),Y(0.12))} ${P2(X(0.5),Y(0.32))} C${P2(X(0.5),Y(0.45))} ${P2(X(0.515),Y(0.52))} ${P2(X(0.5),Y(0.6))}`+(F?` C${P2(X(BV.jw*0.66),Y(BV.jy-0.06))} ${P2(cx+sd*cwd*0.95,yB-hH*0.02)} ${P2(cx,yB)}`:` C${P2(X(0.49),Y(0.7))} ${P2(X(BV.jw*0.5),Y(BV.jy-0.05))} ${P2(X(BV.jw*0.46),Y(BV.jy))} C${P2(X(BV.jw*0.4),Y(BV.jy+0.07))} ${P2(cx+sd*cwd*0.9,yB-hH*0.005)} ${P2(cx,yB)}`); };
   const pfR=(sd)=>{ const X=v=>cx+sd*fW*v, Y=v=>yT+hH*v; return (F?`C${P2(cx+sd*cwd*0.95,yB-hH*0.02)} ${P2(X(BV.jw*0.66),Y(BV.jy-0.06))} ${P2(X(0.5),Y(0.6))}`:`C${P2(cx+sd*cwd*0.9,yB-hH*0.005)} ${P2(X(BV.jw*0.4),Y(BV.jy+0.07))} ${P2(X(BV.jw*0.46),Y(BV.jy))} C${P2(X(BV.jw*0.5),Y(BV.jy-0.05))} ${P2(X(0.49),Y(0.7))} ${P2(X(0.5),Y(0.6))}`)+` C${P2(X(0.515),Y(0.52))} ${P2(X(0.5),Y(0.45))} ${P2(X(0.5),Y(0.32))} C${P2(X(0.5),Y(0.12))} ${P2(X(0.3),Y(0))} ${P2(cx,yT)}`; };
   const face=PR?`M${P2(cx,yT)} ${pf(1)} ${pfR(-1)} Z`:`M${P2(cx,yT)} ${side(1)} ${sideR(-1)} Z`;
@@ -1459,10 +1668,10 @@ function drawHead(g,u,cx,yT,hH,dead,shY){
   let o='';
   // 얼굴 + 입체 음영
   // 귀: 얼굴보다 먼저(뒤에) 그려서 뿌리가 얼굴 윤곽 안으로 들어가게 → 절대 뜨지 않음
-  const erx=hH*(0.058+p.earSize*0.0045), ery=hH*(0.1+p.earSize*0.005), ey=(yE+nBase)/2-hH*0.02, earC=mix(skin,'#b0483c',dark?0.06:0.12);
+  const erx=hH*(0.058+p.earSize*0.0045)*(1+0.12*AG), ery=hH*(0.1+p.earSize*0.005)*(1+0.18*AG), ey=(yE+nBase)/2-hH*0.02, earC=mix(skin,'#b0483c',dark?0.06:0.12);
   defs+=`<linearGradient id="eg${u}" x1="0" x2="1"><stop offset="0" stop-color="${mix(earC,'#000000',0.28)}"/><stop offset=".55" stop-color="${earC}"/><stop offset="1" stop-color="${mix(earC,'#ffffff',0.08)}"/></linearGradient><linearGradient id="eh${u}" x1="1" x2="0"><stop offset="0" stop-color="${mix(earC,'#000000',0.28)}"/><stop offset=".55" stop-color="${earC}"/><stop offset="1" stop-color="${mix(earC,'#ffffff',0.08)}"/></linearGradient>`;
   // 옆머리가 귀를 덮는 머리 모양이면 귀를 아예 그리지 않음 (반쯤 삐져나와 이상해 보이는 문제)
-  const earHid=g.hairStyle===3||g.hairStyle===7||(F&&(g.hairStyle===1||g.hairStyle===2))||[8,9,10,14].includes(g.hairStyle)||g.khat===7;
+  const earHid=g.hairStyle===3||g.hairStyle===7||(F&&(g.hairStyle===1||g.hairStyle===2))||[8,9,10,14,20].includes(g.hairStyle)||[7,14,16,22].includes(g.khat);
   (earHid?[]:[-1,1]).forEach(sd=>{ const xr=cx+sd*fW*0.42, xe=cx+sd*fW*0.5, X=v=>xe+sd*v, Y=v=>ey+v*ery, W2=erx;
     const lw=n1(Math.max(0.7,hH*0.006)), dk=mix(earC,'#2a0e06',0.5), lt=mix(earC,'#ffffff',dark?0.12:0.22);
     // 귓바퀴: 위가 둥글고 넓으며 아래로 갈수록 자연스럽게 좁아져 둥근 귓불로 끝나는 하나의 매끈한 타원형. 안쪽은 얼굴 속에 묻힘
@@ -1482,7 +1691,10 @@ function drawHead(g,u,cx,yT,hH,dead,shY){
     // 귓불: 도톰하고 둥글게
     o+=`<ellipse cx="${n1(X(W2*0.38))}" cy="${n1(Y(0.85))}" rx="${n1(W2*0.26)}" ry="${n1(ery*0.15)}" fill="${lt}" opacity=".22"/>`;
   });
+  if(FT>0.3){ const dc=hH*(0.04+0.08*FT), w2=jw*0.4;
+    o+=`<path class="o" fill="${mix(skin,'#000000',0.06)}" d="M${P2(cx-w2,jY-hH*0.02)} C${P2(cx-w2*0.95,yB+dc*0.6)} ${P2(cx-w2*0.55,yB+dc)} ${P2(cx,yB+dc)} C${P2(cx+w2*0.55,yB+dc)} ${P2(cx+w2*0.95,yB+dc*0.6)} ${P2(cx+w2,jY-hH*0.02)} Z"/>`; }
   o+=`<path class="o" fill="${skin}" d="${face}"/><path fill="url(#fs${u})" d="${face}"/><path fill="url(#fl${u})" d="${face}"/>`;
+  if(!PR) o+=faceAge({g,u,cx,yT,hH,fW,yE,yB,dx,rx,ry,noseW,nBase,mY,mw,lipT,jw,cwd,jY,cbY,skin,sk,F,AG,FT,TH,ANG,dark});
   // 이마 하이라이트, 광대 아래 그림자, 눈두덩 그림자, 턱 아래 그늘 (모두 가장자리가 사라지는 음영)
   o+=`<ellipse cx="${n1(cx-fW*0.06)}" cy="${n1(yT+hH*0.24)}" rx="${n1(fW*0.32)}" ry="${n1(hH*0.12)}" fill="url(#hl${u})"/>`;
   [-1,1].forEach(sd=>{
@@ -1519,13 +1731,14 @@ function drawHead(g,u,cx,yT,hH,dead,shY){
     }
     o+=`</g>`;
     // 눈썹: 안쪽은 굵고 바깥은 가늘어지는 면
-    const bt=hH*(0.012+p.brow*0.0055)*(F?0.85:1)*(PR?1.3:1), tl=(p.browTilt-5.5)*hH*0.004, by=yE0-hH*0.068-ry*0.8;
+    const bt=hH*(0.012+p.brow*0.0055)*(F?0.85:1)*(PR?1.3:1)*(1+0.45*AG), tl=(p.browTilt-5.5)*hH*0.004, by=yE0-hH*0.068-ry*0.8;
     const eb=ANG?hH*0.034:EX==='stern'?hH*0.016:0, xi=cx+sd*(dx-rx*0.95-(ANG?rx*0.15:0)), xo=cx+sd*(dx+rx*1.45), xm=cx+sd*(dx+rx*0.55), yi=by+tl+eb+(EX==='smirk'&&sd>0?-hH*0.015:0), yo=by-tl*0.6+hH*0.008-eb*0.25, ym=Math.min(yi,yo)-hH*(F?0.024:0.016);
     const bc=g.hairStyle===0&&hc==='#D8D4CC'?'#9b968c':mix(hc,'#000000',0.12);
     o+=`<path d="M${P2(xi,yi-bt*0.55)} Q${P2(xm,ym-bt*0.55)} ${P2(xo,yo)} Q${P2(xm,ym+bt*0.45)} ${P2(xi,yi+bt*0.5)} Q${P2(xi-sd*bt*0.3,yi)} ${P2(xi,yi-bt*0.55)} Z" fill="${bc}"/>`;
     o+=`<path d="M${P2(xi+sd*bt*0.2,yi+bt*0.3)} l${n1(sd*bt*0.15)} ${n1(-bt*0.7)} M${P2(xi+sd*bt*0.6,yi+bt*0.3)} l${n1(sd*bt*0.2)} ${n1(-bt*0.7)}" stroke="${mix(bc,'#000000',0.3)}" stroke-width=".6" opacity=".6"/>`;
   });
   if(ANG&&!PR) o+=`<path d="M${P2(cx-hH*0.022,yE0-hH*0.115)} q${n1(hH*0.006)} ${n1(hH*0.03)} ${n1(hH*0.004)} ${n1(hH*0.055)} M${P2(cx+hH*0.022,yE0-hH*0.115)} q${n1(-hH*0.006)} ${n1(hH*0.03)} ${n1(-hH*0.004)} ${n1(hH*0.055)}" stroke="${sk}" stroke-width="${n1(Math.max(0.8,hH*0.008))}" fill="none" opacity=".55"/>`;
+  if(!PR&&!dead) o+=eyeAge({u,cx,hH,fW,yE:yE0,dx,RX,RY,EY,skin,sk,F,AG,FT,tilt});
   // 코: 콧대 그림자 + 코끝 하이라이트 + 콧볼 + 콧구멍
   const flatN=g.eth==='ea'||g.eth==='sea';
   const tipY=nBase-hH*0.028, rT=noseW*0.3, bt0=yE-hH*0.01;
@@ -1539,7 +1752,7 @@ function drawHead(g,u,cx,yT,hH,dead,shY){
   [-1,1].forEach(sd=>{ o+=`<path d="M${P2(cx+sd*rT*0.85,nBase-hH*0.05)} C${P2(cx+sd*noseW*0.56,nBase-hH*0.075)} ${P2(cx+sd*noseW*0.56,nBase+hH*0.006)} ${P2(cx+sd*noseW*0.3,nBase+hH*0.012)}" stroke="${sk}" stroke-width="${n1(hH*0.009)}" fill="none" opacity=".5" stroke-linecap="round"/><path d="M${P2(cx+sd*noseW*0.1,nBase+hH*0.004)} q${n1(sd*noseW*0.1)} ${n1(-hH*0.012)} ${n1(sd*noseW*0.2)} ${n1(-hH*0.002)}" stroke="#241008" stroke-width="${n1(hH*0.011)}" opacity=".55" fill="none" stroke-linecap="round"/>`; });
   }
   // 수염
-  const Lb=[0,0,hH*0.05,hH*0.13,hH*0.55,0][g.beard];
+  const Lb=[0,0,hH*0.05,hH*0.13,hH*0.55,0,0,0][g.beard]||0;
   const upY=yE+hH*0.14, inY=mY-hH*0.055;
   if(g.beard>=1&&g.beard<=4){
     const bp=`M${P2(cx-fW*0.49,upY)} C${P2(cx-fW*0.5,yT+hH*0.6)} ${P2(cx-jw*0.5,yT+hH*0.76)} ${P2(cx-jw*0.48,yT+hH*0.86)} C${P2(cx-jw*0.42,yB+Lb*0.5)} ${P2(cx-cwd*0.7,yB+Lb)} ${P2(cx,yB+Lb*1.15)} C${P2(cx+cwd*0.7,yB+Lb)} ${P2(cx+jw*0.42,yB+Lb*0.5)} ${P2(cx+jw*0.48,yT+hH*0.86)} C${P2(cx+jw*0.5,yT+hH*0.76)} ${P2(cx+fW*0.5,yT+hH*0.6)} ${P2(cx+fW*0.49,upY)} L${P2(cx+fW*0.4,upY+hH*0.05)} C${P2(cx+fW*0.3,mY-hH*0.03)} ${P2(cx+mw*1.5,inY)} ${P2(cx+mw*1.1,inY)} Q${P2(cx,inY-hH*0.012)} ${P2(cx-mw*1.1,inY)} C${P2(cx-mw*1.5,inY)} ${P2(cx-fW*0.3,mY-hH*0.03)} ${P2(cx-fW*0.4,upY+hH*0.05)} Z`;
@@ -1549,8 +1762,15 @@ function drawHead(g,u,cx,yT,hH,dead,shY){
       o+=hairFill(u,bp)+`<path d="${st}" stroke="${mix(hc,'#000000',0.45)}" stroke-width=".8" opacity=".5" fill="none"/>`;
     }
   }
-  if(g.beard>=2) o+=`<path class="o" fill="url(#hg${u})" d="M${P2(cx,mY-lipT*1.1-hH*0.03)} C${P2(cx+mw*0.4,mY-lipT*1.1-hH*0.06)} ${P2(cx+mw*1.0,mY-lipT*1.1-hH*0.04)} ${P2(cx+mw*1.25,mY-lipT*0.4)} C${P2(cx+mw*0.9,mY-lipT*1.1)} ${P2(cx+mw*0.4,mY-lipT*1.1-hH*0.01)} ${P2(cx,mY-lipT*1.05)} C${P2(cx-mw*0.4,mY-lipT*1.1-hH*0.01)} ${P2(cx-mw*0.9,mY-lipT*1.1)} ${P2(cx-mw*1.25,mY-lipT*0.4)} C${P2(cx-mw*1.0,mY-lipT*1.1-hH*0.04)} ${P2(cx-mw*0.4,mY-lipT*1.1-hH*0.06)} ${P2(cx,mY-lipT*1.1-hH*0.03)} Z"/>`;
-  if(g.beard>=2) o+=`<ellipse cx="${n1(cx)}" cy="${n1(mY+lipT*0.9)}" rx="${n1(mw*1.02)}" ry="${n1(lipT*1.7)}" fill="${mix(hc,'#000000',0.45)}" opacity=".55"/>`; // 수염 속 입 주변 살짝 드러남
+  if(g.beard===7){ const L7=hH*0.42, ty=yB+L7;
+    o+=hairFill(u,`M${P2(cx-jw*0.36,jY-hH*0.06)} C${P2(cx-jw*0.34,jY+hH*0.08)} ${P2(cx-cwd*0.7,yB+L7*0.3)} ${P2(cx-hH*0.03,ty)} L${P2(cx+hH*0.03,ty)} C${P2(cx+cwd*0.7,yB+L7*0.3)} ${P2(cx+jw*0.34,jY+hH*0.08)} ${P2(cx+jw*0.36,jY-hH*0.06)} C${P2(cx+mw*1.3,mY+lipT*2.6)} ${P2(cx-mw*1.3,mY+lipT*2.6)} ${P2(cx-jw*0.36,jY-hH*0.06)} Z`);
+    let st=''; for(let i=-3;i<=3;i++) st+=`M${P2(cx+i*cwd*0.22,mY+lipT*3)} Q${P2(cx+i*cwd*0.18,yB+L7*0.4)} ${P2(cx+i*hH*0.008,ty-hH*0.03)} `;
+    o+=`<path d="${st}" stroke="${mix(hc,'#000000',0.35)}" stroke-width=".7" opacity=".45" fill="none"/>`; }
+  if(g.beard===6){ // 팔자 콧수염(입꼬리 아래로 길게 늘어짐) + 턱 끝 염소수염
+    [-1,1].forEach(sd=>{ o+=hairFill(u,`M${P2(cx,mY-lipT*1.2-hH*0.02)} C${P2(cx+sd*mw*0.6,mY-lipT*1.4-hH*0.03)} ${P2(cx+sd*mw*1.2,mY-lipT*0.6)} ${P2(cx+sd*mw*1.3,mY+hH*0.05)} C${P2(cx+sd*mw*1.38,mY+hH*0.12)} ${P2(cx+sd*mw*1.3,yB+hH*0.02)} ${P2(cx+sd*mw*1.22,yB+hH*0.1)} C${P2(cx+sd*mw*1.15,yB)} ${P2(cx+sd*mw*1.12,mY+hH*0.08)} ${P2(cx+sd*mw*1.02,mY+hH*0.02)} C${P2(cx+sd*mw*0.9,mY-lipT*0.7)} ${P2(cx+sd*mw*0.4,mY-lipT*1.1)} ${P2(cx,mY-lipT*1.0)} Z`); });
+    o+=hairFill(u,`M${P2(cx-cwd*0.35,yB-hH*0.05)} Q${P2(cx,yB-hH*0.02)} ${P2(cx+cwd*0.35,yB-hH*0.05)} L${P2(cx+hH*0.02,yB+hH*0.14)} L${P2(cx-hH*0.02,yB+hH*0.14)} Z`); }
+  if(g.beard>=2&&g.beard!==6) o+=`<path class="o" fill="url(#hg${u})" d="M${P2(cx,mY-lipT*1.1-hH*0.03)} C${P2(cx+mw*0.4,mY-lipT*1.1-hH*0.06)} ${P2(cx+mw*1.0,mY-lipT*1.1-hH*0.04)} ${P2(cx+mw*1.25,mY-lipT*0.4)} C${P2(cx+mw*0.9,mY-lipT*1.1)} ${P2(cx+mw*0.4,mY-lipT*1.1-hH*0.01)} ${P2(cx,mY-lipT*1.05)} C${P2(cx-mw*0.4,mY-lipT*1.1-hH*0.01)} ${P2(cx-mw*0.9,mY-lipT*1.1)} ${P2(cx-mw*1.25,mY-lipT*0.4)} C${P2(cx-mw*1.0,mY-lipT*1.1-hH*0.04)} ${P2(cx-mw*0.4,mY-lipT*1.1-hH*0.06)} ${P2(cx,mY-lipT*1.1-hH*0.03)} Z"/>`;
+  if(g.beard>=2&&g.beard<=4) o+=`<ellipse cx="${n1(cx)}" cy="${n1(mY+lipT*0.9)}" rx="${n1(mw*1.02)}" ry="${n1(lipT*1.7)}" fill="${mix(hc,'#000000',0.45)}" opacity=".55"/>`; // 수염 속 입 주변 살짝 드러남
   // 입술: 큐피드 활 모양 윗입술 + 도톰한 아랫입술
   if(PR) o+=beautyLips({cx,hH,fW,mY,mw,lipT,F,BV,skin,u,EX,dead});
   const x1=cx-mw, x2=cx+mw, cyc=mY-sm, cL=cyc+(EX==='smirk'?hH*0.004:0), cR=cyc-(EX==='smirk'?hH*0.018:0);
@@ -1564,6 +1784,7 @@ function drawHead(g,u,cx,yT,hH,dead,shY){
     o+=`<path d="M${P2(ox1,mY)} Q${P2(cx,top-lipT*0.5)} ${P2(ox2,mY)} Q${P2(cx,bot+lipT*0.6)} ${P2(ox1,mY)} Z" fill="#2a0d0b"/>`;
     o+=`<path d="M${P2(ox1+mw*0.06,mY-lipT*0.02)} Q${P2(cx,top-lipT*0.45)} ${P2(ox2-mw*0.06,mY-lipT*0.02)} L${P2(ox2-mw*0.14,mY+lipT*0.5)} Q${P2(cx,mY+lipT*0.62)} ${P2(ox1+mw*0.14,mY+lipT*0.5)} Z" fill="#ece3d2"/>`;
     let tl=''; for(let q=-2;q<=2;q++){ const x=cx+q*mw*0.22; tl+=`M${P2(x,mY-lipT*0.3)} L${P2(x,mY+lipT*0.55)} `; }
+    if(AG>0.55) [-1,0.9].forEach(q=>{ const x=cx+q*mw*0.33; o+=`<rect x="${n1(x-mw*0.1)}" y="${n1(mY-lipT*0.35)}" width="${n1(mw*0.2)}" height="${n1(lipT*0.95)}" fill="#2a0d0b"/>`; });
     o+=`<path d="${tl}" stroke="#b9ad98" stroke-width=".7"/><path d="M${P2(ox1+mw*0.18,bot-lipT*0.2)} Q${P2(cx,bot+lipT*0.1)} ${P2(ox2-mw*0.18,bot-lipT*0.2)}" stroke="#d9cfbd" stroke-width="${n1(lipT*0.35)}" fill="none" opacity=".8"/>`;
   }
   }
@@ -1842,7 +2063,7 @@ function drawPortrait(h,dead){
   const skin=SKIN[g.skin-1], skinS=mix(skin,'#000000',0.14), sk=mix(skin,'#2a1408',0.32);
   const hH=112*(0.92+p.faceLen*0.016), yT=42, chinY=yT+hH, shY=chinY+hH*0.26;
   const hd=drawHead(g,u,cx,yT,hH,dead,shY);
-  const nW=hH*0.36*(0.72+0.28*Math.min(1.6,M.build(p.build)))*(F?0.76:1), SW=(80+(p.shoulder-5.5)*5)*(F?0.86:1);
+  const nW=hH*0.36*(0.72+0.28*Math.min(1.6,M.build(p.build)))*(F?0.76:1)*(1+0.35*Math.max(0,Math.min(1,(M.build(p.build)-1.3)/0.75))), SW=(80+(p.shoulder-5.5)*5)*(F?0.86:1);
   const bust=`M${cx-nW*0.62} ${shY-6} C${cx-nW*0.9} ${shY+2} ${cx-SW*0.55} ${shY+2} ${cx-SW*0.86} ${shY+12} C${cx-SW*1.02} ${shY+18} ${cx-SW*1.08} ${shY+34} ${cx-SW*1.1} ${shY+52} L${cx-SW-14} 252 L${cx+SW+14} 252 L${cx+SW*1.1} ${shY+52} C${cx+SW*1.08} ${shY+34} ${cx+SW*1.02} ${shY+18} ${cx+SW*0.86} ${shY+12} C${cx+SW*0.55} ${shY+2} ${cx+nW*0.9} ${shY+2} ${cx+nW*0.62} ${shY-6} Z`;
   const topCol=ou._tc||skin;
   const uw=g.uw||'#1E1E22';
@@ -2014,18 +2235,20 @@ function dims3(h){
   const bM=M.build(p.build), aM=M.arm(p.armLen), lM=M.leg(p.legLen), hM=M.head(p.headSize), sM=M.sh(p.shoulder), nM=M.neck(p.neck);
   const rawL=0.48*lM, rawT=0.29, rawN=0.042*nM, rawH=0.138*hM*(0.92+p.faceLen*0.016), S=rawL+rawT+rawN+rawH;
   const legL=rawL/S, torso=rawT/S, neckL=rawN/S, hH=rawH/S;
-  const musc=Math.max(0,Math.min(1.15,((p.muscle||5)-1.5)/6))*(F?0.5:1)*(bM<0.7?0.6:1);
+  // 살집: 체격은 큰데 근육이 적으면 배가 나오고 팔다리·목이 두꺼워짐
+  const fat=Math.max(0,Math.min(1,(bM-1.3)/0.75))*(1-0.45*Math.max(0,Math.min(1,((p.muscle||5)-6)/4)));
+  const musc=Math.max(0,Math.min(1.15,((p.muscle||5)-1.5)/6))*(F?0.5:1)*(bM<0.7?0.6:1)*(1-0.7*fat);
   const MT=musc+Math.min(2.4,(g.bulk||0)*0.36)*(F?0.6:1), MX=Math.max(0,MT-1), m=Math.min(MT,1.5), mb=Math.min(MT,2.4);
   const SWf=0.255*sM*(F?0.86:1)*(1+0.12*musc+0.16*MX);
   const chestW=Math.min(SWf*0.97,SWf*Math.min(1.1+0.06*MX,0.82*(0.45+0.55*bM)*(1+(F?0:0.1)*musc+0.08*MX))*(F?0.92:1));
   const chestW2=Math.min(chestW,SWf*(F?0.8:0.8+0.03*Math.min(MX,1)));
   const hipW0=(F?0.2:0.172)*(0.72+0.28*bM)*(1+0.05*Math.min(MT,2)), waistW=F?Math.min(chestW2*0.82,hipW0*(0.6+0.08*bM)):Math.min(chestW2*0.8,hipW0*(0.84+0.06*bM)*(1+0.04*MX));
   const bL=0.62+0.38*Math.min(bM,1.7); // 체격이 커도 팔다리가 풍선처럼 부풀지 않게
-  const wa=Math.min(0.085,0.05*bL*(F?0.84:1)*(1+0.24*musc+0.14*MX)), ua=0.17*aM, fa=0.15*aM;
-  const t0=Math.min(0.105,0.075*bL*(F?0.98:1)*(1+0.12*musc+0.08*MX));
-  const nW=Math.min(0.1,(0.06*bL+0.017)*(F?0.8:1)*(1+0.22*MX));
-  const hipW=Math.max(hipW0,t0*2.45); // 골반은 허벅지 두 개를 담을 만큼은 넓게
-  return {F,bM,legL,torso,neckL,hH,musc,MT,MX,m,mb,SWf,SW:SWf/2,chestW:chestW2,waistW,hipW,wa,ua,fa,t0,nW};
+  const wa=Math.min(0.085+0.015*fat,0.05*bL*(F?0.84:1)*(1+0.24*musc+0.14*MX)*(1+0.3*fat)), ua=0.17*aM, fa=0.15*aM;
+  const t0=Math.min(0.105+0.02*fat,0.075*bL*(F?0.98:1)*(1+0.12*musc+0.08*MX)*(1+0.25*fat));
+  const nW=Math.min(0.1+0.02*fat,(0.06*bL+0.017)*(F?0.8:1)*(1+0.22*MX)*(1+0.3*fat));
+  const hipW=Math.max(hipW0*(1+0.22*fat),t0*2.45); // 골반은 허벅지 두 개를 담을 만큼은 넓게
+  return {fat,F,bM,legL,torso,neckL,hH,musc,MT,MX,m,mb,SWf,SW:SWf/2,chestW:chestW2*(1+0.08*fat),waistW:Math.max(waistW,Math.min(chestW2*1.15,waistW*(1+0.85*fat))),hipW,wa,ua,fa,t0,nW};
 }
 /* ---- 로프트(단면을 이어 붙인 몸 형태): 앞뒤 납작한 타원 단면 + 근육 굴곡 ---- */
 // 단조 3차 보간(튀지 않고 매끈하게)
@@ -2106,12 +2329,13 @@ function torsoCtrl(D,g){
     {t:0.115, w:nw+(shw-nw)*(F?0.68:0.75), f:T*(0.145+0.006*m), b:T*0.15, z:-T*0.004},
     {t:0.16, w:shw*0.96, f:T*(0.158+0.008*m), b:T*0.158, n:2.1},
     {t:0.22, w:Math.max(cw*1.0,shw*0.86), f:T*(F?0.165:0.166+0.006*m), b:T*0.17, ps:F?0.2:0.25, pk:F?bs*0.35:T*(0.014+0.02*m), gv:F?bs*0.06:T*(0.006+0.008*m), n:2.1},
-    {t:0.3, w:cw*(1+(F?0:0.04*m+0.05*X)), f:T*(F?0.16:0.168+0.006*m), b:T*0.165, ps:F?0.21:0.25, pk:F?bs*0.95:T*(0.022+0.024*m), gv:F?bs*0.14:T*(0.008+0.01*m), n:F?2.4:2.1},
+    {t:0.3, w:cw*(1+(F?0:0.04*m+0.05*X)), f:T*(F?0.16:0.168+0.006*m), b:T*0.165, ps:F?0.21:0.25, pk:F?bs*0.95:T*(0.022+0.024*m+0.03*D.fat), gv:F?bs*0.14:T*(0.008+0.01*m), n:F?2.4:2.1},
     {t:0.36, w:cw*(F?0.88:0.95+0.03*X), f:T*(F?0.15:0.163), b:T*0.155, ps:F?0.2:0.25, pk:F?bs*0.55:T*0.012*m, gv:F?0:T*0.008*m},
     {t:0.41, w:cw*(F?0.84:0.93), f:T*0.145, b:T*0.15, pk:F?0:T*0.004*m},
-    {t:0.56, w:ww, f:T*0.14, b:T*0.125, gv:F?0:T*0.012*m},
-    {t:0.74, w:F?ww*0.6+hw*0.4:(ww+hw)/2*1.02, f:T*0.145, b:T*0.135},
-    {t:0.86, w:hw*(F?1.04:1.0), f:T*0.15, b:T*(F?0.16:0.145), pg:T*(F?0.05:0.035)},
+    {t:0.48, w:cw*(F?0.86:0.93)*(1-0.05*D.fat)+ww*0.08*D.fat, f:T*(0.145+0.05*D.fat), b:T*(0.15+0.01*D.fat)},
+    {t:0.6, w:ww, f:T*(0.14+0.12*D.fat), b:T*(0.125+0.025*D.fat), gv:F?0:T*0.012*m},
+    {t:0.74, w:(F?ww*0.6+hw*0.4:(ww+hw)/2*1.02)*(1+0.04*D.fat), f:T*(0.145+0.11*D.fat), b:T*(0.135+0.02*D.fat)},
+    {t:0.86, w:hw*(F?1.04:1.0), f:T*(0.15+0.05*D.fat), b:T*(F?0.16:0.145), pg:T*(F?0.05:0.035)},
     {t:0.96, w:hw*0.97, f:T*0.13, b:T*(F?0.17:0.15), pg:T*(F?0.065:0.05)},
     {t:1.04, w:hw*0.84, f:T*0.11, b:T*0.12},
     {t:1.1, w:hw*0.4, f:T*0.06, b:T*0.07}
@@ -2592,7 +2816,7 @@ function packDuel(h,letter){
     g.armPose.join('.'),g.legPose.join('.'),
     (g.armOk[0]?1:0)+''+(g.armOk[1]?1:0)+(g.legOk[0]?1:0)+(g.legOk[1]?1:0),g.blessed?1:g.pretty?2:0,
     [ou.top,ou.bottom,ou.boots,ou.fur,ou.helm].map(x=>Math.max(0,Math.min(35,x|0)).toString(36)).join(''),wk,
-    STK.map(k=>h.st[k]).join('.'),h.maxhp,letter||'',h.flag||'',g.sex==='f'?1:0,g.mono?1:0,hx(g.uw||'1E1E22'),Math.round((g.bust||0)*100),g.eth||'eu',g.expr||'stern',g.oddEye||0,hx(g.eye2||''),g.bulk||0,g.khat||0];
+    STK.map(k=>h.st[k]).join('.'),h.maxhp,letter||'',h.flag||'',g.sex==='f'?1:0,g.mono?1:0,hx(g.uw||'1E1E22'),Math.round((g.bust||0)*100),g.eth||'eu',g.expr||'stern',g.oddEye||0,hx(g.eye2||''),g.bulk||0,g.khat||0,g.age||30,g.freck?1:0];
   return b64(JSON.stringify(o));
 }
 function unpackDuel(str){
@@ -2603,9 +2827,10 @@ function unpackDuel(str){
     const sv=String(stv).split('.'), st={}; STK.forEach((key,i)=>{ const v=+sv[i]; st[key]=cl(Number.isFinite(v)&&v>0?v:(key==='int'?50:1),1,key==='hp'?4000:key==='int'?100:199); });
     const col=c=>/^[0-9a-fA-F]{6}$/.test(c)?'#'+c:'#888888';
     const pose=(x,lo,hi)=>String(x).split('.').slice(0,2).map(v=>cl(+v||lo,lo,hi));
-    const g={p,blessed:+bl===1,pretty:+bl===2,cm:cl(+cm||175,20,1000),skin:cl(+skin||5,1,10),eyeColor:col(ec),hairColor:col(hc),hairStyle:cl(+hs||0,0,18),beard:cl(+bd||0,0,5),scar:!!scar,tattoo:cl(+tat||0,0,3),
+    const g={p,blessed:+bl===1,pretty:+bl===2,cm:cl(+cm||175,20,1000),skin:cl(+skin||5,1,10),eyeColor:col(ec),hairColor:col(hc),hairStyle:cl(+hs||0,0,21),beard:cl(+bd||0,0,7),scar:!!scar,tattoo:cl(+tat||0,0,3),
       tunic:col(tun),pants:col(pan),furC:col(fur),armPose:pose(ap,7,20),legPose:pose(lp,2,7),armOk:[ok[0]==='1',ok[1]==='1'],legOk:[ok[2]==='1',ok[3]==='1'],
-      sex:o[26]?'f':'m',mono:!!o[27],uw:col(o[28]||'1E1E22'),bust:o[26]?Math.min(1.3,Math.max(0.8,(+o[29]||100)/100)):0,eth:ETH[o[30]]?o[30]:'eu',expr:['stern','angry','snarl','smirk','calm'].includes(o[31])?o[31]:'stern',oddEye:cl(+o[32]||0,0,2),eye2:/^[0-9a-fA-F]{6}$/.test(o[33]||'')?'#'+o[33]:'',bulk:Math.max(0,Math.min(8,+o[34]||0)),khat:cl(+o[35]||0,0,7)};
+      sex:o[26]?'f':'m',mono:!!o[27],uw:col(o[28]||'1E1E22'),bust:o[26]?Math.min(1.3,Math.max(0.8,(+o[29]||100)/100)):0,eth:ETH[o[30]]?o[30]:'eu',expr:['stern','angry','snarl','smirk','calm'].includes(o[31])?o[31]:'stern',oddEye:cl(+o[32]||0,0,2),eye2:/^[0-9a-fA-F]{6}$/.test(o[33]||'')?'#'+o[33]:'',bulk:Math.max(0,Math.min(8,+o[34]||0)),khat:cl(+o[35]||0,0,29),age:cl(+o[36]||30,18,99),freck:o[37]?1:0};
+    if(g.beard>7) g.beard=0;
     if(g.sex==='f') g.beard=0;
     const o36=i=>parseInt(String(of)[i]||'0',36)||0, gid=(sl,i)=>{ const v=o36(i); return gearOf(sl,v)?v:0; };
     const outfit={top:gid('top',0),bottom:gid('bottom',1),boots:cl(o36(2),0,1),fur:cl(o36(3),0,1),helm:gid('helm',4)};
