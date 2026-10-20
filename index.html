@@ -519,6 +519,7 @@ const START_LINES=['{a} · {b}, 결투 개시','{a}와 {b}, 서로의 목을 노
 const WIN_LINES=['살아남았다. 오늘은.','적의 피로 목을 축였다.','까마귀들이 너에게 감사한다.','발할라는 오늘도 너를 거절했다.','놈의 묘비에 네 이름이 새겨질 것이다.','오딘이 고개를 끄덕였다.','또 하나의 해골을 술잔으로.','네 도끼는 아직 배고프다.','무릎 꿇은 건 놈이었다.','전장은 강한 자의 것이다.','적의 가문이 오늘 밤 울 것이다.','피 묻은 손으로 승리를 쥐었다.'];
 const LOSE_LINES=['묘지에 이름이 새겨졌다. 까마귀들이 감사해한다.','발할라의 문이 열렸다. 들어가라.','오늘 까마귀가 배부르다. 네 덕분이다.','땅이 네 피를 마셨다.','전사는 쓰러졌다. 전설은… 글쎄.','적의 술잔이 될 운명이었다.','눈을 감아라. 싸움은 끝났다.','오딘이 고개를 돌렸다.','네 이름은 묘비에만 남는다.','무릎 꿇은 채 숨이 멎었다.','뼈는 늑대가, 이름은 묘지가 가져갔다.','다음 생엔 더 굶주려 태어나라.'];
 function fight(A,B){
+  clampSt(A); clampSt(B); A.hp=Math.min(A.hp,A.maxhp); B.hp=Math.min(B.hp,B.maxhp); // 조작되거나 너무 커진 능력치도 결투에선 상한까지만
   const log=[];
   const inj=x=>x.inj||(x.inj={stun:0,acc:0,dmg:1,leg:0,bleed:0});
   const push=(o)=>log.push(Object.assign({text:'',kind:'',by:null,target:null,word:'',dmg:0},o,{hpA:Math.max(0,A.hp),hpB:Math.max(0,B.hp),sA:Math.round(Math.max(0,A.stam)/A.maxSta*100),sB:Math.round(Math.max(0,B.stam)/B.maxSta*100)}));
@@ -992,9 +993,13 @@ function newHero(){
   return {id:uid(),name:nm[0],flag:nm[1],nick:makeNick(g),g,st:c.st,cm:c.cm,kg:c.kg,hp:c.st.hp,maxhp:c.st.hp,wins:0,weapon:null,outfit:{top:0,bottom:0,boots:0,fur:0,helm:0},tags};
 }
 // 이길 때마다 고정값으로 성장. 연승 보너스: 5연승마다 오름폭 +2, 5·10·15…연승 달성 시 전 능력치 +5
+// 능력치 상한: 결투 링크로 오가는 값과 같게 (체력 4000, 지능 100, 나머지 199). 상한에 가까울수록 덜 오름
+const STCAP=k=>k==='hp'?4000:k==='int'?100:199;
+function clampSt(h){ if(!h||!h.st) return h; Object.keys(h.st).forEach(k=>{ const v=+h.st[k]; h.st[k]=Math.max(1,Math.min(STCAP(k),Number.isFinite(v)?Math.round(v):1)); });
+  h.maxhp=Math.max(1,Math.min(4000,Math.round(+h.maxhp||h.st.hp))); if(h.hp!=null) h.hp=Math.min(h.hp,h.maxhp); return h; }
 function grow(h){
-  const gain={}, streak=h.wins+1, bonus=Math.floor(streak/5)*2;
-  const add=(k,v)=>{ const nv=Math.min(k==='int'?100:9999,Math.round(h.st[k]+v)); gain[k]=(gain[k]||0)+nv-h.st[k]; h.st[k]=nv; };
+  const gain={}, streak=h.wins+1, bonus=Math.min(6,Math.floor(streak/5)*2);
+  const add=(k,v)=>{ const cap=STCAP(k), soft=Math.max(0.15,1-h.st[k]/cap), nv=Math.min(cap,Math.round(h.st[k]+Math.max(v>0?1:0,v*soft))); gain[k]=(gain[k]||0)+nv-h.st[k]; h.st[k]=nv; };
   const keys=SKEYS.filter(k=>k!=='hp'&&k!=='luck'&&k!=='str').sort(()=>Math.random()-0.5).slice(0,6);
   add('str',RI(3,5)+bonus);
   keys.forEach(k=>add(k,RI(2,4)+bonus));
@@ -2648,7 +2653,7 @@ if(!Array.isArray(S.handledDuels)) S.handledDuels=[];
 let intMigrated=false;
 const ensureInt=h=>{ if(h&&h.st&&!Number.isFinite(h.st.int)){ h.st.int=RI(1,100); intMigrated=true; } if(h&&h.st&&h.st.int<=10&&Array.isArray(h.tags)&&!h.tags.some(t=>t[0]==='야수 지능 · 네발 보행')) h.tags.push(['야수 지능 · 네발 보행',1]); };
 if(S.hero&&S.hero.weapon&&S.hero.weapon.kind==='tank'){ S.hero.weapon=null; saveState(); }
-ensureInt(S.hero); if(Array.isArray(S.board)) S.board.forEach(ensureInt); if(intMigrated) saveState();
+clampSt(S.hero); ensureInt(S.hero); if(Array.isArray(S.board)) S.board.forEach(ensureInt); if(intMigrated) saveState();
 if(!S.flag&&S.hero&&S.hero.flag&&FLAGS.includes(S.hero.flag)) S.flag=S.hero.flag;
 let view=S.hero?'card':'home';
 let ui={shop:false,rolling:false,rep:null,code:'',timer:null,detail:null,msg:''};
