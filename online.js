@@ -222,7 +222,7 @@
     const rep={me:clone(me),foe:opponent,log:isOwner?flipLog(result.log):result.log,
       win:won,draw:isDraw,sparedMe:spared?1:0,broke:null,gain:null,fled:result.fled?(isOwner?(result.fled==='A'?'B':'A'):result.fled):null};
     if(isDraw||spared){ me.hp=me.maxhp; sync(me,true); }
-    else if(won){ rep.gain=grow(me,opponent); rep.gold=typeof winGold==='function'?winGold(me):0; if(theyFled) rep.plunder=null; else if(isRecipient&&show){ rep.mercy='ask'; rep.duelId=id; } else rep.plunder=typeof plunderHelm==='function'?plunderHelm(me,opponent):null; rep.wins=me.wins; sync(me,true); }
+    else if(won){ rep.gain=grow(me,opponent); rep.gold=typeof winGold==='function'?winGold(me):0; if(theyFled) rep.plunder=null; else if(isRecipient&&show){ rep.mercy='ask'; rep.duelId=id; } else { rep.plunder=typeof plunderHelm==='function'?plunderHelm(me,opponent):null; if(isOwner) markDead(data.recipientHeroId,id); } rep.wins=me.wins; sync(me,true); }
     else if(iFled&&typeof cowardize==='function'){ cowardize(me); sync(me,true); }
     else{
       const last=result.log[result.log.length-1];
@@ -448,6 +448,14 @@
   async function mercy(id,spare){
     try{ const db=await ready; await db.collection('duels').doc(id).update({spared:!!spare}); }
     catch(error){ console.warn('자비 기록 실패',error&&error.code||error); }
+    if(!spare){ try{ const db=await ready, shot=await db.collection('duels').doc(id).get(); const d=shot.exists&&shot.data(); if(d) markDead(d.ownerHeroId,id); }catch(_){} }
+  }
+  // 내가 죽인 상대를 명예의 전당에서 바로 '전사'로 표시 (상대가 게임을 안 열어도)
+  async function markDead(heroId,duelId){
+    if(!heroId||!duelId) return;
+    try{ const db=await ready; await db.collection('heroes2').doc(heroId).update({alive:false,killedIn:duelId,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}); }
+    catch(error){ console.warn('상대 전사 표시 실패',error&&error.code||error); }
+    if(ui.board){ const e=ui.board.find(x=>x.id===heroId); if(e) e.alive=false; }
   }
   window.DuelOnline={prepareKakao,send,open,accept,decline,cancel,checkDuels,isLocked,pushHero,loadBoard,redeem,mercy,sendTo,declineId,setNoInvite,unblockAll};
   if(S.hero) pushHero(S.hero,true);
@@ -473,5 +481,11 @@
   }
   setInterval(()=>{ watch(); if(duelReady&&view!=='battle'&&!ui.duelId&&S.pendingDuel){ checkDuels(); } if(!S.pendingDuel) duelReady=false; },2000);
   watch(); watchInbox();
+  // 예전에 내가 죽인 상대들도 한 번 훑어서 명예의 전당에 '전사'로 표시
+  setTimeout(async()=>{ if(S.retroDead2) return; try{ const db=await ready, uid=firebase.auth().currentUser.uid;
+    for(const id of (S.handledDuels||[]).slice(-40)){ try{ const sh=await db.collection('duels').doc(id).get(); if(!sh.exists) continue; const d=sh.data(); if(d.status!=='accepted'||!d.result||d.result.draw||d.spared===true) continue;
+      if(d.ownerUid===uid&&d.result.winner==='A'&&d.recipientHeroId) await markDead(d.recipientHeroId,id);
+      else if(d.recipientUid===uid&&d.result.winner==='B') await markDead(d.ownerHeroId,id); }catch(_){} }
+    S.retroDead2=1; saveState(); }catch(_){} },6000);
   setTimeout(()=>{ loadKakao().catch(()=>{}); },4000); // 버튼 누를 때 바로 뜨게 미리 불러둠 (팝업 차단 방지)
 })();
