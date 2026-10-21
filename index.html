@@ -670,15 +670,21 @@ function fight(A,B){
     if(att.stam<=att.maxSta*0.06){ att.stam=Math.min(att.maxSta,att.stam+att.maxSta*0.25); push({text:`${att.name}, 숨이 턱까지 차서 헐떡인다.`,kind:'tired',by,target:by,word:'헉헉'}); return; }
     // 숨이 차면 비겁하게 머리채를 잡고 엉겨 붙음
     if(att.stam<att.maxSta*0.3&&Math.random()<0.65){
-      const bald=def.g&&def.g.hairStyle===0;
-      push({text:bald?`${att.name}, 숨이 차자 비겁하게 ${def.name}의 귀를 붙잡고 늘어졌다!`:`${att.name}, 숨이 차자 비겁하게 ${def.name}의 머리채를 붙잡았다!`,kind:'hair',by,target:tg,word:bald?'귀 잡기':'머리채'});
+      // 머리채는 잡을 머리가 있어야 잡힘: 대머리·짧게 깎은 머리·투구 쓴 놈은 귀·목덜미·수염을 잡음
+      const noHair=x=>{ const g=x.g||{}; return g.hairStyle===0||g.hairStyle===21||(g.hairStyle===1&&g.sex!=='f')||!!(x.outfit&&x.outfit.helm); };
+      const grip=x=>noHair(x)?((x.g&&x.g.beard>0)?'수염':pick(['귀','목덜미'])):'머리채';
+      const gp=grip(def);
+      push({text:gp==='머리채'?`${att.name}, 숨이 차자 비겁하게 ${def.name}의 머리채를 움켜잡았다!`:gp==='수염'?`${att.name}, 숨이 차자 비겁하게 ${def.name}의 수염을 움켜쥐고 늘어졌다!`:`${att.name}, 숨이 차자 비겁하게 ${def.name}의 ${gp}를 붙잡고 늘어졌다!`,kind:'hair',by,target:tg,
+        word:pick(gp==='머리채'?['놔라!!','이 비겁한 놈!!','머리채를 잡아?!']:['놔라!!','이 비겁한 놈!!','손 치워라!!'])});
       const n=RI(2,3);
       for(let q=0;q<n&&alive();q++){
-        const a2=Math.random()<0.55?att:def, v=a2===att?def:att, d=Math.max(1,Math.round((3+a2.st.str*0.07)*R(0.5,1.6)*a2.form));
+        const a2=Math.random()<0.55?att:def, v=a2===att?def:att, d=Math.max(1,Math.round((3+a2.st.str*0.07)*R(0.5,1.6)*a2.form)), vg=grip(v);
         v.hp-=d;
-        const t=pick([`엉겨서 뒹군다. ${a2.name}의 손톱에 ${v.name}의 얼굴이 긁혔다. (-${d})`,`${v.name}, 머리채를 잡힌 채 질질 끌려다닌다. (-${d})`,`서로 머리채를 쥐고 바닥을 구른다. ${v.name}의 머리가 땅에 찧였다. (-${d})`,`${a2.name}, 엉킨 채로 ${v.name}의 귀를 깨물었다. (-${d})`]);
-        if(v.hp<=0){ cur=null; lethal(v,`${v.name}, 머리채를 잡힌 채 축 늘어졌다.`,idOf(a2),'쿵'); break; }
-        push({text:t,kind:'tangle',by:idOf(a2),target:idOf(v),word:pick(['투닥','엉킴','으윽','악!','이게!']),dmg:d});
+        const t=pick(vg==='머리채'?[`${v.name}, 머리채를 잡힌 채 질질 끌려다닌다. (-${d})`,`${a2.name}, 머리채를 휘어잡고 ${v.name}의 얼굴을 땅에 처박았다. (-${d})`,`서로 엉겨 뒹군다. ${a2.name}의 손톱이 ${v.name}의 얼굴을 할퀴었다. (-${d})`,`${a2.name}, 머리채를 잡아당겨 ${v.name}의 목을 꺾었다. (-${d})`]
+          :vg==='수염'?[`${a2.name}, ${v.name}의 수염을 한 움큼 뽑아버렸다. (-${d})`,`${a2.name}, 수염을 잡아당겨 ${v.name}의 얼굴을 무릎으로 찍었다. (-${d})`,`서로 엉겨 뒹군다. ${a2.name}의 손톱이 ${v.name}의 얼굴을 할퀴었다. (-${d})`]
+          :[`${a2.name}, ${v.name}의 귀를 물어뜯었다. (-${d})`,`${a2.name}, ${v.name}의 목덜미를 움켜쥐고 땅에 메다꽂았다. (-${d})`,`서로 엉겨 뒹군다. ${a2.name}의 손톱이 ${v.name}의 얼굴을 할퀴었다. (-${d})`,`${a2.name}, ${v.name}의 귀를 비틀어 바닥에 짓눌렀다. (-${d})`]);
+        if(v.hp<=0){ cur=null; lethal(v,vg==='머리채'?`${v.name}, 머리채를 잡힌 채 축 늘어졌다.`:`${v.name}, 진흙 속에 처박힌 채 축 늘어졌다.`,idOf(a2),'쿵'); break; }
+        push({text:t,kind:'tangle',by:idOf(a2),target:idOf(v),word:pick(['놔라!!','이 비겁한 놈!!','손 치워라!!','놓지 못해?!','더러운 손 떼라!','죽여버리겠다!']),dmg:d});
       }
       att.stam=Math.min(att.maxSta,att.stam+att.maxSta*0.18); def.stam=Math.min(def.maxSta,def.stam+def.maxSta*0.08);
       return;

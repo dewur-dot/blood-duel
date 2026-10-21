@@ -147,14 +147,14 @@ function Valhalla(cv,folk,opt){
     S.folk.forEach(p=>{ if(now>p.until){ if(p.act==='fight'&&p.partner){ const q=p.partner; q.partner=null; if(q.act==='fight') q.until=now; } nextAct(p,now); }
       const dx=p.tx-p.x, dy=p.ty-p.y, d=Math.hypot(dx,dy); p.moving=false;
       if(p.act==='fight'&&p.partner){ const q=p.partner; if(!p.meet){ p.meet=[q.x,q.y]; q.meet=p.meet; } const mx=p.meet[0], my=p.meet[1]; p.tx=mx+(p.x<q.x?-0.04:0.04)+Math.sin(t*5+p.i)*0.012; p.ty=my; p.dir=p.x<q.x?1:-1;
-        if(Math.random()<dt*0.9){ q.hitT=t; floatTxt(q.x,q.y-0.2,pick(['퍽!','쾅!','윽!','하하!','이 녀석!']),'#fff'); } }
+        if(Math.random()<dt*0.9){ q.hitT=t; floatTxt(q.x,q.y-0.2,pick(['퍽!','쾅!','덤벼라!','하하!','한판 붙자!']),'#fff'); } }
       if(p.act==='throw'&&p.partner&&!p.thrown&&now>p.until-2500){ p.thrown=true; const q=p.partner; p.dir=q.x>p.x?1:-1; p.thrownAt=t; S.props.push({k:pick(['meat','apple','bread']),x0:p.x,y0:p.y-0.13,x1:q.x,y1:q.y-0.1,t0:t,dur:0.9,to:q}); floatTxt(p.x,p.y-0.22,pick(['받아라!','먹어라!','이거나 먹어!']),'#ffe9a8'); }
       if(d>0.004){ const sp=(p.act==='run'?0.16:0.09)*dt; p.x+=dx/d*Math.min(sp,d); p.y+=dy/d*Math.min(sp,d); p.moving=true; if(Math.abs(dx)>0.002) p.dir=dx>0?1:-1; }
       if(p.act==='sing'&&Math.random()<dt*1.6) S.fx.push({k:'note',x:p.x+rnd(-0.01,0.02),y:p.y-0.2,t0:t,life:1.8,ch:pick(['♪','♫','♬'])});
       if(p.act==='drink'&&!p.moving&&Math.random()<dt*0.4) floatTxt(p.x,p.y-0.21,pick(['벌컥벌컥','캬아!','한 잔 더!','스콜!']),'#ffe9a8');
       if(p.act==='cheer'&&Math.random()<dt*0.5) floatTxt(p.x,p.y-0.21,pick(['오딘이여!','발할라!','하하하!','스콜!']),'#fff');
     });
-    S.props=S.props.filter(pr=>{ const u=(t-pr.t0)/pr.dur; if(u>=1){ if(pr.to){ pr.to.hitT=t; S.fx.push({k:'splat',x:pr.x1,y:pr.y1,t0:t,life:0.6}); floatTxt(pr.x1,pr.y1-0.12,pick(['철퍽!','으악!','뭐야!']),'#fff'); } return false; } return true; });
+    S.props=S.props.filter(pr=>{ const u=(t-pr.t0)/pr.dur; if(u>=1){ if(pr.to){ pr.to.hitT=t; S.fx.push({k:'splat',x:pr.x1,y:pr.y1,t0:t,life:0.6}); floatTxt(pr.x1,pr.y1-0.12,pick(['철퍽!','어떤 놈이야!','이 자식이!']),'#fff'); } return false; } return true; });
     S.fx=S.fx.filter(f=>t-f.t0<f.life);
     S.birds.forEach(b=>{ b.x+=b.v*dt; b.f+=dt*(b.k==='peg'?4:8); if(b.v>0&&b.x>1.25) b.x=-0.25; if(b.v<0&&b.x<-0.25) b.x=1.25; });
     if(bigfest&&Math.random()<dt*6) S.fx.push({k:'conf',x:Math.random(),y:-0.02,vx:rnd(-0.02,0.02),vy:rnd(0.05,0.12),c:pick(['#ff6b6b','#ffd43b','#69db7c','#4dabf7','#e599f7']),t0:t,life:6});
