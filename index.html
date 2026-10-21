@@ -2622,7 +2622,7 @@ function build3(h,dead){
 function weapon3(kind,D){
   const w=N3(null), s=0.0036; w.T=[0,-D.wa*0.4,0]; w.R=[-1.15,0,0];
   if(kind==='club'){ add3(w,N3(MS.lathe([[0,0.012],[0.6,0.022],[1,0.028]],0.2,4),'#6B4A2B')); }
-  else if(kind==='axe'){ add3(w,cyl('#6B4A2B',0,-0.1,0,0.009,0.22)); add3(w,box('#8F969C',0,-0.19,0.035,0.012,0.06,0.07,{met:1})); }
+  else if(kind==='axe'){ add3(w,cyl('#6B4A2B',0,-0.1,0,0.009,0.22)); add3(w,box('#8F969C',0,-0.19,-0.035,0.012,0.06,0.07,{met:1})); } // 도끼날은 상대 쪽으로
   else if(kind==='sword'){ add3(w,cyl('#3A3E43',0,0.02,0,0.008,0.06)); add3(w,box('#575C62',0,-0.012,0,0.016,0.012,0.07,{met:1})); add3(w,box('#B7BEC4',0,-0.17,0,0.006,0.3,0.026,{met:1})); }
   else { add3(w,cyl('#6B4A2B',0,-0.1,0,0.01,0.24)); add3(w,box('#575C62',0,-0.22,0,0.08,0.06,0.07,{met:1})); }
   return w;
@@ -3262,9 +3262,11 @@ function startFight(foeIn){
   const A=JSON.parse(JSON.stringify(me)); A.hp=A.maxhp; A.st.def+=outfitDef(me);
   const B=JSON.parse(JSON.stringify(foe)); B.hp=B.maxhp; B.st.def+=outfitDef(foe);
   const res=fight(A,B);
-  const draw=!!res.draw, win=!draw&&res.winner==='A';
-  const rep={me:snapMe,foe,log:res.log,win,draw,broke:null,gain:null,fled:res.fled||null};
-  if(draw){ me.hp=me.maxhp; sync(me,true); }
+  const draw=!!res.draw, win=!draw&&res.winner==='A', practice=!foeIn;
+  const rep={me:snapMe,foe,log:res.log,win,draw,practice,broke:null,gain:null,fled:res.fled||null};
+  // 연습 결투: 져도 안 죽고, 이겨도 아무것도 안 얻음 (킬·능력치·골드·투구 파밍 금지)
+  if(practice){ me.hp=me.maxhp; }
+  else if(draw){ me.hp=me.maxhp; sync(me,true); }
   else if(win){ rep.gain=grow(me,foe); rep.gold=winGold(me); rep.plunder=res.fled?null:plunderHelm(me,foe); rep.wins=me.wins; sync(me,true); }
   else if(res.fled==='A'){ cowardize(me); sync(me,true); }
   else {
@@ -3489,6 +3491,8 @@ function finish(){
   const st=$('#stage'); if(st) st.classList.remove('fighting');
   ['A','B'].forEach(id=>{ const f=$('#f'+id); if(f) f.classList.remove('brawl','run','tangle'); });
   const w=r.win?'A':'B', loser=r.win?'B':'A';
+  if(r.practice){ if(!r.win&&$('#a'+loser)&&!$('#a'+loser).dataset.ko&&r.fled!==loser){ act(loser,'fall',0); $('#a'+loser).dataset.ko='1'; } const wf0=$('#f'+w); if(wf0&&!r.draw){ wf0.dataset.ct=performance.now(); wf0.classList.add('cheer'); }
+    after.innerHTML=`<div class="verdict ${r.draw?'draw':r.win?'win':'lose'}"><b>연습 결투 · ${r.draw?'무승부':r.win?'이겼다':r.fled==='A'?'도망쳤다':'졌다'}</b><span>연습이다. 아무도 죽지 않고, 얻는 것도 잃는 것도 없다. 진짜 피는 결투장에서.</span></div><button class="btn primary" data-act="back">돌아간다</button>`; return; }
   if(r.draw){ after.innerHTML=`<div class="verdict draw"><b>무승부</b><span>${(r.log.find(e=>e.kind==='peace')||{}).broken?'둘 다 뼈가 부러져 절뚝이며 떠났다. 다음엔 끝장을 보자.':'봄바람에 칼을 거뒀다. 오늘은 아무도 죽지 않았다.'}</span></div><button class="btn primary" data-act="back">돌아간다</button>`; return; }
   if(r.fled!==loser&&$('#a'+loser)&&!$('#a'+loser).dataset.ko){
     const lh=loser==='A'?r.me:r.foe, f=$('#fig'+loser); if(f) f.innerHTML=drawChar(lh,true,Math.round(hfrac(lh.cm)*((ui.stageH||340)-40)));
