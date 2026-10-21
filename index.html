@@ -169,6 +169,7 @@ details .sheet{margin-top:10px}
 .wxflash{position:absolute;inset:0;z-index:5;pointer-events:none;background:#f4f6ff;opacity:0}
 .wxflash.on{animation:wxf .7s ease-out}
 @keyframes wxf{0%{opacity:.95}12%{opacity:.2}22%{opacity:.85}100%{opacity:0}}
+.verdict.honor{background:linear-gradient(180deg,#e9c766,#b8892a);border-color:#f6d36b;color:#2a1c06;margin-top:6px}
 .verdict.draw{background:linear-gradient(180deg,#5b6b4a,#3f4d33);border-color:#8fa271;color:#f1f4e6}
 #log p.weather{color:#9fc3e6;font-style:italic}#log p.peace{color:#b8e08f;font-weight:700}#log p.bolt{color:#ffe27a;font-weight:700}#log p.env{color:#a9b4c0}
 .word{position:absolute;font-family:var(--serif);font-weight:800;font-size:26px;line-height:1.1;color:var(--bone);text-shadow:0 0 3px #000,0 2px 0 #000,2px 0 0 #000,-2px 0 0 #000;transform:rotate(var(--r,-6deg));animation:wpop 1.4s ease-out forwards;white-space:nowrap}
@@ -626,7 +627,7 @@ function fight(A,B){
       if(att.hp<=0) lethal(att,`${att.name}, 미끄러져 머리를 돌에 박고 일어나지 못했다.`,null,'쿵'); else push({text:t,kind:'self',by,target:by,word:'미끌',dmg:d}); return; }
     // 체력이 바닥나면(최대의 5% 또는 5 이하) 도망치기도 함
     if(att.hp<=Math.max(5,att.maxhp*0.05)&&!att.fleeTried){ att.fleeTried=true;
-      if(Math.random()<0.35){ fled=by; push({text:pick([`${att.name}, 피투성이가 되자 등을 보이고 걸음아 나 살려라 도망쳤다!`,`${att.name}, 무기도 자존심도 버리고 꽁무니를 뺐다!`,`${att.name}, 비명을 지르며 숲으로 달아났다!`]),kind:'flee',by,target:by,word:'도망!'}); return; } }
+      if(Math.random()<0.12){ fled=by; push({text:pick([`${att.name}, 피투성이가 되자 등을 보이고 걸음아 나 살려라 도망쳤다!`,`${att.name}, 무기도 자존심도 버리고 꽁무니를 뺐다!`,`${att.name}, 비명을 지르며 숲으로 달아났다!`]),kind:'flee',by,target:by,word:'도망!'}); return; } }
     // 모래가 눈에 들어가면 2턴 동안 막기만 함
     if(ia.blind>0){ ia.blind--; push({text:pick([`${att.name}, 눈에 모래가 들어가 앞이 안 보인다. 팔로 얼굴만 가린다.`,`${att.name}, 눈을 비비며 허우적댄다.`,`${att.name}, 아무것도 안 보여 웅크린 채 버틴다.`]),kind:'blind',by,target:by,word:'눈이!'}); return; }
     // 머리가 좋으면 비겁하게 모래를 뿌리거나 돌을 던짐
@@ -1100,6 +1101,9 @@ function grow(h,foe){
   const nv=Math.min(STCAP(k),mine+inc); gain[k]=nv-mine; h.st[k]=nv; gain.learn=k;
   if(Math.random()<0.1&&h.st.int<100){ h.st.int++; gain.int=1; } // 지능은 가끔 1씩만
   if(h.g){ const add2=0.12; h.g.bulk=Math.min(8,Math.round(((h.g.bulk||0)+add2)*100)/100); gain.bulk=add2; if(h.g.bulk>=3&&h.tags&&!h.tags.some(t=>t[0]==='레어 · 근육 괴물')) h.tags.unshift(['레어 · 근육 괴물',1]); }
+  if(h.name==='비겁한 겁쟁이'){ // 겁쟁이가 다시 싸워 이기면 이름을 되찾음
+    h.name=h.realName||nameFor(FLAGS.includes(h.flag)?h.flag:pick(FLAGS),h.g&&h.g.sex); delete h.realName;
+    if(h.tags) h.tags=h.tags.filter(t=>t[0]!=='도망친 겁쟁이'); gain.honor=h.name; }
   h.maxhp=h.st.hp; h.hp=h.maxhp; h.wins++;
   const ls=LOOT_AT[h.wins]; if(ls){ const it=rollGear(ls), worn=giveGear(h,it); gain.loot={slot:it.slot,id:it.id,tier:it.tier,worn,at:h.wins}; }
   return gain;
@@ -3242,7 +3246,7 @@ function bornView(){
     `<p class="bline">${ui.bornLine||(ui.bornLine=pick(BORN_LINES))}</p><p class="btap">화면을 눌러라</p></section>`;
 }
 // 도망쳐서 살아남은 전사: 이름이 '비겁한 겁쟁이'로 바뀜
-function cowardize(h){ if(!h) return; h.name='비겁한 겁쟁이'; h.tags=h.tags||[]; if(!h.tags.some(t=>t[0]==='도망친 겁쟁이')) h.tags.unshift(['도망친 겁쟁이',1]); h.hp=h.maxhp; }
+function cowardize(h){ if(!h) return; if(h.name!=='비겁한 겁쟁이') h.realName=h.name; h.name='비겁한 겁쟁이'; h.tags=h.tags||[]; if(!h.tags.some(t=>t[0]==='도망친 겁쟁이')) h.tags.unshift(['도망친 겁쟁이',1]); h.hp=h.maxhp; }
 // 연습 상대: 외형은 남이지만 능력치·무기는 나와 똑같은 거울 전사 (약한 놈만 골라 패서 크는 꼼수 금지)
 function mirrorFoe(me){
   const f=makeFoe(me.name);
@@ -3493,9 +3497,10 @@ function finish(){
   const wf=$('#f'+w); if(wf){ wf.dataset.ct=performance.now(); wf.classList.add('cheer'); }
   let h='';
   if(r.win){
-    const top=Object.entries(r.gain).filter(([k])=>k!=='bulk'&&k!=='loot'&&k!=='learn').sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>{
+    const top=Object.entries(r.gain).filter(([k])=>k!=='bulk'&&k!=='loot'&&k!=='learn'&&k!=='honor').sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>{
       const nm=SGROUPS.flatMap(g=>g[1]).find(x=>x[0]===k)[1]; return `${nm} +${v}`; });
     h+=`<div class="verdict win"><b>${r.fled?'놈이 꽁무니를 뺐다.':r.vline||(r.vline=pick(WIN_LINES))}</b><span>${r.wins}킬 · ${(()=>{ const k=r.gain.learn, v=r.gain[k]||0, nm=k&&(SGROUPS.flatMap(g=>g[1]).find(x=>x[0]===k)||[])[1]; return k?(v>0?`놈에게서 ${nm}을(를) 배웠다 +${v}`:`놈의 ${nm}에서 더 배울 게 없었다`):top.join(' · '); })()}${r.gold?` · <b class="gold">+${fmtG(r.gold)}</b>`:''}</span></div>`;
+    if(r.gain.honor) h+=`<div class="verdict honor"><b>이름을 되찾았다</b><span>겁쟁이의 오명을 피로 씻었다. 다시 ${esc(r.gain.honor)}(이)라 불린다.</span></div>`;
     if(r.plunder){ const it=gearOf(r.plunder.slot,r.plunder.id); if(it) h+=`<div class="plunder">${itemIcon(it)}<div><b>놈의 투구를 빼앗았다</b><span><i class="tierb" style="background:${TIER_C(it.tier)}">${it.tier}</i>${esc(it.name)} · ${r.plunder.worn?'바로 썼다':'창고에 넣었다 (지금 것이 더 좋다)'}</span></div></div>`; }
   } else if(r.fled==='A'){
     h+=`<div class="verdict lose"><b>도망쳤다. 살긴 살았다.</b><span>이제부터 너의 이름은 '비겁한 겁쟁이'다. 전사들이 손가락질한다.</span></div>`;
