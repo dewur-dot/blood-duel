@@ -77,12 +77,13 @@
   // 모바일 공유처럼 내 초상화 + 결투장 문구 카드를 카카오 이미지 서버에 올려서 씀 (미리 올려둬서 버튼 누르면 바로 열림)
   let kakaoImg={key:'',p:null};
   function prepareKakao(){ if(!S.hero) return null; const key=S.hero.id+'|'+(ui.letter||'')+'|'+S.hero.name; if(kakaoImg.key===key&&kakaoImg.p) return kakaoImg.p;
-    kakaoImg={key,p:(async()=>{ try{ const K=await loadKakao(); if(!K.isInitialized()) K.init(KAKAO_KEY); const file=await profileShareFile(S.hero); if(!file) return null; const res=await K.Share.uploadImage({file:[file]}); return res&&res.infos&&res.infos.original&&res.infos.original.url||null; }catch(e){ console.warn('카카오 이미지 올리기 실패',e); return null; } })()};
+    kakaoImg={key,p:(async()=>{ try{ const K=await loadKakao(); if(!K.isInitialized()) K.init(KAKAO_KEY); const file=await profileShareFile(S.hero); if(!file){ kakaoImg.err='카드 만들기 실패'; return null; } const res=await K.Share.uploadImage({file:[file]}); return res&&res.infos&&res.infos.original&&res.infos.original.url||null; }catch(e){ console.warn('카카오 이미지 올리기 실패',e); kakaoImg.err=String(e&&(e.message||e.msg)||e).slice(0,60); return null; } })()};
     return kakaoImg.p; }
   async function kakaoShare(link,hero,letter){
     const K=await loadKakao(); if(!K.isInitialized()) K.init(KAKAO_KEY);
     let up=null; try{ up=await Promise.race([prepareKakao(),new Promise(r=>setTimeout(()=>r(null),6000))]); }catch(_){}
     if(!up){ // 초상화를 못 올렸으면 남의 그림 대신 글자 결투장으로
+      setTimeout(()=>{ ui.notice='초상화를 카카오에 올리지 못해 글자 결투장으로 보냈다'+(kakaoImg.err?` (${kakaoImg.err})`:' (시간 초과)'); render(); },300);
       K.Share.sendDefault({objectType:'text',text:`⚔ ${hero.name}의 결투 신청\n${letter?`"${letter.slice(0,120)}"\n`:''}${typeof fmtH==='function'?fmtH(hero.cm):''} · ${hero.wins||0}킬 · 덤비든가 도망치든가`,link:{mobileWebUrl:link,webUrl:link},buttonTitle:'결투장 열기'}); return; }
     const img=up;
     K.Share.sendDefault({objectType:'feed',content:{title:`⚔ ${hero.name}의 결투 신청`,description:letter?`"${letter.slice(0,80)}"`:`${fmtH(hero.cm)} · ${hero.wins||0}킬 · 덤비든가 도망치든가`,imageUrl:img,imageWidth:1200,imageHeight:630,link:{mobileWebUrl:link,webUrl:link}},
