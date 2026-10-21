@@ -3245,20 +3245,22 @@ function warRun(){
   const say=(t,kind)=>{ w.lines.push({t,k:kind}); const lg=$('#wlog'); if(lg){ const p=document.createElement('p'); p.className=kind||''; p.textContent=t; lg.appendChild(p); lg.scrollTop=lg.scrollHeight; } };
   const setBar=()=>{ const b=$('#whp'), v=$('#whpv'), k=$('#wkill'); if(b) b.style.width=Math.max(0,w.hp/me.maxhp*100)+'%'; if(v) v.textContent=Math.max(0,Math.round(w.hp))+' / '+me.maxhp; if(k) k.textContent=w.kills; };
   say(pick(['폭풍을 뚫고 노를 젓는다. 적의 해안이 보인다!','용머리 배가 파도를 가른다. 전사들이 방패를 두드린다!','"오딘이여, 오늘 우리를 지켜보소서!" 노꾼들이 함성을 지른다.']),'info');
-  later2(()=>{ if(sc) sc.land(); say('배가 모래톱에 처박혔다! 상륙하라!','crit'); w.phase='melee'; },3400);
+  later2(()=>{ if(w.sc) w.sc.land(); say('배가 모래톱에 처박혔다! 상륙하라!','crit'); w.phase='melee'; },3400);
+  // 상륙 뒤엔 결투와 똑같은 3D 몸·동작으로 난전 (3D를 못 쓰는 폰은 그림 장면 그대로)
+  later2(()=>{ if(USE3D&&G3.ok&&!B2D()){ try{ if(w.sc&&w.sc.stop) w.sc.stop(); w.sc=war3d(cv,{heroName:me.name,hero:me,gen:w.gen,genName:w.gen.name}); }catch(e){ console.error(e); } } },4900);
   const steps=RI(12,16); let k=0;
   const tick=()=>{ k++;
     const r=Math.random();
     if(Math.random()<0.005*(1+k/6)){ const cause=pick(['난전 속에서 등 뒤로 창이 박혔다.','어디선가 날아온 화살이 목을 꿰뚫었다.','발밑의 시체에 걸려 넘어진 순간, 도끼가 내려왔다.']);
-      w.hp=0; setBar(); if(sc) sc.heroDie(); say(`${me.name}, ${cause}`,'kill'); return warDie(cause); }
-    if(r<0.4){ const n=Math.random()<0.25?2:1; w.kills+=n; setBar(); if(sc) sc.heroKill(n); say(n>1?`${me.name}, 적 둘을 한꺼번에 베어 넘겼다!`:pick([`${me.name}, 적의 투구째 머리를 쪼갰다!`,`${me.name}, 방패로 밀쳐 넘어뜨리고 숨통을 끊었다!`,`${me.name}의 도끼에 적이 피를 뿜으며 쓰러졌다!`,`${me.name}, 달려드는 적의 목을 단칼에 날렸다!`]),'hit'); }
-    else if(r<0.66){ const d=Math.max(1,Math.round(me.maxhp*R(0.04,0.12)*(1-Math.min(0.5,(me.st.def||0)/400)))); w.hp-=d; setBar(); if(sc) sc.heroHit();
+      w.hp=0; setBar(); if(w.sc) w.sc.heroDie(); say(`${me.name}, ${cause}`,'kill'); return warDie(cause); }
+    if(r<0.4){ const n=Math.random()<0.25?2:1; w.kills+=n; setBar(); if(w.sc) w.sc.heroKill(n); say(n>1?`${me.name}, 적 둘을 한꺼번에 베어 넘겼다!`:pick([`${me.name}, 적의 투구째 머리를 쪼갰다!`,`${me.name}, 방패로 밀쳐 넘어뜨리고 숨통을 끊었다!`,`${me.name}의 도끼에 적이 피를 뿜으며 쓰러졌다!`,`${me.name}, 달려드는 적의 목을 단칼에 날렸다!`]),'hit'); }
+    else if(r<0.66){ const d=Math.max(1,Math.round(me.maxhp*R(0.04,0.12)*(1-Math.min(0.5,(me.st.def||0)/400)))); w.hp-=d; setBar(); if(w.sc) w.sc.heroHit();
       say(pick([`적의 창끝이 옆구리를 스쳤다. (-${d})`,`화살 한 대가 어깨에 박혔다. (-${d})`,`뒤에서 날아온 몽둥이에 뒤통수를 맞았다. (-${d})`,`방패가 쪼개지며 팔이 저린다. (-${d})`]),'crit');
-      if(w.hp<=0){ if(sc) sc.heroDie(); return warDie('전쟁터의 난전 속에서 쓰러졌다.'); } }
-    else if(r<0.8){ if(sc) sc.volley(); say(pick(['하늘을 뒤덮은 화살비가 쏟아진다! 방패를 들어라!','적 궁수들이 화살을 날린다!']),'miss'); }
-    else if(r<0.9){ if(sc) sc.allyFall(); say(pick(['옆에서 싸우던 동료가 쓰러졌다… 발할라에서 보자.','아군 방패벽 한쪽이 무너졌다!']),'miss'); }
+      if(w.hp<=0){ if(w.sc) w.sc.heroDie(); return warDie('전쟁터의 난전 속에서 쓰러졌다.'); } }
+    else if(r<0.8){ if(w.sc) w.sc.volley(); say(pick(['하늘을 뒤덮은 화살비가 쏟아진다! 방패를 들어라!','적 궁수들이 화살을 날린다!']),'miss'); }
+    else if(r<0.9){ if(w.sc) w.sc.allyFall(); say(pick(['옆에서 싸우던 동료가 쓰러졌다… 발할라에서 보자.','아군 방패벽 한쪽이 무너졌다!']),'miss'); }
     else say(pick(['양쪽에서 새 전사들이 끝없이 쏟아져 나온다!','까마귀 떼가 전장 위를 맴돈다.','진흙과 피가 발목까지 차오른다.']),'info');
-    if(k>=steps){ w.phase='gen'; if(sc) sc.general(); say(`적군이 무너진다! 적장 ${w.gen.name}이(가) 앞으로 나섰다.`,'crit');
+    if(k>=steps){ w.phase='gen'; if(w.sc) w.sc.general(); say(`적군이 무너진다! 적장 ${w.gen.name}이(가) 앞으로 나섰다.`,'crit');
       const a=$('#wact'); if(a) a.innerHTML=`<button class="btn primary" data-act="warGen">적장과 맞선다</button>`; return; }
     later2(tick,reduce?250:1250);
   };
@@ -3875,6 +3877,112 @@ function arena3d(W,gy){
     const mt=add3(root,N3(MS.lathe([[0,0.001],[0.18,r*0.17],[1,r]],h,6),'#6a7a94')); mt.T=[x,gy-60+h,z];
     const sn=add3(root,N3(MS.lathe([[0,0.001],[1,r*0.19]],h*0.19,3),'#f2f5fa')); sn.T=[x,gy-60+h+2,z]; }
   return root;
+}
+/* ---------- 전쟁터 난전 (3D): 결투와 똑같은 몸과 동작으로 여럿이 뒤엉켜 싸움 ---------- */
+function war3d(cv,opt){
+  opt=opt||{}; let alive=true, raf=0, last=performance.now(), shake=0, genOn=false, gen=null, flash=0;
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const sol=[], fx=[], arrows=[];
+  const heroH=opt.hero;
+  const mk=(team,isHero,hIn)=>{ let h=hIn; if(!h){ h=newHero(); h.cm=RI(160,200); h.g.cm=h.cm; h.outfit=randOutfit(); h.weapon=Math.random()<0.55?{...pick(WEAPONS.filter(w=>!w.off&&w.kind!=='maul'))}:null; }
+    h=Object.assign({},h,{g:Object.assign({},h.g,{expr:pick(['angry','snarl','gape','angry'])})});
+    return {team,hero:!!isHero,h,J:build3(h,false),x:0,d:rnd2(0,1),dir:team===0?1:-1,state:'run',foe:null,hp:isHero?99:RI(2,4),kt:-9,kn:'jab',hitT:-9,ph:Math.random()*6.3,dead:null,cm:h.cm||175}; };
+  function rnd2(a,b){ return a+Math.random()*(b-a); }
+  const spawn=(team,x,d,isHero,h)=>{ const s=mk(team,isHero,h); s.x=x; s.d=d; sol.push(s); return s; };
+  const geo=()=>{ const W=cv.clientWidth, H=cv.clientHeight; return {W,H}; };
+  // 깊이(d: 0=뒤, 1=앞) → 발 높이·크기
+  const footY=(d,H)=>H*(0.30-0.25*d), scl=(s,H)=>H*0.34*(0.62+0.38*s.d)*Math.pow(clamp(s.cm,60,500)/175,0.85);
+  let hero=null, heroDead=false, t0=performance.now();
+  function nearestFoe(s){ let best=null,bd=1e9; sol.forEach(q=>{ if(q.team===s.team||q.dead||q.flee||q===s) return; const dd=Math.abs(q.x-s.x)+Math.abs(q.d-s.d)*120; if(dd<bd){ bd=dd; best=q; } }); return best; }
+  function kill(v,by,now){ if(v.dead) return; v.dead={t0:now,dir:by?(by.x<v.x?1:-1):(v.dir>0?-1:1)}; v.J=build3(v.h,true); sol.forEach(q=>{ if(q.foe===v) q.foe=null; }); for(let i=0;i<12;i++) fx.push({x:v.x,y:0,d:v.d,vx:rnd2(-90,90),vy:rnd2(120,300),t0:now,life:rnd2(500,900)}); }
+  const {W:W0}=geo();
+  hero=spawn(0,W0*0.32,0.62,true,heroH); hero.hp=999;
+  for(let i=0;i<6;i++) spawn(0,rnd2(-W0*0.1,W0*0.35),Math.random());
+  for(let i=0;i<7;i++) spawn(1,rnd2(W0*0.65,W0*1.1),Math.random());
+  const KINDS=['jab','cross','onetwo','onetwo','kick'];
+  function pose(s,now){ const t=now/1000;
+    if(s.dead){ return null; }
+    if(s.state==='run'){ const ph=t*2*Math.PI/0.6+s.ph, sn=Math.sin(ph); return {a0:40*sn,a1:-40*sn,e0:-85,e1:-85,l0:-45*sn,l1:45*sn,k0:20+60*Math.max(0,Math.sin(ph-1.1)),k1:20+60*Math.max(0,Math.sin(ph-1.1+Math.PI)),ln:16,tw:8*sn,z:6}; }
+    const sb=Math.sin(t*2*Math.PI/1.3+s.ph), b=Math.sin(t*2*Math.PI/0.62+s.ph), wpn=!!s.h.weapon;
+    const A={a1:wpn?-36:-52,e1:wpn?-80:-118,a0:-34,e0:-138,z0:-14,z1:-10,l1:-24,k1:30,l0:14,k0:24,ln:12,tw:12,both:1};
+    A.a1+=3*sb; A.e1-=4*sb; A.a0+=3*b; A.k0+=6*Math.abs(b); A.k1+=6*Math.abs(b);
+    const tt=(now-s.kt)/950; if(tt>=0&&tt<1){ const nm=s.h.weapon&&s.kn!=='kick'?'chop':s.kn, set=KF3[nm]; if(set){ for(const L in set) A[L]=kfv(set[L],tt); if(nm==='kick') delete A.both; } }
+    const r=(now-s.hitT)/600; if(r>=0&&r<1){ const e=(r<0.14?r/0.14:Math.pow(1-(r-0.14)/0.86,2)); A.ln-=24*e; A.tw+=16*e; A.e0+=26*e; A.e1+=22*e; A.k0+=14*e; A.k1+=18*e; }
+    if(s.cheer){ const e=1, sh=Math.sin(t*6+s.ph); return {a0:-165,a1:-150,e0:-20+6*sh,e1:-25-6*sh,z:-34,ln:-8,k0:10,k1:10}; }
+    return A; }
+  function update(dt,now){ const {W,H}=geo();
+    if(!genOn){ const live=tm=>sol.filter(q=>q.team===tm&&!q.dead&&!q.flee).length;
+      const cap=(S.gfx&&S.gfx.q==='high')?9:7;
+      if(live(0)<cap&&Math.random()<dt*2.6) spawn(0,-W*0.12,Math.random());
+      if(live(1)<cap+1&&Math.random()<dt*3) spawn(1,W*1.12,Math.random());
+      if(Math.random()<dt*0.12) api.volley(); }
+    sol.forEach(s=>{ if(s.dead) return; const S=scl(s,H);
+      if(s.flee){ s.dir=1; s.state='run'; s.x+=S*1.6*dt; if(s.x>W*1.3) s.gone=true; return; }
+      if(s.isGen){ const tx=hero?hero.x+S*0.85:W*0.6; s.dir=-1; if(s.x>tx){ s.x-=S*0.9*dt; s.state='run'; } else s.state='fight'; return; }
+      if(genOn&&!s.hero){ if(s.ring==null) s.ring=[rnd2(-W*0.05,(hero?hero.x:W*0.4)-S*1.2),Math.random()<0.5?rnd2(0,0.25):rnd2(0.85,1)]; const dx=s.ring[0]-s.x, dd=s.ring[1]-s.d; if(Math.abs(dx)>4||Math.abs(dd)>0.02){ s.state='run'; s.x+=Math.sign(dx)*Math.min(Math.abs(dx),S*1.2*dt); s.d+=Math.sign(dd)*Math.min(Math.abs(dd),0.5*dt); s.dir=dx>=0?1:-1; } else { s.state='fight'; s.cheer=true; s.dir=1; } return; }
+      if(s.hero&&genOn){ s.foe=null; s.state='fight'; s.dir=1; return; }
+      if(!s.foe||s.foe.dead||s.foe.flee) s.foe=nearestFoe(s);
+      const f=s.foe; if(!f){ s.state='fight'; return; }
+      const gap=(scl(s,H)+scl(f,H))*0.28, dx=f.x-s.x, dd=f.d-s.d; s.dir=dx>=0?1:-1;
+      if(Math.abs(dx)>gap+6||Math.abs(dd)>0.06){ s.state='run'; const sp=S*(s.hero?1.2:rnd2(0.9,1.3))*dt; s.x+=Math.sign(dx)*Math.min(sp,Math.max(0,Math.abs(dx)-gap)); s.d+=Math.sign(dd)*Math.min(Math.abs(dd),0.35*dt); }
+      else { s.state='fight'; if(now-s.kt>1100&&Math.random()<dt*1.5){ s.kt=now; s.kn=pick(KINDS);
+          if(!s.hero&&!f.hero) setTimeout(()=>{ if(alive&&!s.dead&&!f.dead&&Math.random()<0.6){ f.hitT=performance.now(); f.hp--; for(let i=0;i<5;i++) fx.push({x:f.x,y:0,d:f.d,vx:rnd2(-60,60),vy:rnd2(80,200),t0:performance.now(),life:600}); if(f.hp<=0) kill(f,s,performance.now()); } },420); } } });
+    for(let i=sol.length-1;i>=0;i--){ const s=sol[i]; if(s.gone||(s.dead&&now-s.dead.t0>12000)) sol.splice(i,1); }
+    arrows.forEach(a=>{ a.x+=a.vx*dt; a.y+=a.vy*dt; a.vy-=420*dt; }); for(let i=arrows.length-1;i>=0;i--) if(arrows[i].y<arrows[i].floor) arrows.splice(i,1);
+    shake*=Math.pow(0.02,dt); flash=Math.max(0,flash-dt*1.6);
+  }
+  let world=null, wW=0;
+  function frame(now){ if(!alive) return; raf=requestAnimationFrame(frame); if(!cv.isConnected){ stop(); return; }
+    const dt=Math.min(0.05,(now-last)/1000); last=now; update(dt,now);
+    const {W,H}=geo(), cw=Math.round(W*DPR), ch=Math.round(H*DPR); if(cv.width!==cw||cv.height!==ch){ cv.width=cw; cv.height=ch; }
+    const gy=H*0.05; if(!world||wW!==W){ world=arena3d(W,gy); wW=W; }
+    const Dz=2600, PV=M4.mul(M4.persp(2*Math.atan(H/2/Dz),W/H,60,90000),M4.look([W/2,H*0.5,Dz],[W/2,H*0.5,0],[0,1,0]));
+    g3render([{J:{root:world,noHead:true},M:M4.I(),des:false}],{PV},cw,ch);
+    const figs=[]; const order=sol.slice().sort((a,b)=>b.d-a.d);
+    order.forEach(s=>{ const S=scl(s,H), y0=footY(s.d,H), z=(s.d-0.5)*1600;
+      if(s.dead){ const u=(now-s.dead.t0)/1000, T1=0.55, k=Math.min(u/T1,1), dir=s.dead.dir;
+        let dx=dir*S*0.3*(1-Math.pow(1-k,2)), dy=S*0.22*4*k*(1-k), th=(Math.PI/2)*Math.pow(k,1.3);
+        if(u>T1){ const bb=Math.min((u-T1)/0.6,1); dx+=dir*S*0.06*(1-Math.pow(1-bb,2)); dy=0; th=Math.PI/2; }
+        const lift=S*0.055, roll=-dir*th; const mx=Math.min(1,Math.max(0,(u-T1+0.05)/0.35));
+        const fly={a0:-125,a1:-140,e0:-25,e1:-10,z:24,l0:-40,l1:-14,k0:38,k1:12,ln:-26}, limp={a0:-165,a1:-150,e0:-12,e1:-22,z:34,l0:-8,l1:-16,k0:10,k1:22,ln:-6}, A={free:1}; for(const q in fly) A[q]=fly[q]+(limp[q]-fly[q])*mx;
+        s.J.root.R=[0,s.dir>0?0.85:-0.85,0]; pose3(s.J,A,0);
+        figs.push({J:s.J,M:M4.mul(M4.mul(M4.T(s.x+dx,y0+dy+lift*Math.sin(th),z),M4.RZ(roll)),M4.S(S,S,S)),des:true,roll}); return; }
+      s.J.root.R=[0,s.dir>0?0.85:-0.85,0]; pose3(s.J,pose(s,now),0);
+      const bob=s.state==='run'?Math.abs(Math.sin(now/1000*2*Math.PI/0.6+s.ph))*S*0.03:0;
+      figs.push({J:s.J,M:M4.mul(M4.T(s.x,y0+bob,z),M4.S(S,S,S)),des:false,roll:0}); });
+    g3render(figs,{l:0,r:W,b:0,t:H,keep:1},cw,ch);
+    const c=cv.getContext('2d'); c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,cw,ch);
+    if(shake>0.4) c.translate((Math.random()-0.5)*shake*2*DPR,(Math.random()-0.5)*shake*2*DPR);
+    c.drawImage(G3.cv,0,0,cw,ch); c.setTransform(DPR,0,0,DPR,0,0);
+    // 비 오는 듯한 어둑한 하늘 색
+    c.fillStyle='rgba(40,30,30,.18)'; c.fillRect(0,0,W,H);
+    // 피
+    for(let i=fx.length-1;i>=0;i--){ const f=fx[i], u=(now-f.t0)/f.life; if(u>=1){ fx.splice(i,1); continue; } const tt=(now-f.t0)/1000, S0=H*0.34*(0.62+0.38*f.d); const x=f.x+f.vx*tt, y=H-(footY(f.d,H)+S0*0.6+f.vy*tt-400*tt*tt);
+      c.fillStyle=`rgba(160,8,8,${1-u})`; c.beginPath(); c.arc(x,y,2.4,0,6.3); c.fill(); }
+    // 화살
+    c.strokeStyle='#2a2018'; c.lineWidth=1.4; arrows.forEach(a=>{ const ang=Math.atan2(-a.vy,a.vx); c.beginPath(); c.moveTo(a.x,H-a.y); c.lineTo(a.x-Math.cos(ang)*14,H-a.y-Math.sin(ang)*14); c.stroke(); });
+    // 내 전사 이름표
+    if(hero&&!heroDead){ const S=scl(hero,H), y=H-(footY(hero.d,H)+S*1.05); c.font='800 12px system-ui,sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='rgba(0,0,0,.75)'; c.fillStyle='#ffd76a'; c.strokeText(opt.heroName||'나',hero.x,y); c.fillText(opt.heroName||'나',hero.x,y); c.beginPath(); c.moveTo(hero.x-5,y+3); c.lineTo(hero.x+5,y+3); c.lineTo(hero.x,y+9); c.fill(); }
+    if(genOn){ const u=Math.min(1,(now-gen.t0)/1200); c.globalAlpha=u; c.font=`900 ${Math.round(W/13)}px serif`; c.textAlign='center'; c.lineWidth=5; c.strokeStyle='rgba(0,0,0,.8)'; c.fillStyle='#ff6b4a'; c.strokeText('적장이 나타났다!',W/2,H*0.16); c.fillText('적장이 나타났다!',W/2,H*0.16);
+      if(opt.genName){ c.font=`800 ${Math.round(W/26)}px system-ui,sans-serif`; c.fillStyle='#f3e6c8'; c.lineWidth=4; c.strokeText(opt.genName,W/2,H*0.23); c.fillText(opt.genName,W/2,H*0.23); } c.globalAlpha=1; }
+    if(flash>0){ c.fillStyle=`rgba(200,0,0,${flash*0.6})`; c.fillRect(0,0,W,H); }
+    if(heroDead){ c.fillStyle='rgba(80,0,0,.3)'; c.fillRect(0,0,W,H); }
+  }
+  const api={
+    land(){},
+    heroKill(n){ if(!hero||heroDead) return; const now=performance.now(); hero.kt=now; hero.kn=pick(KINDS);
+      for(let i=0;i<(n||1);i++){ let f=(i===0&&hero.foe&&!hero.foe.dead)?hero.foe:nearestFoe(hero); if(!f){ const {W}=geo(); f=spawn(1,hero.x+scl(hero,geo().H)*0.6,hero.d); }
+        const ff=f; setTimeout(()=>{ if(i>0){ hero.kt=performance.now(); hero.kn=pick(KINDS); } setTimeout(()=>{ kill(ff,hero,performance.now()); shake=Math.max(shake,4); },420); },i*700); } },
+    heroHit(){ if(!hero||heroDead) return; hero.hitT=performance.now(); for(let i=0;i<7;i++) fx.push({x:hero.x,y:0,d:hero.d,vx:rnd2(-80,80),vy:rnd2(100,240),t0:performance.now(),life:700}); shake=Math.max(shake,6); flash=0.25; },
+    heroDie(){ if(!hero||heroDead) return; heroDead=true; kill(hero,nearestFoe(hero),performance.now()); shake=10; flash=0.6; },
+    allyFall(){ const a=sol.filter(s=>s.team===0&&!s.hero&&!s.dead); if(a.length) kill(pick(a),null,performance.now()); },
+    volley(){ const {W,H}=geo(); for(let i=0;i<12;i++) arrows.push({x:W*rnd2(0.8,1.1),y:H*rnd2(0.75,1),vx:-W*rnd2(0.5,0.8),vy:rnd2(0,60),floor:H*rnd2(0.05,0.3)}); },
+    general(){ genOn=true; gen={t0:performance.now()}; sol.forEach(s=>{ if(s.team===1&&!s.dead) s.flee=true; }); const {W}=geo(); const g=spawn(1,W*1.15,hero?hero.d:0.6,false,opt.gen); g.isGen=true; },
+    stop(){ stop(); }
+  };
+  function stop(){ alive=false; cancelAnimationFrame(raf); }
+  raf=requestAnimationFrame(frame);
+  return api;
 }
 function battle3d(now){
   const cv=$('#st3d'), st=$('#stage'); if(!cv||!st||!ui.rep) return;
