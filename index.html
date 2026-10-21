@@ -3425,7 +3425,10 @@ function startFight(foeIn,opts){
     if(opts.war){ // 전쟁터는 죽을 확률이 높은 만큼 보상이 큼: 골드 + 능력치 + 전리품 장비
       const wg=RI(25,60)+(opts.war.kills||0)*3; S.gold=(S.gold||0)+wg; rep.gold+=wg;
       const k=pick(LEARN_KEYS), add=RI(2,4), nv=Math.min(STCAP(k),(me.st[k]||0)+add); rep.warStat=[k,nv-(me.st[k]||0)]; me.st[k]=nv;
-      if(Math.random()<0.6){ const it=rollGear(pick(['top','bottom','helm'])); rep.warLoot={slot:it.slot,id:it.id,tier:it.tier,worn:giveGear(me,it)}; } }
+      // 전리품: 지금 걸친 장비와 같은 등급, 운 좋으면(30%) +2등급
+      if(Math.random()<0.6){ const slot=pick(['top','bottom','helm']), cur=gearOf(slot,(me.outfit||{})[slot]), up=Math.random()<0.3, tier=Math.min(10,(cur?cur.tier:0)+(up?2:cur?0:1));
+        const cand=CLOTHES.filter(c=>c.slot===slot&&c.tier===tier&&!c.fun); const it=cand.length?pick(cand):null;
+        if(it) rep.warLoot={slot:it.slot,id:it.id,tier:it.tier,worn:giveGear(me,it),up}; } }
     rep.mercy=res.fled?null:'ask'; rep.wins=me.wins; sync(me,true); }
   else if(res.fled==='A'){ cowardize(me); sync(me,true); }
   else if(opts.war&&Math.random()<0.2){ rep.sparedMe=1; me.hp=me.maxhp; sync(me,true); } // 적장이 자비를 베풂
@@ -3685,7 +3688,7 @@ function finish(){
     h+=`<div class="verdict win"><b>${r.war?(r.fled?'적장이 꽁무니를 뺐다. 전쟁은 우리의 것이다!':r.mercy==='spared'?'적장이 무릎을 꿇었다. 전쟁은 우리의 것이다!':'적장의 목을 베었다. 전쟁은 우리의 것이다!'):r.fled?'놈이 꽁무니를 뺐다.':r.vline||(r.vline=pick(WIN_LINES))}</b><span>${r.wins}킬 · ${(()=>{ const k=r.gain.learn, v=r.gain[k]||0, nm=k&&(SGROUPS.flatMap(g=>g[1]).find(x=>x[0]===k)||[])[1]; return k?(v>0?`놈에게서 ${nm}을(를) 배웠다 +${v}`:`놈의 ${nm}에서 더 배울 게 없었다`):top.join(' · '); })()}${r.gold?` · <b class="gold">+${fmtG(r.gold)}</b>`:''}</span></div>`;
     if(r.mercy==='spared') h+=`<div class="verdict mercy"><b>목숨만은 살려줬다</b><span>${esc(r.foe.name)}, 땅에 이마를 찧으며 기어서 도망쳤다.${r.ransom?` 몸값 +${r.ransom} 골드`:''}</span></div>`;
     if(r.warStat){ const nm=(SGROUPS.flatMap(g=>g[1]).find(x=>x[0]===r.warStat[0])||[])[1]||r.warStat[0]; h+=`<p class="note">전쟁에서 단련됐다: ${nm} +${r.warStat[1]}</p>`; }
-    if(r.warLoot){ const it=gearOf(r.warLoot.slot,r.warLoot.id); if(it) h+=`<div class="plunder">${itemIcon(it)}<div><b>전장에서 전리품을 주웠다</b><span><i class="tierb" style="background:${TIER_C(it.tier)}">${it.tier}</i>${esc(it.name)} · ${r.warLoot.worn?'바로 걸쳤다':'창고에 넣었다'}</span></div></div>`; }
+    if(r.warLoot){ const it=gearOf(r.warLoot.slot,r.warLoot.id); if(it) h+=`<div class="plunder">${itemIcon(it)}<div><b>${r.warLoot.up?'운이 좋다! 더 좋은 전리품을 주웠다':'전장에서 전리품을 주웠다'}</b><span><i class="tierb" style="background:${TIER_C(it.tier)}">${it.tier}</i>${esc(it.name)} · ${r.warLoot.worn?'바로 걸쳤다':'창고에 넣었다'}</span></div></div>`; }
     if(r.gain.honor) h+=`<div class="verdict honor"><b>이름을 되찾았다</b><span>겁쟁이의 오명을 피로 씻었다. 다시 ${esc(r.gain.honor)}(이)라 불린다.</span></div>`;
     if(r.plunder){ const it=gearOf(r.plunder.slot,r.plunder.id); if(it) h+=`<div class="plunder">${itemIcon(it)}<div><b>놈의 투구를 빼앗았다</b><span><i class="tierb" style="background:${TIER_C(it.tier)}">${it.tier}</i>${esc(it.name)} · ${r.plunder.worn?'바로 썼다':'창고에 넣었다 (지금 것이 더 좋다)'}</span></div></div>`; }
   } else if(r.fled==='A'){
