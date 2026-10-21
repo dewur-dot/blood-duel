@@ -94,6 +94,7 @@ body.nobody .top,body.nobody .subtabs{display:none}
 .chbtn{margin:6px 0}
 .pendbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;margin:6px 0;border:1px dashed #8a6a3a;border-radius:8px;background:#1d1610;font-size:13px}.pendbar .linkbtn{padding:2px 6px}
 .pbtn.kakaosel{background:#FEE500;border-color:#FEE500;color:#191919}.pbtn.kakaosel span{opacity:.75}
+.revq{display:block;font-size:12px;color:#ffb35c;margin-top:4px}
 .natpick{padding:18px 4px 30px}.natpick h2{font-family:var(--serif);font-size:24px;text-align:center;margin:6px 0 6px;color:var(--bone)}.natpick .note{text-align:center;margin-bottom:14px}
 .natgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .natbtn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;background:#151110;border:1px solid var(--line);border-radius:3px;color:var(--bone);font:inherit;font-size:13px;cursor:pointer}
@@ -555,7 +556,7 @@ body.bview .after{gap:8px}
 <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
 <script src="./firebase-config.js"></script>
 <script src="./support-config.js"></script>
-<script src="./scenes.js?v=10211528"></script>
+<script src="./scenes.js?v=10211543"></script>
 <script>
 //ENGINE-START
 const RI=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
@@ -2968,7 +2969,7 @@ function recordHtml(){
   let o=`<button class="vhbanner" data-act="valhalla"><b>발할라</b><span>${S.yard.length?`쓰러진 전사 ${S.yard.length}명이 잔치를 벌이고 있다`:'아직 아무도 오지 않은 오딘의 연회장'}</span></button><section class="card panel"><h2>전사의 여정</h2><div class="recs">${box(S.fights||0,'벌인 결투')}${box(h?h.wins:0,'지금 전사의 처치')}${box(best,'역대 최다 학살')}${box(S.yard.length,'묻힌 전사')}</div></section>`;
   if(!S.yard.length) return o+`<p class="note center">묘지가 아직 비어 있다. 오래가진 않을 것이다.</p>`;
   return o+`<section class="yard"><h2>전사들의 묘지</h2>`+S.yard.map((y,i)=>
-    `<div class="stone"><div>${fig3d({g:y.g,name:y.name,weapon:null,outfit:y.outfit},true,Math.round(hfrac(y.cm||175)*110),'static')}</div><div><b>${S.yard.length-i}대 · ${esc(y.name)}</b><span>${y.wins}킬 · ${esc(y.cause)}</span></div></div>`).join('')+`</section>`;
+    `<div class="stone"><div>${fig3d({g:y.g,name:y.name,weapon:null,outfit:y.outfit},true,Math.round(hfrac(y.cm||175)*110),'static')}</div><div><b>${S.yard.length-i}대 · ${esc(y.name)}</b><span>${y.wins}킬 · ${esc(y.cause)}</span>${ui.isAdmin?(ui.revConf===i?`<span class="revq">${S.hero?`지금 전사 ${esc(S.hero.name)}는 사라진다. `:''}정말 되살릴까? <button class="linkbtn" data-act="revive" data-i="${i}">되살린다</button><button class="linkbtn" data-act="revno">그만</button></span>`:`<button class="linkbtn" data-act="revask" data-i="${i}">운영자 · 되살리기</button>`):''}</div></div>`).join('')+`</section>`;
 }
 function settingsHtml(){
   return (ui.isAdmin?`<a class="btn adminbtn" href="./support.html?admin">운영자 · 후원 확인 페이지</a>`:'')+`<section class="card panel"><h2>오딘에게 청원</h2><p class="note">후원하면 골드와 이름변경 쿠폰을 담은 쿠폰 코드를 받는다. 1,000원 = 1,000 골드, 5,000원 = 7,000 골드, 1만원이면 14,000 골드에 이름변경 쿠폰 1장.</p>`+
@@ -3459,6 +3460,15 @@ function startFight(foeIn,opts){
   ui.rep=rep; view='battle'; render();
 }
 // 전사의 죽음: 명예의 전당에 기록하고, 묘지(=내 발할라)로 보냄
+// 운영자 전용: 묘지의 전사를 되살림 (능력치는 명예의 전당 기록에서, 없으면 몸으로 다시 계산)
+function reviveYard(i){ const y=S.yard[i]; if(!y) return;
+  const sn=S.board.filter(e=>e.name===y.name&&!e.sample).sort((a,b)=>(b.kills||0)-(a.kills||0))[0]||(ui.board||[]).find(e=>e.name===y.name);
+  let h;
+  if(sn&&sn.st){ h={id:sn.id,name:y.name,flag:sn.flag||y.flag||'',nick:sn.nick||makeNick(y.g),g:y.g,st:JSON.parse(JSON.stringify(sn.st)),cm:y.cm||sn.cm,kg:sn.kg,outfit:y.outfit||sn.outfit||{},weapon:sn.weapon||null,tags:sn.tags||makeTags(y.g),wins:y.wins||sn.kills||0}; }
+  else { const c=calcStats(y.g); h={id:uid(),name:y.name,flag:y.flag||'',nick:makeNick(y.g),g:y.g,st:c.st,cm:c.cm,kg:c.kg,outfit:y.outfit||{},weapon:null,tags:makeTags(y.g),wins:y.wins||0}; }
+  h.maxhp=h.st.hp; h.hp=h.maxhp; clampSt(h);
+  S.yard.splice(i,1); S.hero=h; if(h.flag) S.flag=h.flag; ui.revConf=null; sync(h,true); saveState();
+  ui.notice=`${h.name}, 발할라에서 끌려 내려왔다. 다시 피를 볼 시간이다.`; view='card'; ui.tab='stat'; render(); window.scrollTo(0,0); }
 function bury(me,cause){ sync(me,false);
   S.yard.unshift({name:me.name,g:me.g,cm:me.cm,outfit:me.outfit,wins:me.wins,flag:me.flag||'',cause:cause||'전사',t:Date.now()});
   S.yard=S.yard.slice(0,60); S.hero=null; }
@@ -3842,6 +3852,9 @@ app.addEventListener('click',e=>{
   }
   else if(a==='invite'){ ui.code='#'+Array.from({length:4},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[RI(0,31)]).join(''); view='invite'; render(); }
   else if(a==='accept') pracPick();
+  else if(a==='revask'){ ui.revConf=+b.dataset.i; render(); }
+  else if(a==='revno'){ ui.revConf=null; render(); }
+  else if(a==='revive'){ if(ui.isAdmin) reviveYard(+b.dataset.i); }
   else if(a==='challenge'){ if(window.DuelOnline&&DuelOnline.sendTo) DuelOnline.sendTo({uid:b.dataset.uid,id:b.dataset.id,name:b.dataset.name}); }
   else if(a==='inboxOpen'){ if(window.DuelOnline) DuelOnline.open(b.dataset.id); }
   else if(a==='inboxNo'||a==='inboxBlock'){ if(window.DuelOnline&&DuelOnline.declineId) DuelOnline.declineId(b.dataset.id,a==='inboxBlock'); }
@@ -4319,6 +4332,6 @@ function animTick(now){
 requestAnimationFrame(animTick);
 render();
 </script>
-<script src="./online.js?v=10211528"></script>
+<script src="./online.js?v=10211543"></script>
 </body>
 </html>
