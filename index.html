@@ -255,6 +255,7 @@ svg.dead{filter:saturate(.35) brightness(.78)}
 .podium{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:6px;align-items:end;margin:4px 0 12px;padding:10px 4px 6px;background:radial-gradient(ellipse at 50% 30%,rgba(216,118,42,.16),transparent 70%)}
 .podium{position:relative;overflow:hidden}.podium>.seat{position:relative;z-index:2}
 .podium.valh{padding-top:118px;background:linear-gradient(180deg,#9fd2e6 0%,#cfe6df 45%,#efe2b6 100%);border:1px solid #c9a24a}
+.podium.valh .tface{box-shadow:0 0 14px 4px rgba(255,215,110,.55);filter:saturate(1.1) brightness(1.06)}
 .podium.valh .seat .tn,.podium.valh .seat .rnk{text-shadow:0 1px 2px #000,0 0 6px #000}
 .vsky{position:absolute;inset:0;z-index:0;pointer-events:none}
 .vrays{position:absolute;left:50%;top:22%;width:220%;aspect-ratio:1;transform:translate(-50%,-50%);background:repeating-conic-gradient(from 0deg,rgba(255,226,140,.55) 0deg 6deg,rgba(255,226,140,0) 6deg 18deg);-webkit-mask:radial-gradient(circle,#000 0%,transparent 60%);mask:radial-gradient(circle,#000 0%,transparent 60%);animation:vspin 60s linear infinite}
@@ -2986,7 +2987,7 @@ function podium(list,valh,s1){
   const top=list.slice(0,3); if(!top.length) return '';
   const order=[1,0,2].filter(i=>top[i]);
   return `<div class="podium${valh?' valh':''}">${valh?valhallaSky():''}${order.map(i=>{ const e=top[i], r=i+1;
-    return `<button class="seat r${r}" data-act="detail" data-id="${e.id}"${s1?' data-s="1"':''}><div class="tbox">${throneSvg(r,valh)}<div class="tface">${drawPortrait(Object.assign({},e,{flag:''}),!e.alive)}</div>${throneArms(r)}${r===1?'<span class="crown">♛</span>':''}</div><b class="rnk">${r}</b><span class="tn">${e.flag?flagSvg(e.flag,'flgrow'):''}${esc(e.name)}</span><em>${e.kills}킬</em></button>`; }).join('')}</div>`;
+    return `<button class="seat r${r}" data-act="detail" data-id="${e.id}"${s1?' data-s="1"':''}><div class="tbox">${throneSvg(r,valh)}<div class="tface">${drawPortrait(Object.assign({},e,{flag:''}),false)}</div>${throneArms(r)}${r===1?'<span class="crown">♛</span>':''}</div><b class="rnk">${r}</b><span class="tn">${e.flag?flagSvg(e.flag,'flgrow'):''}${esc(e.name)}</span><em>${e.kills}킬</em></button>`; }).join('')}</div>`;
 }
 function rankView(){
   const s1=ui.season===1, valh=ui.realm==='valh';
@@ -2996,7 +2997,7 @@ function rankView(){
   const list=all.filter(e=>valh?!e.alive:e.alive).sort((a,b)=>b.kills-a.kills).slice(0,30);
   const myId=S.hero&&S.hero.id;
   const rows=list.slice(3).map((e,i)=>{ const me=!s1&&e.id===myId;
-    return `<button class="rrow${me?' me':''}${s1?' old':''}" data-act="detail" data-id="${e.id}"${s1?' data-s="1"':''}><span class="rk">${i+4}</span><span class="pt">${drawPortrait(Object.assign({},e,{flag:''}),!e.alive)}</span><span class="rf">${e.flag?flagSvg(e.flag,'flgrow'):'<i class="noflag"></i>'}</span><span class="rn"><b>${esc(e.name)}</b><em>${e.flag&&FLAGN[e.flag]?FLAGN[e.flag]+' · ':''}${esc(e.nick||'')}${me?' · 나':''}</em></span><span class="rkl"><b>${e.kills}</b>킬</span></button>`; }).join('');
+    return `<button class="rrow${me?' me':''}${s1?' old':''}" data-act="detail" data-id="${e.id}"${s1?' data-s="1"':''}><span class="rk">${i+4}</span><span class="pt">${drawPortrait(Object.assign({},e,{flag:''}),false)}</span><span class="rf">${e.flag?flagSvg(e.flag,'flgrow'):'<i class="noflag"></i>'}</span><span class="rn"><b>${esc(e.name)}</b><em>${e.flag&&FLAGN[e.flag]?FLAGN[e.flag]+' · ':''}${esc(e.nick||'')}${me?' · 나':''}</em></span><span class="rkl"><b>${e.kills}</b>킬</span></button>`; }).join('');
   let natHtml='';
   if(!s1){ const nat={}; all.forEach(e=>{ if(!e.flag) return; const n=nat[e.flag]||(nat[e.flag]={k:0,c:0}); n.k+=e.kills; n.c++; });
     const top=Object.entries(nat).sort((a,b)=>b[1].k-a[1].k).slice(0,5);
