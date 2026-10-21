@@ -70,6 +70,16 @@
     finally{ URL.revokeObjectURL(source); }
   }
 
+  // 카카오톡으로 보내기 (PC·폰 모두): 카카오 공유 SDK를 필요할 때만 불러옴
+  const KAKAO_KEY='363a5ec461b3de7d399600c177f25fdf';
+  let kakaoReady=null;
+  function loadKakao(){ if(kakaoReady) return kakaoReady; kakaoReady=new Promise((res,rej)=>{ if(window.Kakao){ res(window.Kakao); return; } const s=document.createElement('script'); s.src='https://t1.kakaocdn.net/kakao_js_sdk/2.8.4/kakao.min.js'; s.crossOrigin='anonymous'; s.onload=()=>res(window.Kakao); s.onerror=()=>{ kakaoReady=null; rej(new Error('kakao-load')); }; document.head.appendChild(s); }); return kakaoReady; }
+  async function kakaoShare(link,hero,letter){
+    const K=await loadKakao(); if(!K.isInitialized()) K.init(KAKAO_KEY);
+    const img=new URL('og.jpg',location.origin+location.pathname).href;
+    K.Share.sendDefault({objectType:'feed',content:{title:`⚔ ${hero.name}의 결투 신청`,description:letter?`"${letter.slice(0,80)}"`:`${fmtH(hero.cm)} · ${hero.wins||0}킬 · 덤비든가 도망치든가`,imageUrl:img,imageWidth:1200,imageHeight:630,link:{mobileWebUrl:link,webUrl:link}},
+      buttons:[{title:'결투장 열기',link:{mobileWebUrl:link,webUrl:link}}]});
+  }
   async function send(copyOnly){
     if(!S.hero){ say('먼저 전사를 만들어 주세요.'); return; }
     if(sending) return;
@@ -118,6 +128,10 @@
       const link=baseUrl()+'?invite='+ref.id+'#duel-id='+ref.id;
       const intro=`⚔ ${S.hero.name}의 결투 신청`+(ui.letter?`\n\n"${ui.letter}"`:'');
       const message=intro+`\n\n${link}`;
+      if(copyOnly==='kakao'){
+        try{ await kakaoShare(link,S.hero,ui.letter||''); say('카카오톡 보내기 창을 열었다. 친구를 골라 보내라.'); return; }
+        catch(error){ console.warn('카카오 공유 실패',error); say('카카오톡 보내기를 열지 못했다. 아래 "결투 링크 복사"로 보내라.'); return; }
+      }
       if(!copyOnly&&navigator.share){
         try{
           const file=await profileShareFile(S.hero);
@@ -448,4 +462,5 @@
   }
   setInterval(()=>{ watch(); if(duelReady&&view!=='battle'&&!ui.duelId&&S.pendingDuel){ checkDuels(); } if(!S.pendingDuel) duelReady=false; },2000);
   watch(); watchInbox();
+  setTimeout(()=>{ loadKakao().catch(()=>{}); },4000); // 버튼 누를 때 바로 뜨게 미리 불러둠 (팝업 차단 방지)
 })();

@@ -9,6 +9,7 @@
 <meta property="og:site_name" content="피의 결투">
 <meta property="og:title" content="피의 결투장이 날아왔다">
 <meta property="og:description" content="도전자의 전사를 확인하고 결투하거나 도주하세요.">
+<meta property="og:image" content="https://dewur-dot.github.io/blood-duel/og.jpg">
 <meta property="og:url" content="https://dewur-dot.github.io/blood-duel/">
 <meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#0E0D0C">
@@ -93,6 +94,7 @@ body.nobody .top,body.nobody .subtabs{display:none}
 @keyframes inboxp{0%,100%{box-shadow:0 0 0 rgba(255,90,40,0)}50%{box-shadow:0 0 18px rgba(255,90,40,.5)}}
 .chbtn{margin:6px 0}
 .pendbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;margin:6px 0;border:1px dashed #8a6a3a;border-radius:8px;background:#1d1610;font-size:13px}.pendbar .linkbtn{padding:2px 6px}
+.kakaobtn{background:#FEE500!important;color:#191919!important;border-color:#FEE500!important;font-weight:800}
 .natpick{padding:18px 4px 30px}.natpick h2{font-family:var(--serif);font-size:24px;text-align:center;margin:6px 0 6px;color:var(--bone)}.natpick .note{text-align:center;margin-bottom:14px}
 .natgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .natbtn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;background:#151110;border:1px solid var(--line);border-radius:3px;color:var(--bone);font:inherit;font-size:13px;cursor:pointer}
@@ -3100,7 +3102,7 @@ function inviteView(){
     `<textarea id="letter" maxlength="200" rows="4" placeholder="적에게 던질 한마디 (최대 200자)">${esc(ui.letter||'')}</textarea>`+
     `<div class="cnt" id="lcnt">${(ui.letter||'').length} / 200</div>`+
     `<div class="note" id="sendmsg">${esc(ui.msg||'')}</div><textarea id="codeshow" rows="3" readonly style="display:none"></textarea></section>`+
-    `<div class="actions"><button class="btn primary" data-act="send">결투장 던지기</button><button class="btn warbtn" data-act="war"><b>전쟁터로 나간다</b><span>배를 타고 적의 해안으로 · 진짜 죽을 수 있다 · 골드·장비·능력치</span></button><button class="btn" data-act="copycode">결투 링크 복사</button>${S.pendingDuel?'<button class="btn" data-act="cancelduel">보낸 결투장 취소</button>':'<button class="btn" data-act="accept">연습 결투</button>'}<button class="btn" data-act="back">돌아가기</button></div>`;
+    `<div class="actions"><button class="btn primary" data-act="send">결투장 던지기</button><button class="btn warbtn" data-act="war"><b>전쟁터로 나간다</b><span>배를 타고 적의 해안으로 · 진짜 죽을 수 있다 · 골드·장비·능력치</span></button><button class="btn kakaobtn" data-act="kakao">카카오톡으로 보내기</button><button class="btn" data-act="copycode">결투 링크 복사</button>${S.pendingDuel?'<button class="btn" data-act="cancelduel">보낸 결투장 취소</button>':'<button class="btn" data-act="accept">연습 결투</button>'}<button class="btn" data-act="back">돌아가기</button></div>`;
 }
 function incomingView(){
   const f=ui.incoming;
@@ -3851,6 +3853,7 @@ app.addEventListener('click',e=>{
     if(!f){ ui.codemsg='코드를 읽지 못했어요. 친구가 보낸 메시지를 통째로 붙여넣어 주세요.'; const e=$('#codemsg'); if(e) e.textContent=ui.codemsg; return; }
     ui.codemsg=''; ui.incoming=f; view='incoming'; render(); window.scrollTo(0,0);
   }
+  else if(a==='kakao'){ const ta=$('#letter'); if(ta) ui.letter=ta.value.slice(0,200); DuelOnline.send('kakao'); }
   else if(a==='copycode'){ const ta=$('#letter'); if(ta) ui.letter=ta.value.slice(0,200); DuelOnline.send(true); }
   else if(a==='skiproll'){ doneRoll(); }
   else if(a==='setnat'){ const v=b.dataset.f; if(FLAGS.includes(v)){ S.flag=v; if(S.hero){ S.hero.flag=v; sync(S.hero,true); } saveState(); } view=ui.incoming?'incoming':'card'; ui.tab='stat'; render(); window.scrollTo(0,0); }
