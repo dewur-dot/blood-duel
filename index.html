@@ -3231,7 +3231,10 @@ function warView(){
 }
 function warRun(){
   const w=ui.war, me=S.hero; if(!w||!me) return; w.name=me.name;
-  const cv=$('#warcv'); const sc=window.BDScenes?BDScenes.War(cv,{heroName:me.name,genName:w.gen.name,genSvg:drawChar(Object.assign({},w.gen,{g:Object.assign({},w.gen.g,{expr:'snarl'})}),false,258)}):null; w.sc=sc;
+  const cv=$('#warcv'); const fighter=()=>{ const h=newHero(); h.cm=RI(160,200); h.g.cm=h.cm; h.outfit=randOutfit(); h.weapon=null; h.g=Object.assign({},h.g,{expr:pick(['angry','snarl','gape','angry'])}); return {svg:drawChar(h,false,258),cm:h.cm}; };
+  const sc=window.BDScenes?BDScenes.War(cv,{heroName:me.name,heroSvg:drawChar(Object.assign({},me,{weapon:null,g:Object.assign({},me.g,{expr:'snarl'})}),false,258),heroCm:me.cm,
+    allies:Array.from({length:8},fighter),foes:Array.from({length:10},fighter),
+    genName:w.gen.name,genCm:w.gen.cm,genSvg:drawChar(Object.assign({},w.gen,{weapon:null,g:Object.assign({},w.gen.g,{expr:'snarl'})}),false,258)}):null; w.sc=sc;
   const later2=(fn,ms)=>{ ui.tms=ui.tms||[]; ui.tms.push(setTimeout(()=>{ if(view==='war'&&ui.war===w) fn(); },ms)); };
   const say=(t,kind)=>{ w.lines.push({t,k:kind}); const lg=$('#wlog'); if(lg){ const p=document.createElement('p'); p.className=kind||''; p.textContent=t; lg.appendChild(p); lg.scrollTop=lg.scrollHeight; } };
   const setBar=()=>{ const b=$('#whp'), v=$('#whpv'), k=$('#wkill'); if(b) b.style.width=Math.max(0,w.hp/me.maxhp*100)+'%'; if(v) v.textContent=Math.max(0,Math.round(w.hp))+' / '+me.maxhp; if(k) k.textContent=w.kills; };
