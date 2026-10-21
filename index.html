@@ -97,6 +97,7 @@ body.nobody .top,body.nobody .subtabs{display:none}
 .revq{display:block;font-size:12px;color:#ffb35c;margin-top:4px}
 .nw5{color:#7ee07e!important}.nw10{color:#5fb0ff!important;text-shadow:0 0 8px rgba(95,176,255,.35)}.nw20{color:#c48bff!important;text-shadow:0 0 10px rgba(196,139,255,.45)}.nw30{color:#ffc94a!important;text-shadow:0 0 12px rgba(255,201,74,.55)}.nw50{color:#ff4a3a!important;text-shadow:0 0 14px rgba(255,60,40,.7),0 0 2px #000;animation:nwp 2s ease-in-out infinite}
 @keyframes nwp{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
+.vhbar{display:flex;justify-content:center}.vhbar .btn{min-width:200px}
 .natpick{padding:18px 4px 30px}.natpick h2{font-family:var(--serif);font-size:24px;text-align:center;margin:6px 0 6px;color:var(--bone)}.natpick .note{text-align:center;margin-bottom:14px}
 .natgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .natbtn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;background:#151110;border:1px solid var(--line);border-radius:3px;color:var(--bone);font:inherit;font-size:13px;cursor:pointer}
@@ -558,7 +559,7 @@ body.bview .after{gap:8px}
 <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
 <script src="./firebase-config.js"></script>
 <script src="./support-config.js?v=10211545"></script>
-<script src="./scenes.js?v=10211558"></script>
+<script src="./scenes.js?v=10211615"></script>
 <script>
 //ENGINE-START
 const RI=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
@@ -3313,6 +3314,9 @@ function vhProps(J){ if(J._props) return J._props; const P={};
   J._props=P; return P; }
 function vhShow(P,which){ ['mug','meat','horn'].forEach(k=>{ if(P[k]) P[k].S=which.includes(k)?[1,1,1]:[0,0,0]; }); }
 function vhPose(p,t,J){ const ph=p.ph+t*6.2, sn=Math.sin(ph), act=p.act, A={};
+  if(p.held){ const sw=clamp2((p.swing||0)*40,-30,30), wob=Math.sin(t*5+p.ph)*6; // 등덜미를 잡혀 축 늘어짐
+    return {A:{free:1,a0:12+wob,a1:-12-wob,e0:-8,e1:-8,z0:8,z1:8,l0:6+sw*0.5+wob,l1:-6+sw*0.5-wob,k0:14,k1:20,ln:22,tw:sw*0.3},R:sw*0.01,props:[]}; }
+  if(p.fall) return {A:{free:1,a0:-120,a1:-130,e0:-20,e1:-20,l0:-20,l1:10,k0:30,k1:20,ln:-10},R:0,props:[]};
   const walk=(sp,amp)=>{ const q=t*2*Math.PI*sp+p.ph, s1=Math.sin(q); return {a0:amp*0.7*s1,a1:-amp*0.7*s1,e0:-30,e1:-30,l0:-amp*s1,l1:amp*s1,k0:amp*0.9*Math.max(0,Math.sin(q-1.1)),k1:amp*0.9*Math.max(0,Math.sin(q-1.1+Math.PI)),ln:amp/6,tw:5*s1}; };
   if(p.moving) return {A:p.act==='run'?walk(1.7,48):walk(1.0,26),R:p.dir>0?1.2:-1.2,props:act==='drink'||act==='sit'?['mug']:[],lower:0};
   if(act==='fight'){ const base={a1:-52,e1:-118,a0:-34,e0:-138,z0:-14,z1:-10,l1:-24,k1:30,l0:14,k0:24,ln:12,tw:12}; const per=1.05, tt=((t+p.ph)%per)/per, nm=['jab','cross','onetwo','jab'][Math.floor((t+p.ph)/per)%4]; const set=KF3[nm]; for(const L in base) A[L]=base[L]; if(set) for(const L in set) A[L]=kfv(set[L],tt);
@@ -3346,17 +3350,32 @@ function vh3dRender(c,W,H,t,batch){
   g3render(figs,{l:0,r:W,b:0,t:H},cw,ch);
   c.save(); c.setTransform(1,0,0,1,0,0); c.drawImage(G3.cv,0,0,c.canvas.width,c.canvas.height); c.restore(); return true; }
 const clamp2=(v,a,b)=>Math.max(a,Math.min(b,v));
+// 부활의 제단: 제물 셋 → 한 명 부활
+function altarDrop(f,zone){ const i=S.yard.indexOf(f.ref); if(i<0) return false;
+  if(zone==='pyre'){ if((S.offer||0)>=3){ toast('제물은 이미 충분하다. 이제 부활의 제단에 한 명을 올려라.'); return false; }
+    S.yard.splice(i,1); S.offer=(S.offer||0)+1; saveState(); setAltarNote(); toast(`${f.name}, 불구덩이에 던져졌다. 제물 ${S.offer}/3`); return true; }
+  if(zone==='altar'){ if((S.offer||0)<3){ toast(`제물이 부족하다. (${S.offer||0}/3) 먼저 불구덩이에 셋을 던져라.`); return false; }
+    const doIt=()=>{ const k=S.yard.indexOf(f.ref); if(k<0) return; if(S.hero) bury(S.hero,'부활의 제단에 자리를 내주고 발할라로 갔다.'); S.offer=(S.offer||0)-3; ui.altar=false; reviveYard(S.yard.indexOf(f.ref)); };
+    if(S.hero){ const ov=document.createElement('div'); ov.className='overlay'; ov.innerHTML=`<div class="sheet prac"><h2>${esc(f.name)}를 되살릴까</h2><p class="note">지금 살아 있는 전사 ${esc(S.hero.name)}는 발할라로 간다.</p><button class="pbtn" data-y="1"><b>되살린다</b><span>${esc(S.hero.name)}는 자리를 내준다</span></button><button class="linkbtn" data-x="1">그만둔다</button></div>`;
+      document.body.append(ov); ov.addEventListener('click',e=>{ if(e.target.closest('[data-y]')){ ov.remove(); doIt(); } else if(e.target===ov||e.target.closest('[data-x]')) ov.remove(); }); return false; }
+    setTimeout(doIt,400); return true; }
+  return false; }
+function toast(m){ const v=$('#vcard'); if(v){ v.hidden=false; v.innerHTML=`<em>${esc(m)}</em>`; } }
+function setAltarNote(){ const n=document.querySelector('.altarnote'); if(n) n.innerHTML=`전사를 눌러 끌어다 놓아라. <b>왼쪽 불구덩이</b>에 제물 셋을 던지면, <b>부활의 제단</b>에 올린 한 명이 되살아난다. 제물로 바친 자는 영원히 사라진다. (모은 제물 ${S.offer||0}/3)`; }
 function valhallaView(){
   const n=(S.yard||[]).length;
   return topbar()+`<section class="vhall"><div class="vhtitle"><h2>발할라</h2><p>${n?`쓰러진 나의 전사 ${n}명이 오딘의 연회장에서 ${n>=8?'떠들썩한 잔치를 벌이고 있다':'술잔을 기울이고 있다'}. 전사를 눌러보라.`:'아직 아무도 오지 않았다. 연회장이 고요하다.'}</p></div>
+    <div class="vhbar"><button class="btn ${ui.altar?'primary':''}" data-act="altar">${ui.altar?'잔치로 돌아간다':'부활의 제단'}</button></div>
+    ${ui.altar?`<p class="note center altarnote">전사를 눌러 끌어다 놓아라. <b>왼쪽 불구덩이</b>에 제물 셋을 던지면, <b>부활의 제단</b>에 올린 한 명이 되살아난다. 제물로 바친 자는 영원히 사라진다. (모은 제물 ${S.offer||0}/3)</p>`:'<p class="note center">전사를 꾹 눌러 끌면 등덜미를 잡아 옮길 수 있다.</p>'}
     <canvas class="vhcv" id="vhcv"></canvas><div class="vcard" id="vcard" hidden></div>
     <div class="actions">${S.hero?'<button class="btn" data-act="back">현생으로 돌아간다</button>':'<button class="btn primary" data-act="roll">생명을 얻는다</button>'}</div></section>`;
 }
 function valhallaRun(){
   const cv=$('#vhcv'); if(!cv||!window.BDScenes) return;
-  const folk=(S.yard||[]).slice(0,USE3D&&G3.ok?30:60).map(y=>{ // 3D는 폰이 버티게 최근 30명까지 const h={name:y.name,g:Object.assign({},y.g,{expr:pick(['grin','grin','smirk','calm'])}),cm:y.cm||175,outfit:y.outfit||{},weapon:null,flag:y.flag||''};
-    return {svg:USE3D&&G3.ok?'':drawChar(h,false,258),hero:h,name:y.name,wins:y.wins||0,cause:y.cause||'',h:Math.pow((y.cm||175)/175,0.5)}; });
-  ui.vh=BDScenes.Valhalla(cv,folk,{render3d:USE3D&&G3.ok?vh3dRender:null,onSelect:f=>{ const v=$('#vcard'); if(!v) return; if(!f){ v.hidden=true; return; } v.hidden=false; v.innerHTML=`<b>${esc(f.name)}</b><span>${f.wins}킬을 남기고 발할라에 왔다</span><em>${esc(f.cause)}</em>`; }});
+  // 3D는 폰이 버티게 최근 30명까지
+  const folk=(S.yard||[]).slice(0,USE3D&&G3.ok?30:60).map(y=>{ const h={name:y.name,g:Object.assign({},y.g,{expr:pick(['grin','grin','smirk','calm'])}),cm:y.cm||175,outfit:y.outfit||{},weapon:null,flag:y.flag||''};
+    return {ref:y,svg:USE3D&&G3.ok?'':drawChar(h,false,258),hero:h,name:y.name,wins:y.wins||0,cause:y.cause||'',h:Math.pow((y.cm||175)/175,0.5)}; });
+  ui.vh=BDScenes.Valhalla(cv,folk,{offerCount:()=>S.offer||0,onDrop:(f,zone)=>altarDrop(f,zone),render3d:USE3D&&G3.ok?vh3dRender:null,onSelect:f=>{ const v=$('#vcard'); if(!v) return; if(!f){ v.hidden=true; return; } v.hidden=false; v.innerHTML=`<b>${esc(f.name)}</b><span>${f.wins}킬을 남기고 발할라에 왔다</span><em>${esc(f.cause)}</em>`; }});
 }
 /* ---------- actions ---------- */
 function roll(){
@@ -3892,7 +3911,8 @@ app.addEventListener('click',e=>{
   else if(a==='war'){ if(!S.hero||S.pendingDuel) { if(S.pendingDuel){ ui.notice='보낸 결투장의 답을 기다리는 동안엔 전쟁에 나갈 수 없다. 위의 "결투장 거두기"로 거둘 수 있다.'; render(); } return; } ui.war=newWar(); view='war'; render(); window.scrollTo(0,0); warRun(); }
   else if(a==='warSkip'){ if(ui.war&&ui.war.skip) ui.war.skip(); }
   else if(a==='warGen'){ const w=ui.war; if(w&&w.phase==='gen'&&S.hero){ w.phase='done'; const ratio=Math.max(0.35,Math.min(1,w.hp/S.hero.maxhp+R(-0.12,0.12))); startFight(w.gen,{war:{kills:w.kills},hp:w.hp,foeHp:w.gen.maxhp*ratio,label:'적장'}); } }
-  else if(a==='valhalla'){ view='valhalla'; render(); window.scrollTo(0,0); valhallaRun(); }
+  else if(a==='altar'){ ui.altar=!ui.altar; render(); valhallaRun(); if(ui.vh&&ui.vh.setAltar) ui.vh.setAltar(ui.altar); }
+  else if(a==='valhalla'){ ui.altar=false; view='valhalla'; render(); window.scrollTo(0,0); valhallaRun(); }
   else if(a==='acceptin'){ if(ui.duelId) DuelOnline.accept(); else { const f=ui.incoming; ui.incoming=null; try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){} startFight(f); } }
   else if(a==='declinein'){ if(ui.duelId) DuelOnline.decline(); else { ui.incoming=null; try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){} view=S.hero?'card':'home'; render(); } }
   else if(a==='joincode'){
@@ -4360,6 +4380,6 @@ function animTick(now){
 requestAnimationFrame(animTick);
 render();
 </script>
-<script src="./online.js?v=10211558"></script>
+<script src="./online.js?v=10211615"></script>
 </body>
 </html>
