@@ -190,6 +190,7 @@ details .sheet{margin-top:10px}
 .wxflash{position:absolute;inset:0;z-index:5;pointer-events:none;background:#f4f6ff;opacity:0}
 .wxflash.on{animation:wxf .7s ease-out}
 @keyframes wxf{0%{opacity:.95}12%{opacity:.2}22%{opacity:.85}100%{opacity:0}}
+.act.beg{transform:translateY(16%) rotate(calc(var(--d,1)*-8deg));transition:transform .5s}
 .verdict.mercyq{background:linear-gradient(180deg,#3a1410,#200a08);border-color:#a8321e;color:#f3e0cc}.verdict.mercyq i{font-style:normal;color:#ffb35c;font-weight:800;font-size:18px}
 .mbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .verdict.mercy{background:linear-gradient(180deg,#e8edf2,#b9c4cf);border-color:#fff;color:#1d2833;margin-top:6px}
@@ -3501,6 +3502,12 @@ function impact(e){
     else if(e.stun) later(()=>act(e.target,'woozy',1500),1100);
   } else if(e.kind==='miss'){
     act(e.target,'dodge',800); pop(e.word,e.target,'word');
+  } else if(e.kind==='kill'&&ui.rep&&ui.rep.mercy==='ask'&&ui.rep.win&&e.target==='B'){
+    // 이긴 자가 목숨을 정하는 동안: 진 놈은 죽지 않고 무릎 꿇은 채 손을 뻗어 빈다
+    const el=$('#a'+e.target); if(el){ el.dataset.beg=performance.now(); act(e.target,'beg',0); }
+    const fi=$('#f'+e.target); if(fi) fi.classList.remove('brawl');
+    pop(pick(['살려다오…!','제발…!','자비를…!']),e.target,'word'); if(e.dmg) pop('-'+e.dmg,e.target,'dmgn',24);
+    stageShake();
   } else if(e.kind==='kill'){
     const r=ui.rep, h=e.target==='A'?r.me:r.foe;
     const f=$('#fig'+e.target); if(f) f.innerHTML=drawChar(h,true,Math.round(hfrac(h.cm)*((ui.stageH||340)-40)));
@@ -3673,7 +3680,11 @@ function mercyDecide(spare,r){
   else if(me) r.plunder=plunderHelm(me,r.foe);
   if(me) sync(me,true);
   if(r.duelId&&window.DuelOnline&&DuelOnline.mercy) DuelOnline.mercy(r.duelId,spare);
-  saveState(); if(view==='battle'&&ui.rep===r) finish();
+  saveState();
+  if(view==='battle'&&ui.rep===r){ const el=$('#aB');
+    if(el) delete el.dataset.beg;
+    if(spare){ if(el) el.classList.remove('beg'); ui.flee={id:'B',t0:performance.now()}; pop('살았다…!','B','word'); finish(); }
+    else { attackAnim('A',r.me.weapon&&r.me.weapon.kind!=='tank'?'w':'punch'); setTimeout(()=>{ if(ui.rep!==r) return; pop(pick(['서걱','콰직','끝이다']),'B','word'); stageShake(); finish(); },560); } }
 }
 function finish(){
   const r=ui.rep, after=$('#after'); if(!after) return;
@@ -3739,7 +3750,7 @@ function closedDuel(text){
 /* ---- 보상 뽑기 룰렛 ---- */
 function gacha(loot){
   const it=gearOf(loot.slot,loot.id); if(!it) return;
-  const pool=CLOTHES.filter(c=>c.slot===loot.slot), N=34, cellW=96;
+  const pool=CLOTHES.filter(c=>c.slot===loot.slot&&!c.fun&&c.tier>=1), N=34, cellW=96;
   const reel=[]; for(let i=0;i<N+4;i++) reel.push(i===N?it:rollGear(loot.slot));
   const title=loot.at===1?'첫 승리 보상 · 투구 뽑기':loot.at===5?'5승 보상 · 갑옷 상의 뽑기':'10승 보상 · 하의 뽑기';
   const ov=document.createElement('div'); ov.className='gacha';
@@ -4056,6 +4067,7 @@ function battle3d(now){
   ['A','B'].forEach(id=>{
     const f=$('#f'+id), a=$('#a'+id), svg=f&&f.querySelector('svg'); if(!f||!a||!svg) return;
     let J=ui.b3[id];
+    if(ui.b3['beg'+id]&&!a.dataset.beg&&J&&J.root) J.root.T=[0,0,0]; // 빌던 자세에서 풀려나면 원래 높이로
     const ko=!!a.dataset.ko;
     if(ko&&!J.dead){ const h0=ui.b3['h'+id], ou=h0.outfit||{}, wk=h0.weapon&&h0.weapon.kind!=='tank'?h0.weapon.kind:null;
       J=ui.b3[id]=build3(Object.assign({},h0,{outfit:Object.assign({},ou,{helm:0}),weapon:wk?null:h0.weapon}),true);
@@ -4115,6 +4127,13 @@ function battle3d(now){
       const ph=now/1000*2*Math.PI/0.46, sn=Math.sin(ph);
       pose3(J,(+f.dataset.int||50)<=10?fighterAngles3(f,now):{a0:45*sn,a1:-45*sn,e0:-85,e1:-85,l0:-50*sn,l1:50*sn,k0:20+70*Math.max(0,Math.sin(ph-1.1)),k1:20+70*Math.max(0,Math.sin(ph-1.1+Math.PI)),ln:18,tw:9*sn,z:6},0);
       figs.push({J,M:M4.mul(M4.T(x,y0,0),M4.S(s,s,s)),des:false,roll:0}); return; }
+    // 목숨 구걸: 무릎 꿇고 이긴 자에게 손을 뻗어 떨면서 빔
+    if(a.dataset.beg&&!ko){ if(!ui.b3['beg'+id]){ const h0=ui.b3['h'+id]; ui.b3[id]=J=build3(Object.assign({},h0,{g:Object.assign({},h0.g,{expr:'sad'})}),false); ui.b3['beg'+id]=1; }
+      const x=f.offsetLeft+sw*cxr+fm.e, yb=Hs-(f.offsetTop+f.offsetHeight)+L.ground*hpx-fm.f, u=(now-(+a.dataset.beg||now))/1000, k=Math.min(1,u/0.6), tr=Math.sin(now/55)*3;
+      J.root.R=[0,id==='A'?0.85:-0.85,0];
+      pose3(J,{free:1,l0:-8*k,k0:115*k,l1:-80*k,k1:95*k,ln:32*k+2*Math.sin(now/400),tw:-6,a1:-20-75*k+tr,e1:-30+15*k,z1:-6,a0:-10*k,e0:-40*k,z0:-12},0);
+      J.root.T=[0,-J.D.legL*0.42*k,0];
+      figs.push({J,M:M4.mul(M4.T(x,yb,0),M4.S(s,s,s)),des:false,roll:0}); return; }
     // 넘어짐: 발이 휙 앞으로 미끄러져 뜨고 → 등으로 콰당 → 바닥을 쭉 미끄러짐 → 주섬주섬 일어남
     if(a.dataset.ac==='trip'&&!ko){ const u=(now-(+a.dataset.at||now))/1000; if(u>=0&&u<1.5){
       const dir=id==='A'?-1:1, ez=t=>1-Math.pow(1-t,2), FL=Math.PI/2*0.93;
