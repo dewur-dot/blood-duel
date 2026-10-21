@@ -3102,7 +3102,7 @@ function inviteView(){
     `<textarea id="letter" maxlength="200" rows="4" placeholder="적에게 던질 한마디 (최대 200자)">${esc(ui.letter||'')}</textarea>`+
     `<div class="cnt" id="lcnt">${(ui.letter||'').length} / 200</div>`+
     `<div class="note" id="sendmsg">${esc(ui.msg||'')}</div><textarea id="codeshow" rows="3" readonly style="display:none"></textarea></section>`+
-    `<div class="actions"><button class="btn primary" data-act="send">결투장 던지기</button><button class="btn warbtn" data-act="war"><b>전쟁터로 나간다</b><span>배를 타고 적의 해안으로 · 진짜 죽을 수 있다 · 골드·장비·능력치</span></button><button class="btn kakaobtn" data-act="kakao">카카오톡으로 보내기</button><button class="btn" data-act="copycode">결투 링크 복사</button>${S.pendingDuel?'<button class="btn" data-act="cancelduel">보낸 결투장 취소</button>':'<button class="btn" data-act="accept">연습 결투</button>'}<button class="btn" data-act="back">돌아가기</button></div>`;
+    `<div class="actions"><button class="btn primary kakaobtn" data-act="send">결투장 던지기 · 카카오톡</button><button class="btn warbtn" data-act="war"><b>전쟁터로 나간다</b><span>배를 타고 적의 해안으로 · 진짜 죽을 수 있다 · 골드·장비·능력치</span></button><button class="btn" data-act="copycode">결투 링크 복사</button>${S.pendingDuel?'<button class="btn" data-act="cancelduel">보낸 결투장 취소</button>':'<button class="btn" data-act="accept">연습 결투</button>'}<button class="btn" data-act="back">돌아가기</button></div>`;
 }
 function incomingView(){
   const f=ui.incoming;

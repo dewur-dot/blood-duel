@@ -128,9 +128,9 @@
       const link=baseUrl()+'?invite='+ref.id+'#duel-id='+ref.id;
       const intro=`⚔ ${S.hero.name}의 결투 신청`+(ui.letter?`\n\n"${ui.letter}"`:'');
       const message=intro+`\n\n${link}`;
-      if(copyOnly==='kakao'){
+      if(!copyOnly||copyOnly==='kakao'){ // 결투장 던지기 = 카카오톡으로 보내기 (안 되면 기기 공유 → 링크 복사)
         try{ await kakaoShare(link,S.hero,ui.letter||''); say('카카오톡 보내기 창을 열었다. 친구를 골라 보내라.'); return; }
-        catch(error){ console.warn('카카오 공유 실패',error); say('카카오톡 보내기를 열지 못했다. 아래 "결투 링크 복사"로 보내라.'); return; }
+        catch(error){ console.warn('카카오 공유 실패',error); }
       }
       if(!copyOnly&&navigator.share){
         try{
