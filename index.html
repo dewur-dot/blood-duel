@@ -95,6 +95,8 @@ body.nobody .top,body.nobody .subtabs{display:none}
 .pendbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;margin:6px 0;border:1px dashed #8a6a3a;border-radius:8px;background:#1d1610;font-size:13px}.pendbar .linkbtn{padding:2px 6px}
 .pbtn.kakaosel{background:#FEE500;border-color:#FEE500;color:#191919}.pbtn.kakaosel span{opacity:.75}
 .revq{display:block;font-size:12px;color:#ffb35c;margin-top:4px}
+.nw5{color:#7ee07e!important}.nw10{color:#5fb0ff!important;text-shadow:0 0 8px rgba(95,176,255,.35)}.nw20{color:#c48bff!important;text-shadow:0 0 10px rgba(196,139,255,.45)}.nw30{color:#ffc94a!important;text-shadow:0 0 12px rgba(255,201,74,.55)}.nw50{color:#ff4a3a!important;text-shadow:0 0 14px rgba(255,60,40,.7),0 0 2px #000;animation:nwp 2s ease-in-out infinite}
+@keyframes nwp{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
 .natpick{padding:18px 4px 30px}.natpick h2{font-family:var(--serif);font-size:24px;text-align:center;margin:6px 0 6px;color:var(--bone)}.natpick .note{text-align:center;margin-bottom:14px}
 .natgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .natbtn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;background:#151110;border:1px solid var(--line);border-radius:3px;color:var(--bone);font:inherit;font-size:13px;cursor:pointer}
@@ -556,7 +558,7 @@ body.bview .after{gap:8px}
 <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
 <script src="./firebase-config.js"></script>
 <script src="./support-config.js?v=10211545"></script>
-<script src="./scenes.js?v=10211552"></script>
+<script src="./scenes.js?v=10211557"></script>
 <script>
 //ENGINE-START
 const RI=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
@@ -925,7 +927,12 @@ function visOut(h){
 function rollGear(slot){ const list=CLOTHES.filter(c=>c.slot===slot&&!c.fun).sort((a,b)=>a.tier-b.tier); let r=Math.random()*100; for(const c of list){ r-=TIER_W[c.tier-1]; if(r<0) return c; } return list[0]; }
 // 얻은 장비: 지금 것보다 좋으면 바로 착용, 아니면 창고(보유 목록)에
 function giveGear(h,it){ h.loot=h.loot||[]; const key=it.slot+':'+it.id; if(!h.loot.includes(key)) h.loot.push(key); h.outfit=h.outfit||{}; const cur=gearOf(it.slot,h.outfit[it.slot]); const better=!cur||it.tier>cur.tier; if(better) h.outfit[it.slot]=it.id; return better; }
-const LOOT_AT={1:'helm',5:'top',10:'bottom'};
+const LOOT_AT={1:'helm',3:'top',5:'bottom',10:'weapon'}; // 연승 보상: 1승 투구 · 3승 갑옷 · 5승 바지 · 10승 무기
+const WEAPON_W={club:45,axe:32,sword:16,maul:7}; // 10승 무기 뽑기 확률(%)
+function rollWeapon(){ const l=WEAPONS.filter(w=>!w.off&&WEAPON_W[w.kind]); let r=Math.random()*100; for(const w of l){ r-=WEAPON_W[w.kind]; if(r<0) return w; } return l[0]; }
+function giveWeapon(h,w){ S.owned=S.owned||[]; if(!S.owned.includes('w:'+w.kind)) S.owned.push('w:'+w.kind); const better=!h.weapon||(w.atk>(h.weapon.atk||0)&&h.weapon.kind!=='tank'); if(better) h.weapon={...w}; return better; }
+// 연승에 따라 이름 색: 5승 초록 · 10승 파랑 · 20승 보라 · 30승 금 · 50승 핏빛
+function winCls(w){ w=w|0; return w>=50?'nw50':w>=30?'nw30':w>=20?'nw20':w>=10?'nw10':w>=5?'nw5':''; }
 // 죽인 상대의 투구 빼앗기
 function plunderHelm(me,foe){ const it=gearOf('helm',foe&&foe.outfit&&foe.outfit.helm); if(!it) return null; const worn=giveGear(me,it); return {slot:'helm',id:it.id,tier:it.tier,worn}; }
 
@@ -1133,7 +1140,7 @@ function grow(h,foe){
   let k=src?LEARN_KEYS.slice().sort((a,b)=>lead(b)-lead(a))[0]:pick(LEARN_KEYS);
   if(src&&lead(k)<=0) k=LEARN_KEYS.slice().sort((a,b)=>(src.st[b]||0)-(src.st[a]||0))[0];
   const mine=h.st[k]||1, theirs=src?(src.st[k]||0):mine+5;
-  const inc=theirs>mine?Math.max(1,Math.min(5,Math.round((theirs-mine)*0.12))):(Math.random()<0.6?1:0);
+  const inc=theirs>mine?Math.max(1,Math.min(7,Math.round((theirs-mine)*0.18))):1;
   const nv=Math.min(STCAP(k),mine+inc); gain[k]=nv-mine; h.st[k]=nv; gain.learn=k;
   if(Math.random()<0.1&&h.st.int<100){ h.st.int++; gain.int=1; } // 지능은 가끔 1씩만
   if(h.g){ const add2=0.12; h.g.bulk=Math.min(8,Math.round(((h.g.bulk||0)+add2)*100)/100); gain.bulk=add2; if(h.g.bulk>=3&&h.tags&&!h.tags.some(t=>t[0]==='레어 · 근육 괴물')) h.tags.unshift(['레어 · 근육 괴물',1]); }
@@ -1141,7 +1148,10 @@ function grow(h,foe){
     h.name=h.realName||nameFor(FLAGS.includes(h.flag)?h.flag:pick(FLAGS),h.g&&h.g.sex); delete h.realName;
     if(h.tags) h.tags=h.tags.filter(t=>t[0]!=='도망친 겁쟁이'); gain.honor=h.name; }
   h.maxhp=h.st.hp; h.hp=h.maxhp; h.wins++;
-  const ls=LOOT_AT[h.wins]; if(ls){ const it=rollGear(ls), worn=giveGear(h,it); gain.loot={slot:it.slot,id:it.id,tier:it.tier,worn,at:h.wins}; }
+  // 5승마다 연승 보정: 아무 능력이나 +2
+  if(h.wins%5===0){ const k2=pick(LEARN_KEYS), v0=h.st[k2]||0, v1=Math.min(STCAP(k2),v0+2); h.st[k2]=v1; gain[k2]=(gain[k2]||0)+(v1-v0); gain.streak=1; }
+  const ls=LOOT_AT[h.wins]; if(ls==='weapon'){ const w=rollWeapon(), worn=giveWeapon(h,w); gain.loot={slot:'weapon',kind:w.kind,worn,at:h.wins}; }
+  else if(ls){ const it=rollGear(ls), worn=giveGear(h,it); gain.loot={slot:it.slot,id:it.id,tier:it.tier,worn,at:h.wins}; }
   return gain;
 }
 function randOutfit(){
@@ -2957,7 +2967,7 @@ function profile(h,opts){
   const alive=opts.alive!==false;
   const slot=opts.mine?`<label class="flagslot${h.flag?' has':''}" title="내 국기 설정"><span>${h.flag?flagSvg(h.flag,'flgbig'):'국기'}</span><select id="flagSel" aria-label="내 국기">${'<option value="">국기 없음</option>'+FLAGS.map(f=>`<option value="${f}"${h.flag===f?' selected':''}>${f} ${FLAGN[f]||''}</option>`).join('')}</select></label>`:'';
   return `<section class="card hero"><div class="pics">${figBox(h,!alive)}<div class="portrait">${USE3D?fig3d(h,!alive,0,'bust'):drawPortrait(opts.mine?Object.assign({},h,{flag:''}):h,!alive)}${slot}</div></div>`+
-    `<h1 class="name">${flg(h)}${esc(h.name)}</h1><div class="nick">${esc(h.nick)}</div>`+
+    `<h1 class="name ${winCls(opts.kills!=null?opts.kills:h.wins)}">${flg(h)}${esc(h.name)}</h1><div class="nick">${esc(h.nick)}</div>`+
     `<div class="meas">${fmtH(h.cm)} · ${fmtKg(h.kg)} · <b>${opts.kills}킬</b>${opts.status?` · ${opts.status}`:''}</div>`+
     (h.tags&&h.tags.length?`<div class="tags">${h.tags.map(t=>`<span class="tag${t[1]?' rare':''}">${t[0]}</span>`).join('')}</div>`:'')+
     (opts.weapon?`<div class="wrow">${weaponLine(h)}</div>`:'')+`<div class="wrow">${outfitLine(h)}</div>`+statSheet(h)+`</section>`+
@@ -3028,7 +3038,7 @@ function podium(list,valh,s1){
   const top=list.slice(0,3); if(!top.length) return '';
   const order=[1,0,2].filter(i=>top[i]);
   return `<div class="podium${valh?' valh':''}">${valh?valhallaSky():''}${order.map(i=>{ const e=top[i], r=i+1;
-    return `<button class="seat r${r}" data-act="detail" data-id="${e.id}"${s1?' data-s="1"':''}><div class="tbox">${throneSvg(r,valh)}<div class="tface">${drawPortrait(Object.assign({},e,{flag:''}),false)}</div>${throneArms(r)}${r===1?'<span class="crown">♛</span>':''}</div><b class="rnk">${r}</b><span class="tn">${e.flag?flagSvg(e.flag,'flgrow'):''}${esc(e.name)}</span><em>${e.kills}킬</em></button>`; }).join('')}</div>`;
+    return `<button class="seat r${r}" data-act="detail" data-id="${e.id}"${s1?' data-s="1"':''}><div class="tbox">${throneSvg(r,valh)}<div class="tface">${drawPortrait(Object.assign({},e,{flag:''}),false)}</div>${throneArms(r)}${r===1?'<span class="crown">♛</span>':''}</div><b class="rnk">${r}</b><span class="tn">${e.flag?flagSvg(e.flag,'flgrow'):''}<span class="${winCls(e.kills)}">${esc(e.name)}</span></span><em>${e.kills}킬</em></button>`; }).join('')}</div>`;
 }
 function rankView(){
   const s1=ui.season===1, valh=ui.realm==='valh';
@@ -3038,7 +3048,7 @@ function rankView(){
   const list=all.filter(e=>valh?!e.alive:e.alive).sort((a,b)=>b.kills-a.kills).slice(0,30);
   const myId=S.hero&&S.hero.id;
   const rows=list.slice(3).map((e,i)=>{ const me=!s1&&e.id===myId;
-    return `<button class="rrow${me?' me':''}${s1?' old':''}" data-act="detail" data-id="${e.id}"${s1?' data-s="1"':''}><span class="rk">${i+4}</span><span class="pt">${drawPortrait(Object.assign({},e,{flag:''}),false)}</span><span class="rf">${e.flag?flagSvg(e.flag,'flgrow'):'<i class="noflag"></i>'}</span><span class="rn"><b>${esc(e.name)}</b><em>${e.flag&&FLAGN[e.flag]?FLAGN[e.flag]+' · ':''}${esc(e.nick||'')}${me?' · 나':''}</em></span><span class="rkl"><b>${e.kills}</b>킬</span></button>`; }).join('');
+    return `<button class="rrow${me?' me':''}${s1?' old':''}" data-act="detail" data-id="${e.id}"${s1?' data-s="1"':''}><span class="rk">${i+4}</span><span class="pt">${drawPortrait(Object.assign({},e,{flag:''}),false)}</span><span class="rf">${e.flag?flagSvg(e.flag,'flgrow'):'<i class="noflag"></i>'}</span><span class="rn"><b class="${winCls(e.kills)}">${esc(e.name)}</b><em>${e.flag&&FLAGN[e.flag]?FLAGN[e.flag]+' · ':''}${esc(e.nick||'')}${me?' · 나':''}</em></span><span class="rkl"><b>${e.kills}</b>킬</span></button>`; }).join('');
   let natHtml='';
   if(!s1){ const nat={}; all.forEach(e=>{ if(!e.flag) return; const n=nat[e.flag]||(nat[e.flag]={k:0,c:0}); n.k+=e.kills; n.c++; });
     const top=Object.entries(nat).sort((a,b)=>b[1].k-a[1].k).slice(0,5);
@@ -3099,7 +3109,7 @@ function inviteView(){
   const h=S.hero;
   return topbar()+`<section class="card panel inv"><h2>결투장 던지기</h2>`+
     `<div class="invp"><div class="portrait">${USE3D?fig3d(h,false,0,'bust'):drawPortrait(h,false)}</div></div>`+
-    `<h1 class="name">${flg(h)}${esc(h.name)}</h1><div class="nick">${esc(h.nick)}</div>`+
+    `<h1 class="name ${winCls(h.wins)}">${flg(h)}${esc(h.name)}</h1><div class="nick">${esc(h.nick)}</div>`+
     `<label class="lbl" for="letter">편지</label>`+
     `<textarea id="letter" maxlength="200" rows="4" placeholder="적에게 던질 한마디 (최대 200자)">${esc(ui.letter||'')}</textarea>`+
     `<div class="cnt" id="lcnt">${(ui.letter||'').length} / 200</div>`+
@@ -3110,7 +3120,7 @@ function incomingView(){
   const f=ui.incoming;
   return topbar()+`<section class="card panel inv"><h2>피의 결투장이 날아왔다</h2>`+
     `<div class="invp"><div class="portrait">${USE3D?fig3d(f,false,0,'bust'):drawPortrait(f,false)}</div></div>`+
-    `<h1 class="name">${flg(f)}${esc(f.name)}</h1><div class="nick">${esc(f.nick)} · ${fmtH(f.cm)} · ${f.wins}킬</div>`+
+    `<h1 class="name ${winCls(f.wins)}">${flg(f)}${esc(f.name)}</h1><div class="nick">${esc(f.nick)} · ${fmtH(f.cm)} · ${f.wins}킬</div>`+
     (f.letter?`<div class="letter">${esc(f.letter).replace(/\n/g,'<br>')}</div>`:'')+`</section>`+
     (S.hero&&S.pendingDuel?`<p class="note center">이 결투를 받으면 ${S.pendingTo?esc(S.pendingTo)+'에게 ':''}보낸 결투장은 자동으로 거둬진다.</p>`:'')+
     (S.hero?`<div class="actions"><button class="btn primary" data-act="acceptin">덤벼라</button><button class="btn" data-act="declinein">등을 보인다 (겁쟁이)</button></div>`
@@ -3147,7 +3157,7 @@ const roman='';
 function battleView(){
   const r=ui.rep;
   const fig=(id,h)=>`<div class="fighter ${id==='A'?'a':'b'}${(h.st.int||50)<=10?' feral':''}" id="f${id}" data-int="${h.st.int||50}"${h.weapon?' data-w="1"':''}><div class="act" id="a${id}"><div class="flip" id="fig${id}">${drawChar(Object.assign({},h,{g:Object.assign({},h.g,{expr:['snarl','grin','gape'].includes(h.g.expr)?h.g.expr:'angry'})}))}</div></div></div>`;
-  return topbar()+`<section class="hud"><div><span class="lbl">내 전사 · ${fmtH(r.me.cm)}</span><div class="nm">${flg(r.me)}${esc(r.me.name)}</div><div class="hpbar"><i id="hpA"></i></div><div class="stbar"><i id="stA"></i></div><div class="hpv" id="hpAv"></div></div><div class="r"><span class="lbl">${esc(r.label||(r.practice?'연습 상대':'친구의 전사'))} · ${fmtH(r.foe.cm)}</span><div class="nm">${flg(r.foe)}${esc(r.foe.name)}</div><div class="hpbar"><i id="hpB"></i></div><div class="stbar"><i id="stB"></i></div><div class="hpv" id="hpBv"></div></div></section>`+
+  return topbar()+`<section class="hud"><div><span class="lbl">내 전사 · ${fmtH(r.me.cm)}</span><div class="nm ${winCls(r.me.wins)}">${flg(r.me)}${esc(r.me.name)}</div><div class="hpbar"><i id="hpA"></i></div><div class="stbar"><i id="stA"></i></div><div class="hpv" id="hpAv"></div></div><div class="r"><span class="lbl">${esc(r.label||(r.practice?'연습 상대':'친구의 전사'))} · ${fmtH(r.foe.cm)}</span><div class="nm ${winCls(r.foe.wins)}">${flg(r.foe)}${esc(r.foe.name)}</div><div class="hpbar"><i id="hpB"></i></div><div class="stbar"><i id="stB"></i></div><div class="hpv" id="hpBv"></div></div></section>`+
     `<section class="stage" id="stage">${stageBg()}${embers()}${fig('A',r.me)}${fig('B',r.foe)}<canvas class="st3d" id="st3d"></canvas><canvas class="wxl" id="wxl"></canvas><div class="wxflash" id="wxflash"></div><div class="fxl" id="fx"></div></section>`+
     `<div class="log" id="log" aria-live="polite"></div><div class="after" id="after"><button class="btn" data-act="skip">바로 끝장내기</button></div>`;
 }
@@ -3727,7 +3737,7 @@ function finish(){
   const wf=$('#f'+w); if(wf){ wf.dataset.ct=performance.now(); wf.classList.add('cheer'); }
   let h='';
   if(r.win){
-    const top=Object.entries(r.gain).filter(([k])=>k!=='bulk'&&k!=='loot'&&k!=='learn'&&k!=='honor').sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>{
+    const top=Object.entries(r.gain).filter(([k])=>k!=='bulk'&&k!=='loot'&&k!=='learn'&&k!=='honor'&&k!=='streak').sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>{
       const nm=SGROUPS.flatMap(g=>g[1]).find(x=>x[0]===k)[1]; return `${nm} +${v}`; });
     h+=`<div class="verdict win"><b>${r.war?(r.fled?'적장이 꽁무니를 뺐다. 전쟁은 우리의 것이다!':r.mercy==='spared'?'적장이 무릎을 꿇었다. 전쟁은 우리의 것이다!':'적장의 목을 베었다. 전쟁은 우리의 것이다!'):r.fled?'놈이 꽁무니를 뺐다.':r.vline||(r.vline=pick(WIN_LINES))}</b><span>${r.wins}킬 · ${(()=>{ const k=r.gain.learn, v=r.gain[k]||0, nm=k&&(SGROUPS.flatMap(g=>g[1]).find(x=>x[0]===k)||[])[1]; return k?(v>0?`놈에게서 ${nm}을(를) 배웠다 +${v}`:`놈의 ${nm}에서 더 배울 게 없었다`):top.join(' · '); })()}${r.gold?` · <b class="gold">+${fmtG(r.gold)}</b>`:''}</span></div>`;
     if(r.mercy==='spared') h+=`<div class="verdict mercy"><b>목숨만은 살려줬다</b><span>${esc(r.foe.name)}, 땅에 이마를 찧으며 기어서 도망쳤다.${r.ransom?` 몸값 +${r.ransom} 골드`:''}</span></div>`;
@@ -3770,11 +3780,27 @@ function closedDuel(text){
   ov.addEventListener('click',()=>{ ov.classList.add('out'); setTimeout(()=>ov.remove(),250); ui.incoming=null; ui.duelId=null; if(view==='incoming'){ view=S.hero?'card':'home'; render(); } });
 }
 /* ---- 보상 뽑기 룰렛 ---- */
+function gachaWeapon(loot){
+  const it=WEAPONS.find(w=>w.kind===loot.kind); if(!it) return; const N=34, cellW=96, rk=k=>({club:1,axe:2,sword:3,maul:4})[k]||1, TC=['#bdbdbd','#5fb35f','#4d8fe2','#b05be0'];
+  const reel=[]; for(let i=0;i<N+4;i++) reel.push(i===N?it:rollWeapon());
+  const ov=document.createElement('div'); ov.className='gacha';
+  ov.innerHTML=`<div class="gbox"><h3>${loot.at}승 보상 · 무기 뽑기</h3><div class="gwin"><div class="gmark"></div><div class="greel">${reel.map(w=>`<div class="gcell" style="--tc:${TC[rk(w.kind)-1]}">${weaponIcon(w.kind)}<i>${esc(w.name)}</i></div>`).join('')}</div></div>`+
+    `<div class="gres"></div><div class="godds">${WEAPONS.filter(w=>WEAPON_W[w.kind]).map(w=>`<span style="color:${TC[rk(w.kind)-1]}">${esc(w.name)} ${WEAPON_W[w.kind]}%</span>`).join(' · ')}</div><button class="btn primary gok" disabled>뽑는 중…</button></div>`;
+  document.body.appendChild(ov);
+  const strip=ov.querySelector('.greel'), win=ov.querySelector('.gwin'), W=win.clientWidth, target=N*cellW+cellW/2-W/2+(Math.random()-0.5)*cellW*0.6, D=4200, t0=performance.now(), ease=x=>1-Math.pow(1-x,4);
+  (function step(now){ const x=Math.min(1,(now-t0)/D); strip.style.transform=`translateX(${-target*ease(x)}px)`;
+    if(x<1) requestAnimationFrame(step);
+    else { strip.children[N].classList.add('hit'); ov.classList.add(rk(it.kind)>=4?'epic':'done');
+      ov.querySelector('.gres').innerHTML=`<b style="color:${TC[rk(it.kind)-1]}">${esc(it.name)}</b><span>공격 +${it.atk} · ${loot.worn?'바로 손에 쥐었다':'지금 무기가 더 좋아서 창고에 넣었다'}</span>`;
+      const b=ov.querySelector('.gok'); b.disabled=false; b.textContent='받는다'; } })(t0);
+  ov.addEventListener('click',e=>{ if(e.target.classList.contains('gok')&&!e.target.disabled){ ov.remove(); if(view!=='battle') render(); } });
+}
 function gacha(loot){
+  if(loot.slot==='weapon') return gachaWeapon(loot);
   const it=gearOf(loot.slot,loot.id); if(!it) return;
   const pool=CLOTHES.filter(c=>c.slot===loot.slot&&!c.fun&&c.tier>=1), N=34, cellW=96;
   const reel=[]; for(let i=0;i<N+4;i++) reel.push(i===N?it:rollGear(loot.slot));
-  const title=loot.at===1?'첫 승리 보상 · 투구 뽑기':loot.at===5?'5승 보상 · 갑옷 상의 뽑기':'10승 보상 · 하의 뽑기';
+  const title=loot.slot==='helm'?`${loot.at}승 보상 · 투구 뽑기`:loot.slot==='top'?`${loot.at}승 보상 · 갑옷 뽑기`:`${loot.at}승 보상 · 바지 뽑기`;
   const ov=document.createElement('div'); ov.className='gacha';
   ov.innerHTML=`<div class="gbox"><h3>${title}</h3><div class="gwin"><div class="gmark"></div><div class="greel">${reel.map(c=>`<div class="gcell" style="--tc:${TIER_C(c.tier)}">${itemIcon(c)}<i>${c.tier}</i></div>`).join('')}</div></div>`+
     `<div class="gres"></div><div class="godds">${pool.sort((a,b)=>a.tier-b.tier).map(c=>`<span style="color:${TIER_C(c.tier)}">${c.tier}단계 ${TIER_W[c.tier-1]}%</span>`).join(' · ')}</div><button class="btn primary gok" disabled>뽑는 중…</button></div>`;
@@ -4334,6 +4360,6 @@ function animTick(now){
 requestAnimationFrame(animTick);
 render();
 </script>
-<script src="./online.js?v=10211552"></script>
+<script src="./online.js?v=10211557"></script>
 </body>
 </html>
