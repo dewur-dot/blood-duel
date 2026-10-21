@@ -71,41 +71,23 @@ svg{overflow:visible}
 .quake{animation:quake .07s linear infinite}
 @keyframes quake{0%{transform:translate(0,0)}25%{transform:translate(calc(var(--qa,4px)*-1),calc(var(--qa,4px)*.6))}50%{transform:translate(var(--qa,4px),calc(var(--qa,4px)*-.5))}75%{transform:translate(calc(var(--qa,4px)*-.6),calc(var(--qa,4px)*-.8))}100%{transform:translate(calc(var(--qa,4px)*.7),calc(var(--qa,4px)*.5))}}
 body.nobody .top,body.nobody .subtabs{display:none}
-.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:2px 0 8px}
-.mode{display:flex;flex-direction:column;gap:3px;align-items:flex-start;padding:12px;border:1px solid var(--line2);border-radius:10px;color:var(--bone);font:inherit;text-align:left;cursor:pointer}
-.mode b{font-family:var(--serif);font-size:19px}.mode span{font-size:12px;opacity:.8}
-.mode.war{background:linear-gradient(160deg,#4a1d14,#22100c)}.mode.vh{background:linear-gradient(160deg,#7a5a1c,#2c2010);border-color:#b8892a}
 .overlay{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.72);display:grid;place-items:center;padding:16px}
 .sheet.prac{width:min(420px,100%);background:#171210;border:1px solid var(--line2);padding:18px;display:flex;flex-direction:column;gap:8px}
 .sheet.prac h2{font-family:var(--serif);margin:0;color:var(--bone)}
 .pbtn{display:flex;flex-direction:column;gap:2px;align-items:flex-start;padding:12px;background:#221a16;border:1px solid var(--line);color:var(--bone);font:inherit;text-align:left;cursor:pointer;border-radius:6px}
 .pbtn b{font-size:16px}.pbtn span{font-size:12px;opacity:.8}.pbtn.odin{background:linear-gradient(160deg,#3a2c0e,#1a1306);border-color:#c9a24a}.pbtn.odin b{color:#f6d36b}
-.war h3{font-family:var(--serif);font-size:15px;margin:12px 0 6px;color:var(--ember)}
-.wallies{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.wally{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;text-align:center}.wally .pt{width:100%;aspect-ratio:1;overflow:hidden;border:1px solid var(--line)}.wally .pt svg{width:100%;height:100%}.wally b{display:flex;gap:3px;align-items:center;overflow:hidden;white-space:nowrap;max-width:100%}
-.wgen{display:flex;gap:10px;align-items:center;padding:8px;border:1px solid #7a2a1a;background:#2a1210}.wgen .pt{width:64px;height:64px;overflow:hidden}.wgen .pt svg{width:100%;height:100%}.wgen div{display:flex;flex-direction:column;gap:2px}.wgen b{display:flex;gap:4px;align-items:center;font-size:16px}.wgen span{font-size:12px;opacity:.8}
-.whud{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:13px;margin-bottom:8px}.whud .hpbar{height:10px}
-.wfield{position:relative;height:200px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(180deg,#9fb2c2 0%,#c9c2a8 52%,#7a6040 53%,#5a4428 100%)}
-.wline{position:absolute;bottom:10px;display:flex;flex-wrap:wrap-reverse;gap:0 1px;width:52%}.wline.a{left:-4%;fill:#1f3352;stroke:#1f3352}.wline.b{right:-4%;flex-direction:row-reverse;fill:#6a1e14;stroke:#6a1e14}.wline.b .sold{transform:scaleX(-1)}
-.sold{width:17%;height:auto;animation:sbob .5s ease-in-out infinite alternate;animation-delay:calc(var(--i)*-.13s)}
-@keyframes sbob{to{translate:0 -3px}}
-.clash .wline.a{animation:charA 1.1s ease-in-out infinite alternate}.clash .wline.b{animation:charB 1.1s ease-in-out infinite alternate}
-@keyframes charA{from{transform:translateX(0)}to{transform:translateX(9%)}}@keyframes charB{from{transform:translateX(0)}to{transform:translateX(-9%)}}
-.wdust{position:absolute;bottom:0;width:40%;height:50px;border-radius:50%;background:rgba(160,130,90,.45);filter:blur(10px);opacity:0}.clash .wdust{opacity:1;animation:dust 2.4s ease-in-out infinite}.wdust.d1{left:20%}.wdust.d2{left:40%;animation-delay:-1.2s}
-@keyframes dust{0%,100%{transform:scale(.8)}50%{transform:scale(1.2) translateY(-10px)}}
-.wspark{position:absolute;left:50%;bottom:60px;width:6px;height:6px;border-radius:50%;background:#ffe9a8;box-shadow:0 0 10px 4px #ffb44a;opacity:0}.clash .wspark{animation:spark 1.1s infinite}.wspark.s2{left:44%;bottom:80px;animation-delay:.4s}.wspark.s3{left:56%;bottom:50px;animation-delay:.75s}
-@keyframes spark{0%,60%{opacity:0;transform:scale(.4)}70%{opacity:1;transform:scale(1.4)}100%{opacity:0;transform:scale(.2)}}
 .wlog{max-height:200px;overflow:auto;margin-top:8px}
-.vhall{position:relative;min-height:calc(100vh - 80px);overflow:hidden;border:1px solid #c9a24a;margin-top:6px}
-.vhsky{position:absolute;inset:0}.vhsky .vsky{background:linear-gradient(180deg,#9fd2e6 0%,#cfe6df 40%,#efe2b6 100%)}
-.vhin{position:relative;z-index:2;padding:14px 10px 20px;display:flex;flex-direction:column;gap:8px}
-.vhin h2{font-family:var(--serif);font-size:30px;text-align:center;margin:4px 0 0;color:#5a3a0a;text-shadow:0 0 12px rgba(255,240,180,.9)}
-.vhin>p{text-align:center;color:#3a2a10;font-size:13px;margin:0 0 120px}
-.vfolks{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;gap:2px 6px;position:relative;z-index:2}
-.vfolk{display:flex;flex-direction:column;align-items:center;background:none;border:0;padding:0;font:inherit;cursor:pointer;width:72px;animation:vbob 2.6s ease-in-out infinite;animation-delay:var(--d)}
-.vfolk svg{height:auto;max-width:100%}.vfolk b{font-size:11px;color:#2a1a06;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;background:rgba(255,245,210,.75);padding:0 4px;border-radius:3px}.vfolk em{font-style:normal;font-size:11px;color:#8a3a10;font-weight:700}
-@keyframes vbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-.vtable{height:14px;margin:0 6% -6px;background:linear-gradient(180deg,#7a4e22,#4a2c12);border-radius:3px;box-shadow:0 4px 0 #2a180a}
-.vcard{position:relative;z-index:3;margin:0 auto;max-width:320px;display:flex;flex-direction:column;gap:2px;align-items:center;text-align:center;background:rgba(30,20,8,.88);border:1px solid #c9a24a;color:#f6e8c0;padding:10px 14px;border-radius:6px}.vcard b{font-family:var(--serif);font-size:18px}.vcard em{font-style:normal;font-size:12px;opacity:.85}
+[hidden]{display:none!important}
+.vcard{position:relative;margin:0 auto;max-width:320px;display:flex;flex-direction:column;gap:2px;align-items:center;text-align:center;background:rgba(30,20,8,.88);border:1px solid #c9a24a;color:#f6e8c0;padding:10px 14px;border-radius:6px}.vcard b{font-family:var(--serif);font-size:18px}.vcard em{font-style:normal;font-size:12px;opacity:.85}
+.warbtn{display:flex;flex-direction:column;gap:2px;align-items:center;background:linear-gradient(180deg,#3a1a10,#1e0d08);border-color:#8a3a1e}.warbtn b{font-family:var(--serif);font-size:18px;color:#ffb35c}.warbtn span{font-size:11px;opacity:.8}
+.vhbanner{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;margin:2px 0 10px;padding:16px 10px;border:1px solid #c9a24a;border-radius:12px;background:radial-gradient(ellipse at 50% 0%,#fff2c0 0%,#e9c766 35%,#8a6418 100%);color:#2a1806;font:inherit;cursor:pointer;box-shadow:0 0 24px rgba(233,199,102,.35)}
+.vhbanner b{font-family:var(--serif);font-size:26px;letter-spacing:.1em;text-shadow:0 1px 0 rgba(255,255,255,.6)}.vhbanner span{font-size:12px}
+.warwrap{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.warcv{display:block;width:100%;height:min(62vh,480px);border:1px solid #3a2a1c;border-radius:4px;background:#222}
+.whud{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;font-size:13px}.whud .hpbar{height:10px}.whud .wk{color:#ffb35c}
+.vhall{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.vhtitle{text-align:center}.vhtitle h2{font-family:var(--serif);font-size:30px;margin:4px 0 0;color:#f6d36b;text-shadow:0 0 14px rgba(246,211,107,.6)}.vhtitle p{font-size:13px;opacity:.85;margin:4px 0 0}
+.vhcv{display:block;width:100%;height:min(72vh,560px);border:1px solid #c9a24a;border-radius:6px;cursor:pointer;background:#cfe6df}
 .natpick{padding:18px 4px 30px}.natpick h2{font-family:var(--serif);font-size:24px;text-align:center;margin:6px 0 6px;color:var(--bone)}.natpick .note{text-align:center;margin-bottom:14px}
 .natgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .natbtn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;background:#151110;border:1px solid var(--line);border-radius:3px;color:var(--bone);font:inherit;font-size:13px;cursor:pointer}
@@ -537,7 +519,6 @@ canvas.v3d{display:block}
 @keyframes proj{0%{transform:translate(0,0);opacity:1}100%{transform:translate(var(--dx),var(--dy));opacity:.15}}
 @keyframes projArc{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(calc(var(--dx)*.5),calc(var(--dy)*.5 - 40px)) rotate(300deg)}100%{transform:translate(var(--dx),var(--dy)) rotate(620deg)}}
 .dustc{position:absolute;border-radius:50%;pointer-events:none;background:radial-gradient(circle at 45% 45%,rgba(222,196,140,.95),rgba(186,152,96,.75) 40%,rgba(150,118,70,.35) 65%,rgba(120,95,60,0) 72%);filter:blur(1.5px);opacity:0;animation:dustc 1.25s ease-out forwards}
-@keyframes dustc{0%{transform:translate(0,0) scale(.25);opacity:.95}35%{opacity:.9}100%{transform:translate(var(--rx),-26px) scale(2.1);opacity:0}}
 .hpv{line-height:1.2}
 /* 결투 화면: 휴대폰 한 화면에 체력바~끝장내기 버튼까지 다 들어가게 */
 body.bview{padding-top:max(6px,env(safe-area-inset-top,0px));padding-bottom:max(8px,env(safe-area-inset-bottom,0px))}
@@ -567,6 +548,7 @@ body.bview .after{gap:8px}
 <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
 <script src="./firebase-config.js"></script>
 <script src="./support-config.js"></script>
+<script src="./scenes.js"></script>
 <script>
 //ENGINE-START
 const RI=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
@@ -2970,7 +2952,7 @@ function subtabs(){ const t=ui.tab||'stat'; return `<nav class="subtabs" aria-la
 function recordHtml(){
   const h=S.hero, best=Math.max(h?h.wins:0,...S.yard.map(y=>y.wins||0),0);
   const box=(n,l)=>`<div class="rec"><b>${n}</b><span>${l}</span></div>`;
-  let o=`<section class="card panel"><h2>전사의 여정</h2><div class="recs">${box(S.fights||0,'벌인 결투')}${box(h?h.wins:0,'지금 전사의 처치')}${box(best,'역대 최다 학살')}${box(S.yard.length,'묻힌 전사')}</div></section>`;
+  let o=`<button class="vhbanner" data-act="valhalla"><b>발할라</b><span>${S.yard.length?`쓰러진 전사 ${S.yard.length}명이 잔치를 벌이고 있다`:'아직 아무도 오지 않은 오딘의 연회장'}</span></button><section class="card panel"><h2>전사의 여정</h2><div class="recs">${box(S.fights||0,'벌인 결투')}${box(h?h.wins:0,'지금 전사의 처치')}${box(best,'역대 최다 학살')}${box(S.yard.length,'묻힌 전사')}</div></section>`;
   if(!S.yard.length) return o+`<p class="note center">묘지가 아직 비어 있다. 오래가진 않을 것이다.</p>`;
   return o+`<section class="yard"><h2>전사들의 묘지</h2>`+S.yard.map((y,i)=>
     `<div class="stone"><div>${fig3d({g:y.g,name:y.name,weapon:null,outfit:y.outfit},true,Math.round(hfrac(y.cm||175)*110),'static')}</div><div><b>${S.yard.length-i}대 · ${esc(y.name)}</b><span>${y.wins}킬 · ${esc(y.cause)}</span></div></div>`).join('')+`</section>`;
@@ -2990,7 +2972,7 @@ function cardView(){
   const h=S.hero, t=ui.tab||'stat';
   let body='';
   if(t==='stat'){
-    body=h?fightBig()+`<div class="modes"><button class="mode war" data-act="war"><b>전쟁터</b><span>동료와 함께 진격 · 진짜 죽는다</span></button><button class="mode vh" data-act="valhalla"><b>발할라</b><span>쓰러진 내 전사 ${S.yard.length}명</span></button></div>`+profile(h,{kills:h.wins,weapon:true,mine:true})+codeBox()
+    body=h?fightBig()+profile(h,{kills:h.wins,weapon:true,mine:true})+codeBox()
       :'';
   } else if(t==='shop') body=h?shopHtml():`<p class="note center">육신도 없는 놈이 뭘 사겠다고. 먼저 태어나라.</p>`;
   else if(t==='record') body=recordHtml();
@@ -3102,7 +3084,7 @@ function inviteView(){
     `<textarea id="letter" maxlength="200" rows="4" placeholder="적에게 던질 한마디 (최대 200자)">${esc(ui.letter||'')}</textarea>`+
     `<div class="cnt" id="lcnt">${(ui.letter||'').length} / 200</div>`+
     `<div class="note" id="sendmsg">${esc(ui.msg||'')}</div><textarea id="codeshow" rows="3" readonly style="display:none"></textarea></section>`+
-    `<div class="actions"><button class="btn primary" data-act="send">결투장 던지기</button><button class="btn" data-act="copycode">결투 링크 복사</button>${S.pendingDuel?'<button class="btn" data-act="cancelduel">보낸 결투장 취소</button>':'<button class="btn" data-act="accept">연습 결투</button>'}<button class="btn" data-act="back">돌아가기</button></div>`;
+    `<div class="actions"><button class="btn primary" data-act="send">결투장 던지기</button><button class="btn warbtn" data-act="war"><b>전쟁터로 나간다</b><span>배를 타고 적의 해안으로 · 진짜 죽을 수 있다 · 골드·장비·능력치</span></button><button class="btn" data-act="copycode">결투 링크 복사</button>${S.pendingDuel?'<button class="btn" data-act="cancelduel">보낸 결투장 취소</button>':'<button class="btn" data-act="accept">연습 결투</button>'}<button class="btn" data-act="back">돌아가기</button></div>`;
 }
 function incomingView(){
   const f=ui.incoming;
@@ -3232,66 +3214,62 @@ function pracPick(){
     if(e.target===ov||e.target.closest('[data-x]')) ov.remove(); });
 }
 
-/* ---------- 전쟁터: 동료들과 패싸움 → 적장과 1:1 (진짜 죽을 수 있음) ---------- */
-const SOLDIER=`<path d="M10 4a4 4 0 1 1 0 8a4 4 0 1 1 0-8z M6 13 L14 13 L16 28 L13 28 L12 40 L9 40 L8 28 L4 28 Z" /><path d="M17 2 L17 40" stroke-width="1.6" fill="none"/><ellipse cx="4" cy="20" rx="4" ry="7"/>`;
+/* ---------- 전쟁터: 배를 타고 건너가 뒤엉켜 싸우다 적장과 1:1 (진짜 죽을 수 있음) ---------- */
 function newWar(){
-  const me=S.hero, pool=boardList().filter(e=>e.alive&&e.id!==me.id&&!e.sample).slice(0,40);
-  const allies=[]; for(let i=0;i<4;i++){ const e=pool.length?pool.splice(Math.floor(Math.random()*pool.length),1)[0]:null; allies.push(e?{name:e.name,g:e.g,cm:e.cm,outfit:e.outfit,flag:e.flag||''}:(()=>{ const h=newHero(); h.flag=me.flag||''; return {name:h.name,g:h.g,cm:h.cm,outfit:randOutfit(),flag:h.flag}; })()); }
+  const me=S.hero;
   let gen=makeFoe(me.name); scaleFoe(gen,me,0.82+Math.random()*0.26); gen.cm=Math.max(gen.cm,Math.round((me.cm||175)*(0.95+Math.random()*0.15))); gen.g.cm=gen.cm; gen.g.armOk=[true,true]; gen.g.legOk=[true,true];
   if(!gen.weapon){ const wp=pick(WEAPONS.filter(w=>!w.off)); gen.weapon={...wp}; } gen.outfit=Object.assign({},gen.outfit,{helm:gen.outfit.helm||rollGear('helm').id});
   gen.nick='적장'; gen.flag=pick(FLAGS.filter(f=>f!==me.flag));
-  const foeN=RI(30,90), allyN=foeN+RI(-10,10);
-  return {phase:'intro',allies,gen,foeN,allyN,kills:0,hp:me.maxhp,lines:[],place:pick(['피의 강가','까마귀 언덕','얼어붙은 협곡','불타는 마을','늑대의 숲','해골 평원'])};
+  return {phase:'sail',gen,kills:0,hp:me.maxhp,lines:[]};
 }
 function warView(){
-  const w=ui.war, me=S.hero; if(!w||!me) return topbar()+`<p class="note center">전쟁이 끝났다.</p><button class="btn" data-act="back">돌아간다</button>`;
-  const ally=a=>`<div class="wally"><span class="pt">${drawPortrait(Object.assign({},a,{flag:''}),false)}</span><b>${a.flag?flagSvg(a.flag,'flgrow'):''}${esc(a.name)}</b></div>`;
-  if(w.phase==='intro') return topbar()+`<section class="card panel war"><h2>전쟁터 · ${esc(w.place)}</h2><p class="note">아군 ${w.allyN}명과 적군 ${w.foeN}명이 맞붙는다. 난전 속에선 누구든 죽을 수 있다. 끝까지 살아남아 적장의 목을 베어라.</p>
-    <h3>함께 싸울 동료</h3><div class="wallies">${w.allies.map(ally).join('')}</div>
-    <h3>적장</h3><div class="wgen"><span class="pt">${drawPortrait(Object.assign({},w.gen,{flag:''}),false)}</span><div><b>${w.gen.flag?flagSvg(w.gen.flag,'flgrow'):''}${esc(w.gen.name)}</b><span>${fmtH(w.gen.cm)} · ${esc(w.gen.weapon.name)}</span></div></div>
-    <div class="actions"><button class="btn primary" data-act="warGo">돌격하라!</button><button class="btn" data-act="back">아직은 때가 아니다</button></div></section>`;
-  const rows=n=>Array.from({length:n},(_,i)=>`<svg class="sold" style="--i:${i}" viewBox="0 0 20 42">${SOLDIER}</svg>`).join('');
-  const pct=Math.max(0,w.hp/me.maxhp*100);
-  return topbar()+`<section class="card panel war"><h2>전쟁터 · ${esc(w.place)}</h2><div class="whud"><span>${esc(me.name)}</span><div class="hpbar"><i style="width:${pct}%"></i></div><span>${Math.max(0,Math.round(w.hp))} / ${me.maxhp}</span></div>
-    <div class="wfield${w.phase==='melee'?' clash':''}"><div class="wsky"></div><div class="wline a">${rows(12)}</div><div class="wline b">${rows(12)}</div><i class="wdust d1"></i><i class="wdust d2"></i><i class="wspark s1"></i><i class="wspark s2"></i><i class="wspark s3"></i></div>
-    <div class="log wlog" id="wlog">${w.lines.map(l=>`<p class="${l.k||''}">${esc(l.t)}</p>`).join('')}</div>
-    <div class="actions" id="wact">${w.phase==='gen'?`<p class="note">적군이 무너진다! 적장 ${esc(w.gen.name)}이(가) 도끼를 들고 앞으로 나섰다. 내 처치 ${w.kills}명.</p><button class="btn primary" data-act="warGen">적장과 맞선다</button>`:w.phase==='dead'?`<button class="btn primary" data-act="roll">다시 태어난다</button><button class="btn" data-act="valhalla">발할라로 간다</button>`:''}</div></section>`;
+  const w=ui.war, me=S.hero; if(!w) return topbar()+`<p class="note center">전쟁이 끝났다.</p><button class="btn" data-act="back">돌아간다</button>`;
+  const mh=me?me.maxhp:1;
+  return topbar()+`<section class="warwrap"><canvas class="warcv" id="warcv"></canvas>
+    <div class="whud"><b>${esc(me?me.name:w.name||'')}</b><div class="hpbar"><i id="whp" style="width:${Math.max(0,w.hp/mh*100)}%"></i></div><span id="whpv">${Math.max(0,Math.round(w.hp))} / ${mh}</span><span class="wk">처치 <b id="wkill">${w.kills}</b></span></div>
+    <div class="log wlog" id="wlog"></div><div class="actions" id="wact"></div></section>`;
 }
-function warMelee(){
-  const w=ui.war, me=S.hero; w.phase='melee'; render();
-  const A=w.allies, steps=RI(7,10); let k=0;
+function warRun(){
+  const w=ui.war, me=S.hero; if(!w||!me) return; w.name=me.name;
+  const cv=$('#warcv'); const sc=window.BDScenes?BDScenes.War(cv,{heroName:me.name,genName:w.gen.name,genSvg:drawChar(Object.assign({},w.gen,{g:Object.assign({},w.gen.g,{expr:'snarl'})}),false,258)}):null; w.sc=sc;
+  const later2=(fn,ms)=>{ ui.tms=ui.tms||[]; ui.tms.push(setTimeout(()=>{ if(view==='war'&&ui.war===w) fn(); },ms)); };
   const say=(t,kind)=>{ w.lines.push({t,k:kind}); const lg=$('#wlog'); if(lg){ const p=document.createElement('p'); p.className=kind||''; p.textContent=t; lg.appendChild(p); lg.scrollTop=lg.scrollHeight; } };
-  const setBar=()=>{ const b=document.querySelector('.whud .hpbar i'), v=document.querySelector('.whud span:last-child'); if(b) b.style.width=Math.max(0,w.hp/me.maxhp*100)+'%'; if(v) v.textContent=Math.max(0,Math.round(w.hp))+' / '+me.maxhp; };
-  say(pick(['뿔나팔이 울린다! 방패벽이 부딪친다!','함성과 함께 양군이 뒤엉켰다!','오딘을 위하여! 전사들이 진흙탕으로 돌진한다!']),'info');
-  const tick=()=>{ if(view!=='war'||ui.war!==w) return;
-    k++; const r=Math.random(), al=pick(A).name;
-    if(Math.random()<0.006*(1+k/6)){ // 난전 속 불의의 죽음 (낮은 확률)
-      const cause=pick([`난전 속에서 등 뒤로 창이 박혔다.`,`어디선가 날아온 화살이 목을 꿰뚫었다.`,`발밑의 시체에 걸려 넘어진 순간, 도끼가 내려왔다.`]);
-      w.hp=0; setBar(); say(`${me.name}, ${cause}`,'kill'); return warDie(cause); }
-    if(r<0.38){ const n=Math.random()<0.25?2:1; w.kills+=n; say(n>1?`${me.name}, 적 둘을 한꺼번에 베어 넘겼다!`:pick([`${me.name}, 적 병사의 투구째 머리를 쪼갰다!`,`${me.name}, 방패로 밀쳐 넘어뜨리고 숨통을 끊었다!`,`${me.name}의 일격에 적 병사가 피를 뿜으며 쓰러졌다!`]),'hit'); }
-    else if(r<0.66){ const d=Math.max(1,Math.round(me.maxhp*R(0.04,0.13)*(1-Math.min(0.5,(me.st.def||0)/400)))); w.hp-=d; setBar();
-      say(pick([`적의 창끝이 ${me.name}의 옆구리를 스쳤다. (-${d})`,`화살 한 대가 어깨에 박혔다. (-${d})`,`뒤에서 날아온 몽둥이에 뒤통수를 맞았다. (-${d})`,`방패가 쪼개지며 팔이 저린다. (-${d})`]),'crit');
-      if(w.hp<=0) return warDie('전쟁터의 난전 속에서 쓰러졌다.'); }
-    else if(r<0.86) say(pick([`동료 ${al}, 적 셋을 상대로 버티고 있다!`,`동료 ${al}의 도끼가 적 병사를 두 동강 냈다!`,`동료 ${al}, "등 뒤는 내가 지킨다!"`,`동료 ${al}, 적 깃발을 쓰러뜨렸다!`]),'info');
-    else say(pick([`동료 ${al}, 창에 찔려 쓰러졌다… 발할라에서 보자.`,`아군 방패벽 한쪽이 무너졌다!`,`까마귀 떼가 전장 위를 맴돈다.`]),'miss');
-    if(k>=steps){ w.phase='gen'; render(); return; }
-    ui.tms.push(setTimeout(tick,reduce?200:1050));
+  const setBar=()=>{ const b=$('#whp'), v=$('#whpv'), k=$('#wkill'); if(b) b.style.width=Math.max(0,w.hp/me.maxhp*100)+'%'; if(v) v.textContent=Math.max(0,Math.round(w.hp))+' / '+me.maxhp; if(k) k.textContent=w.kills; };
+  say(pick(['폭풍을 뚫고 노를 젓는다. 적의 해안이 보인다!','용머리 배가 파도를 가른다. 전사들이 방패를 두드린다!','"오딘이여, 오늘 우리를 지켜보소서!" 노꾼들이 함성을 지른다.']),'info');
+  later2(()=>{ if(sc) sc.land(); say('배가 모래톱에 처박혔다! 상륙하라!','crit'); w.phase='melee'; },3400);
+  const steps=RI(12,16); let k=0;
+  const tick=()=>{ k++;
+    const r=Math.random();
+    if(Math.random()<0.005*(1+k/6)){ const cause=pick(['난전 속에서 등 뒤로 창이 박혔다.','어디선가 날아온 화살이 목을 꿰뚫었다.','발밑의 시체에 걸려 넘어진 순간, 도끼가 내려왔다.']);
+      w.hp=0; setBar(); if(sc) sc.heroDie(); say(`${me.name}, ${cause}`,'kill'); return warDie(cause); }
+    if(r<0.4){ const n=Math.random()<0.25?2:1; w.kills+=n; setBar(); if(sc) sc.heroKill(n); say(n>1?`${me.name}, 적 둘을 한꺼번에 베어 넘겼다!`:pick([`${me.name}, 적의 투구째 머리를 쪼갰다!`,`${me.name}, 방패로 밀쳐 넘어뜨리고 숨통을 끊었다!`,`${me.name}의 도끼에 적이 피를 뿜으며 쓰러졌다!`,`${me.name}, 달려드는 적의 목을 단칼에 날렸다!`]),'hit'); }
+    else if(r<0.66){ const d=Math.max(1,Math.round(me.maxhp*R(0.04,0.12)*(1-Math.min(0.5,(me.st.def||0)/400)))); w.hp-=d; setBar(); if(sc) sc.heroHit();
+      say(pick([`적의 창끝이 옆구리를 스쳤다. (-${d})`,`화살 한 대가 어깨에 박혔다. (-${d})`,`뒤에서 날아온 몽둥이에 뒤통수를 맞았다. (-${d})`,`방패가 쪼개지며 팔이 저린다. (-${d})`]),'crit');
+      if(w.hp<=0){ if(sc) sc.heroDie(); return warDie('전쟁터의 난전 속에서 쓰러졌다.'); } }
+    else if(r<0.8){ if(sc) sc.volley(); say(pick(['하늘을 뒤덮은 화살비가 쏟아진다! 방패를 들어라!','적 궁수들이 화살을 날린다!']),'miss'); }
+    else if(r<0.9){ if(sc) sc.allyFall(); say(pick(['옆에서 싸우던 동료가 쓰러졌다… 발할라에서 보자.','아군 방패벽 한쪽이 무너졌다!']),'miss'); }
+    else say(pick(['양쪽에서 새 전사들이 끝없이 쏟아져 나온다!','까마귀 떼가 전장 위를 맴돈다.','진흙과 피가 발목까지 차오른다.']),'info');
+    if(k>=steps){ w.phase='gen'; if(sc) sc.general(); say(`적군이 무너진다! 적장 ${w.gen.name}이(가) 앞으로 나섰다.`,'crit');
+      const a=$('#wact'); if(a) a.innerHTML=`<button class="btn primary" data-act="warGen">적장과 맞선다</button>`; return; }
+    later2(tick,reduce?250:1250);
   };
-  ui.tms=ui.tms||[]; ui.tms.push(setTimeout(tick,reduce?200:1200));
+  later2(tick,5200);
 }
-function warDie(cause){ const w=ui.war, me=S.hero; if(!me) return; w.phase='dead'; bury(me,cause); S.fights++; saveState(); setTimeout(()=>{ if(view==='war') render(); },900); }
+function warDie(cause){ const w=ui.war, me=S.hero; if(!me) return; w.phase='dead'; bury(me,cause); S.fights++; saveState();
+  setTimeout(()=>{ const a=$('#wact'); if(a&&view==='war') a.innerHTML=`<div class="verdict lose"><b>전사</b><span>${esc(w.name)}, 전쟁터에서 쓰러졌다. 까마귀들이 몰려든다.</span></div><button class="btn primary" data-act="roll">다시 태어난다</button><button class="btn" data-act="valhalla">발할라로 간다</button>`; },1400); }
 
-/* ---------- 나의 발할라: 쓰러진 내 전사들이 살아서 술잔을 든다 ---------- */
+/* ---------- 나의 발할라: 쓰러진 내 전사들이 살아서 잔치를 벌임 ---------- */
 function valhallaView(){
-  const ys=S.yard||[];
-  const folk=ys.map((y,i)=>{ const h={name:y.name,g:Object.assign({},y.g,{expr:pick(['grin','smirk','calm','grin'])}),cm:y.cm||175,outfit:y.outfit||{},weapon:null,flag:y.flag||''};
-    const px=Math.round(70+40*hfrac(h.cm));
-    return `<button class="vfolk" data-act="vsel" data-i="${i}" style="--d:${(i%7)*0.37}s">${drawChar(h,false,px)}<b>${esc(y.name)}</b><em>${y.wins||0}킬</em></button>`; }).join('');
-  const sel=ui.vsel!=null&&ys[ui.vsel]?ys[ui.vsel]:null;
-  return topbar()+`<section class="vhall"><div class="vhsky">${valhallaSky()}</div><div class="vhin"><h2>발할라</h2><p>쓰러진 나의 전사 ${ys.length}명이 오딘의 연회장에서 술잔을 들고 있다.</p>
-    ${sel?`<div class="vcard"><b>${esc(sel.name)}</b><span>${sel.wins||0}킬을 남기고 왔다</span><em>${esc(sel.cause||'')}</em><button class="linkbtn" data-act="vsel" data-i="-1">닫기</button></div>`:''}
-    <div class="vfolks">${folk||'<p class="note center">아직 아무도 오지 않았다. 연회장이 텅 비었다.</p>'}</div>
-    <div class="actions">${S.hero?'<button class="btn" data-act="back">현생으로 돌아간다</button>':'<button class="btn primary" data-act="roll">생명을 얻는다</button>'}</div></div></section>`;
+  const n=(S.yard||[]).length;
+  return topbar()+`<section class="vhall"><div class="vhtitle"><h2>발할라</h2><p>${n?`쓰러진 나의 전사 ${n}명이 오딘의 연회장에서 ${n>=8?'떠들썩한 잔치를 벌이고 있다':'술잔을 기울이고 있다'}. 전사를 눌러보라.`:'아직 아무도 오지 않았다. 연회장이 고요하다.'}</p></div>
+    <canvas class="vhcv" id="vhcv"></canvas><div class="vcard" id="vcard" hidden></div>
+    <div class="actions">${S.hero?'<button class="btn" data-act="back">현생으로 돌아간다</button>':'<button class="btn primary" data-act="roll">생명을 얻는다</button>'}</div></section>`;
+}
+function valhallaRun(){
+  const cv=$('#vhcv'); if(!cv||!window.BDScenes) return;
+  const folk=(S.yard||[]).map(y=>{ const h={name:y.name,g:Object.assign({},y.g,{expr:pick(['grin','grin','smirk','calm'])}),cm:y.cm||175,outfit:y.outfit||{},weapon:null,flag:y.flag||''};
+    return {svg:drawChar(h,false,258),name:y.name,wins:y.wins||0,cause:y.cause||'',h:Math.pow((y.cm||175)/175,0.5)}; });
+  BDScenes.Valhalla(cv,folk,{onSelect:f=>{ const v=$('#vcard'); if(!v) return; if(!f){ v.hidden=true; return; } v.hidden=false; v.innerHTML=`<b>${esc(f.name)}</b><span>${f.wins}킬을 남기고 발할라에 왔다</span><em>${esc(f.cause)}</em>`; }});
 }
 /* ---------- actions ---------- */
 function roll(){
@@ -3767,11 +3745,9 @@ app.addEventListener('click',e=>{
   else if(a==='invite'){ ui.code='#'+Array.from({length:4},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[RI(0,31)]).join(''); view='invite'; render(); }
   else if(a==='accept') pracPick();
   else if(a==='mercy') mercyDecide(b.dataset.m==='1');
-  else if(a==='war'){ if(!S.hero) return; ui.war=newWar(); view='war'; render(); window.scrollTo(0,0); }
-  else if(a==='warGo'){ if(ui.war&&ui.war.phase==='intro') warMelee(); }
+  else if(a==='war'){ if(!S.hero||S.pendingDuel) { if(S.pendingDuel){ ui.notice='보낸 결투장의 답을 기다리는 동안엔 전쟁에 나갈 수 없다.'; render(); } return; } ui.war=newWar(); view='war'; render(); window.scrollTo(0,0); warRun(); }
   else if(a==='warGen'){ const w=ui.war; if(w&&w.phase==='gen'&&S.hero){ w.phase='done'; startFight(w.gen,{war:{kills:w.kills},hp:w.hp,label:'적장'}); } }
-  else if(a==='valhalla'){ ui.vsel=null; view='valhalla'; render(); window.scrollTo(0,0); }
-  else if(a==='vsel'){ const i=+b.dataset.i; ui.vsel=i>=0?i:null; render(); }
+  else if(a==='valhalla'){ view='valhalla'; render(); window.scrollTo(0,0); valhallaRun(); }
   else if(a==='acceptin'){ if(ui.duelId) DuelOnline.accept(); else { const f=ui.incoming; ui.incoming=null; try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){} startFight(f); } }
   else if(a==='declinein'){ if(ui.duelId) DuelOnline.decline(); else { ui.incoming=null; try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){} view=S.hero?'card':'home'; render(); } }
   else if(a==='joincode'){
