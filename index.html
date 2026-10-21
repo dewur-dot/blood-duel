@@ -3050,13 +3050,13 @@ function rankView(){
   const rows=list.slice(3).map((e,i)=>{ const me=!s1&&e.id===myId;
     return `<button class="rrow${me?' me':''}${s1?' old':''}" data-act="detail" data-id="${e.id}"${s1?' data-s="1"':''}><span class="rk">${i+4}</span><span class="pt">${drawPortrait(Object.assign({},e,{flag:''}),false)}</span><span class="rf">${e.flag?flagSvg(e.flag,'flgrow'):'<i class="noflag"></i>'}</span><span class="rn"><b class="${winCls(e.kills)}">${esc(e.name)}</b><em>${e.flag&&FLAGN[e.flag]?FLAGN[e.flag]+' · ':''}${esc(e.nick||'')}${me?' · 나':''}</em></span><span class="rkl"><b>${e.kills}</b>킬</span></button>`; }).join('');
   let natHtml='';
-  if(!s1){ const nat={}; all.forEach(e=>{ if(!e.flag) return; const n=nat[e.flag]||(nat[e.flag]={k:0,c:0}); n.k+=e.kills; n.c++; });
+  { const nat={}; all.forEach(e=>{ if(!e.flag) return; const n=nat[e.flag]||(nat[e.flag]={k:0,c:0}); n.k+=e.kills; n.c++; });
     const top=Object.entries(nat).sort((a,b)=>b[1].k-a[1].k).slice(0,5);
-    natHtml=top.length?`<section class="card panel"><h2>국가 전쟁</h2><div class="nats">${top.map(([f,v],i)=>`<div class="nat${i===0?' first':''}"><span class="nrk">${i+1}</span>${flagSvg(f,'flgnat')}<span class="nn"><b>${FLAGN[f]||''}</b><em>전사 ${v.c}명</em></span><span class="rkl"><b>${v.k}</b>킬</span></div>`).join('')}</div><p class="note">조국의 이름으로 피를 흘리려면 초상화의 국기 칸을 눌러라.</p></section>`:''; }
+    natHtml=top.length?`<section class="card panel"><h2>국가 전쟁 · 시즌 ${s1?1:2}</h2><div class="nats">${top.map(([f,v],i)=>`<div class="nat${i===0?' first':''}"><span class="nrk">${i+1}</span>${flagSvg(f,'flgnat')}<span class="nn"><b>${FLAGN[f]||''}</b><em>전사 ${v.c}명</em></span><span class="rkl"><b>${v.k}</b>킬</span></div>`).join('')}</div><p class="note">조국의 이름으로 피를 흘리려면 초상화의 국기 칸을 눌러라.</p></section>`:''; }
   const err=s1?ui.board1Err:ui.boardErr;
   const head=`<section class="card panel"><h2>명예의 전당 · 시즌 ${s1?1:2}</h2><p class="note">${valh?'쓰러진 전사들은 발할라의 연회장에서 술잔을 든다. 죽기 전에 가장 많이 죽인 자가 위에 앉는다.':'아직 숨이 붙어 있는 살육자들. 가장 많이 죽인 자가 위에 선다.'}${err?' 지금은 서버에 닿지 않아 일부만 보인다.':''}</p>${tabs}${realms}</section>`;
   const empty=`<p class="note center">${s1&&!ui.board1?'돌판을 파내는 중…':valh?'아직 발할라에 간 자가 없다.':'살아 있는 학살자가 없다. 네가 첫 번째가 되어라.'}</p>`;
-  return topbar()+head+(list.length?podium(list,valh,s1)+`<div class="rboard">${rows}</div>`:empty)+(valh?'':natHtml);
+  return topbar()+head+(list.length?podium(list,valh,s1)+`<div class="rboard">${rows}</div>`:empty)+natHtml;
 }
 function detailView(){
   const e=ui.detail;
