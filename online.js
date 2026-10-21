@@ -81,8 +81,10 @@
     return kakaoImg.p; }
   async function kakaoShare(link,hero,letter){
     const K=await loadKakao(); if(!K.isInitialized()) K.init(KAKAO_KEY);
-    let up=null; try{ up=await Promise.race([prepareKakao(),new Promise(r=>setTimeout(()=>r(null),2500))]); }catch(_){}
-    const img=up||new URL('og.jpg',location.origin+location.pathname).href;
+    let up=null; try{ up=await Promise.race([prepareKakao(),new Promise(r=>setTimeout(()=>r(null),6000))]); }catch(_){}
+    if(!up){ // 초상화를 못 올렸으면 남의 그림 대신 글자 결투장으로
+      K.Share.sendDefault({objectType:'text',text:`⚔ ${hero.name}의 결투 신청\n${letter?`"${letter.slice(0,120)}"\n`:''}${typeof fmtH==='function'?fmtH(hero.cm):''} · ${hero.wins||0}킬 · 덤비든가 도망치든가`,link:{mobileWebUrl:link,webUrl:link},buttonTitle:'결투장 열기'}); return; }
+    const img=up;
     K.Share.sendDefault({objectType:'feed',content:{title:`⚔ ${hero.name}의 결투 신청`,description:letter?`"${letter.slice(0,80)}"`:`${fmtH(hero.cm)} · ${hero.wins||0}킬 · 덤비든가 도망치든가`,imageUrl:img,imageWidth:1200,imageHeight:630,link:{mobileWebUrl:link,webUrl:link}},
       buttons:[{title:'결투장 열기',link:{mobileWebUrl:link,webUrl:link}}]});
   }
