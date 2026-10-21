@@ -71,6 +71,41 @@ svg{overflow:visible}
 .quake{animation:quake .07s linear infinite}
 @keyframes quake{0%{transform:translate(0,0)}25%{transform:translate(calc(var(--qa,4px)*-1),calc(var(--qa,4px)*.6))}50%{transform:translate(var(--qa,4px),calc(var(--qa,4px)*-.5))}75%{transform:translate(calc(var(--qa,4px)*-.6),calc(var(--qa,4px)*-.8))}100%{transform:translate(calc(var(--qa,4px)*.7),calc(var(--qa,4px)*.5))}}
 body.nobody .top,body.nobody .subtabs{display:none}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:2px 0 8px}
+.mode{display:flex;flex-direction:column;gap:3px;align-items:flex-start;padding:12px;border:1px solid var(--line2);border-radius:10px;color:var(--bone);font:inherit;text-align:left;cursor:pointer}
+.mode b{font-family:var(--serif);font-size:19px}.mode span{font-size:12px;opacity:.8}
+.mode.war{background:linear-gradient(160deg,#4a1d14,#22100c)}.mode.vh{background:linear-gradient(160deg,#7a5a1c,#2c2010);border-color:#b8892a}
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.72);display:grid;place-items:center;padding:16px}
+.sheet.prac{width:min(420px,100%);background:#171210;border:1px solid var(--line2);padding:18px;display:flex;flex-direction:column;gap:8px}
+.sheet.prac h2{font-family:var(--serif);margin:0;color:var(--bone)}
+.pbtn{display:flex;flex-direction:column;gap:2px;align-items:flex-start;padding:12px;background:#221a16;border:1px solid var(--line);color:var(--bone);font:inherit;text-align:left;cursor:pointer;border-radius:6px}
+.pbtn b{font-size:16px}.pbtn span{font-size:12px;opacity:.8}.pbtn.odin{background:linear-gradient(160deg,#3a2c0e,#1a1306);border-color:#c9a24a}.pbtn.odin b{color:#f6d36b}
+.war h3{font-family:var(--serif);font-size:15px;margin:12px 0 6px;color:var(--ember)}
+.wallies{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.wally{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;text-align:center}.wally .pt{width:100%;aspect-ratio:1;overflow:hidden;border:1px solid var(--line)}.wally .pt svg{width:100%;height:100%}.wally b{display:flex;gap:3px;align-items:center;overflow:hidden;white-space:nowrap;max-width:100%}
+.wgen{display:flex;gap:10px;align-items:center;padding:8px;border:1px solid #7a2a1a;background:#2a1210}.wgen .pt{width:64px;height:64px;overflow:hidden}.wgen .pt svg{width:100%;height:100%}.wgen div{display:flex;flex-direction:column;gap:2px}.wgen b{display:flex;gap:4px;align-items:center;font-size:16px}.wgen span{font-size:12px;opacity:.8}
+.whud{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:13px;margin-bottom:8px}.whud .hpbar{height:10px}
+.wfield{position:relative;height:200px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(180deg,#9fb2c2 0%,#c9c2a8 52%,#7a6040 53%,#5a4428 100%)}
+.wline{position:absolute;bottom:10px;display:flex;flex-wrap:wrap-reverse;gap:0 1px;width:52%}.wline.a{left:-4%;fill:#1f3352;stroke:#1f3352}.wline.b{right:-4%;flex-direction:row-reverse;fill:#6a1e14;stroke:#6a1e14}.wline.b .sold{transform:scaleX(-1)}
+.sold{width:17%;height:auto;animation:sbob .5s ease-in-out infinite alternate;animation-delay:calc(var(--i)*-.13s)}
+@keyframes sbob{to{translate:0 -3px}}
+.clash .wline.a{animation:charA 1.1s ease-in-out infinite alternate}.clash .wline.b{animation:charB 1.1s ease-in-out infinite alternate}
+@keyframes charA{from{transform:translateX(0)}to{transform:translateX(9%)}}@keyframes charB{from{transform:translateX(0)}to{transform:translateX(-9%)}}
+.wdust{position:absolute;bottom:0;width:40%;height:50px;border-radius:50%;background:rgba(160,130,90,.45);filter:blur(10px);opacity:0}.clash .wdust{opacity:1;animation:dust 2.4s ease-in-out infinite}.wdust.d1{left:20%}.wdust.d2{left:40%;animation-delay:-1.2s}
+@keyframes dust{0%,100%{transform:scale(.8)}50%{transform:scale(1.2) translateY(-10px)}}
+.wspark{position:absolute;left:50%;bottom:60px;width:6px;height:6px;border-radius:50%;background:#ffe9a8;box-shadow:0 0 10px 4px #ffb44a;opacity:0}.clash .wspark{animation:spark 1.1s infinite}.wspark.s2{left:44%;bottom:80px;animation-delay:.4s}.wspark.s3{left:56%;bottom:50px;animation-delay:.75s}
+@keyframes spark{0%,60%{opacity:0;transform:scale(.4)}70%{opacity:1;transform:scale(1.4)}100%{opacity:0;transform:scale(.2)}}
+.wlog{max-height:200px;overflow:auto;margin-top:8px}
+.vhall{position:relative;min-height:calc(100vh - 80px);overflow:hidden;border:1px solid #c9a24a;margin-top:6px}
+.vhsky{position:absolute;inset:0}.vhsky .vsky{background:linear-gradient(180deg,#9fd2e6 0%,#cfe6df 40%,#efe2b6 100%)}
+.vhin{position:relative;z-index:2;padding:14px 10px 20px;display:flex;flex-direction:column;gap:8px}
+.vhin h2{font-family:var(--serif);font-size:30px;text-align:center;margin:4px 0 0;color:#5a3a0a;text-shadow:0 0 12px rgba(255,240,180,.9)}
+.vhin>p{text-align:center;color:#3a2a10;font-size:13px;margin:0 0 120px}
+.vfolks{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;gap:2px 6px;position:relative;z-index:2}
+.vfolk{display:flex;flex-direction:column;align-items:center;background:none;border:0;padding:0;font:inherit;cursor:pointer;width:72px;animation:vbob 2.6s ease-in-out infinite;animation-delay:var(--d)}
+.vfolk svg{height:auto;max-width:100%}.vfolk b{font-size:11px;color:#2a1a06;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;background:rgba(255,245,210,.75);padding:0 4px;border-radius:3px}.vfolk em{font-style:normal;font-size:11px;color:#8a3a10;font-weight:700}
+@keyframes vbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.vtable{height:14px;margin:0 6% -6px;background:linear-gradient(180deg,#7a4e22,#4a2c12);border-radius:3px;box-shadow:0 4px 0 #2a180a}
+.vcard{position:relative;z-index:3;margin:0 auto;max-width:320px;display:flex;flex-direction:column;gap:2px;align-items:center;text-align:center;background:rgba(30,20,8,.88);border:1px solid #c9a24a;color:#f6e8c0;padding:10px 14px;border-radius:6px}.vcard b{font-family:var(--serif);font-size:18px}.vcard em{font-style:normal;font-size:12px;opacity:.85}
 .natpick{padding:18px 4px 30px}.natpick h2{font-family:var(--serif);font-size:24px;text-align:center;margin:6px 0 6px;color:var(--bone)}.natpick .note{text-align:center;margin-bottom:14px}
 .natgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .natbtn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;background:#151110;border:1px solid var(--line);border-radius:3px;color:var(--bone);font:inherit;font-size:13px;cursor:pointer}
@@ -169,6 +204,9 @@ details .sheet{margin-top:10px}
 .wxflash{position:absolute;inset:0;z-index:5;pointer-events:none;background:#f4f6ff;opacity:0}
 .wxflash.on{animation:wxf .7s ease-out}
 @keyframes wxf{0%{opacity:.95}12%{opacity:.2}22%{opacity:.85}100%{opacity:0}}
+.verdict.mercyq{background:linear-gradient(180deg,#3a1410,#200a08);border-color:#a8321e;color:#f3e0cc}.verdict.mercyq i{font-style:normal;color:#ffb35c;font-weight:800;font-size:18px}
+.mbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.verdict.mercy{background:linear-gradient(180deg,#e8edf2,#b9c4cf);border-color:#fff;color:#1d2833;margin-top:6px}
 .verdict.honor{background:linear-gradient(180deg,#e9c766,#b8892a);border-color:#f6d36b;color:#2a1c06;margin-top:6px}
 .verdict.draw{background:linear-gradient(180deg,#5b6b4a,#3f4d33);border-color:#8fa271;color:#f1f4e6}
 #log p.weather{color:#9fc3e6;font-style:italic}#log p.peace{color:#b8e08f;font-weight:700}#log p.bolt{color:#ffe27a;font-weight:700}#log p.env{color:#a9b4c0}
@@ -2952,7 +2990,7 @@ function cardView(){
   const h=S.hero, t=ui.tab||'stat';
   let body='';
   if(t==='stat'){
-    body=h?fightBig()+profile(h,{kills:h.wins,weapon:true,mine:true})+codeBox()
+    body=h?fightBig()+`<div class="modes"><button class="mode war" data-act="war"><b>전쟁터</b><span>동료와 함께 진격 · 진짜 죽는다</span></button><button class="mode vh" data-act="valhalla"><b>발할라</b><span>쓰러진 내 전사 ${S.yard.length}명</span></button></div>`+profile(h,{kills:h.wins,weapon:true,mine:true})+codeBox()
       :'';
   } else if(t==='shop') body=h?shopHtml():`<p class="note center">육신도 없는 놈이 뭘 사겠다고. 먼저 태어나라.</p>`;
   else if(t==='record') body=recordHtml();
@@ -3106,14 +3144,14 @@ const roman='';
 function battleView(){
   const r=ui.rep;
   const fig=(id,h)=>`<div class="fighter ${id==='A'?'a':'b'}${(h.st.int||50)<=10?' feral':''}" id="f${id}" data-int="${h.st.int||50}"${h.weapon?' data-w="1"':''}><div class="act" id="a${id}"><div class="flip" id="fig${id}">${drawChar(Object.assign({},h,{g:Object.assign({},h.g,{expr:['snarl','grin','gape'].includes(h.g.expr)?h.g.expr:'angry'})}))}</div></div></div>`;
-  return topbar()+`<section class="hud"><div><span class="lbl">내 전사 · ${fmtH(r.me.cm)}</span><div class="nm">${flg(r.me)}${esc(r.me.name)}</div><div class="hpbar"><i id="hpA"></i></div><div class="stbar"><i id="stA"></i></div><div class="hpv" id="hpAv"></div></div><div class="r"><span class="lbl">친구의 전사 · ${fmtH(r.foe.cm)}</span><div class="nm">${flg(r.foe)}${esc(r.foe.name)}</div><div class="hpbar"><i id="hpB"></i></div><div class="stbar"><i id="stB"></i></div><div class="hpv" id="hpBv"></div></div></section>`+
+  return topbar()+`<section class="hud"><div><span class="lbl">내 전사 · ${fmtH(r.me.cm)}</span><div class="nm">${flg(r.me)}${esc(r.me.name)}</div><div class="hpbar"><i id="hpA"></i></div><div class="stbar"><i id="stA"></i></div><div class="hpv" id="hpAv"></div></div><div class="r"><span class="lbl">${esc(r.label||(r.practice?'연습 상대':'친구의 전사'))} · ${fmtH(r.foe.cm)}</span><div class="nm">${flg(r.foe)}${esc(r.foe.name)}</div><div class="hpbar"><i id="hpB"></i></div><div class="stbar"><i id="stB"></i></div><div class="hpv" id="hpBv"></div></div></section>`+
     `<section class="stage" id="stage">${stageBg()}${embers()}${fig('A',r.me)}${fig('B',r.foe)}<canvas class="st3d" id="st3d"></canvas><canvas class="wxl" id="wxl"></canvas><div class="wxflash" id="wxflash"></div><div class="fxl" id="fx"></div></section>`+
     `<div class="log" id="log" aria-live="polite"></div><div class="after" id="after"><button class="btn" data-act="skip">바로 끝장내기</button></div>`;
 }
 function codeBox(){
   return `<section class="card panel codebox"><h2>친구에게 받은 결투장</h2><p class="note">친구가 보낸 결투 링크를 붙여넣으세요. 결투하거나 도주할 수 있습니다.</p><textarea id="codeIn" rows="2" placeholder="여기에 붙여넣기" autocomplete="off"></textarea><div class="note" id="codemsg">${esc(ui.codemsg||'')}</div><button class="btn" data-act="joincode">결투장 열기</button></section>`;
 }
-const views={nation:nationView,born:bornView,incoming:incomingView,home:cardView,rolling:rollingView,card:cardView,invite:inviteView,battle:battleView,rank:rankView,detail:detailView};
+const views={war:warView,valhalla:valhallaView,nation:nationView,born:bornView,incoming:incomingView,home:cardView,rolling:rollingView,card:cardView,invite:inviteView,battle:battleView,rank:rankView,detail:detailView};
 function render(){
   clearTimeout(ui.timer); (ui.tms||[]).forEach(clearTimeout);
   const nobody=!S.hero&&(view==='home'||view==='card');
@@ -3171,6 +3209,89 @@ function warpIn(done){
     for(const d of dust){ d.vy+=160*dt; d.y+=d.vy*dt; d.x+=d.vx*dt; ctx.fillStyle=`rgba(${d.c},${d.a})`; ctx.beginPath(); ctx.arc(d.x,d.y,d.r,0,7); ctx.fill(); }
     requestAnimationFrame(frame);
   })(t0);
+}
+
+/* ---------- 연습 결투 난이도: 하 동료 전사 · 중 데미갓 · 상 오딘 ---------- */
+function scaleFoe(f,me,k){ f.st=JSON.parse(JSON.stringify(me.st)); Object.keys(f.st).forEach(x=>{ if(x!=='int'&&x!=='luck') f.st[x]=Math.round(f.st[x]*k); }); f.maxhp=Math.round(me.maxhp*k); f.hp=f.maxhp; return f; }
+function practiceFoe(me,lv){
+  if(lv===0){ const f=mirrorFoe(me); scaleFoe(f,me,0.88); f.cm=me.cm; f.g.cm=me.cm; f.nick='동료 전사'; return f; }
+  if(lv===1){ const f=makeFoe(me.name); scaleFoe(f,me,1.22); f.cm=Math.min(500,Math.round((me.cm||175)*1.12)); f.g.cm=f.cm; f.g.armOk=[true,true]; f.g.legOk=[true,true];
+    f.name=pick(['시구르드','시그문드','스타르카드','헬기','볼숭','하그바르']); f.nick='데미갓'; f.weapon={...WEAPONS[2]}; f.flag=''; return f; }
+  let f; do{ f=makeFoe(me.name); }while(f.g.sex!=='m');
+  scaleFoe(f,me,1.65); f.cm=260; f.g.cm=260; f.g.age=82; f.g.beard=Math.max(4,f.g.beard||0); f.g.hairColor='#E8E4DA'; f.g.armOk=[true,true]; f.g.legOk=[true,true];
+  f.name='오딘'; f.nick='모든 것의 아버지'; f.weapon={kind:'sword',name:'궁니르',atk:34}; f.flag=''; f.outfit=Object.assign({},f.outfit,{fur:1}); return f;
+}
+function pracPick(){
+  const ov=document.createElement('div'); ov.className='overlay'; ov.innerHTML=`<div class="sheet prac"><h2>연습 상대를 고른다</h2><p class="note">연습이다. 져도 안 죽고, 이겨도 얻는 건 없다.</p>
+  <button class="pbtn" data-lv="0"><b>하 · 동료 전사</b><span>나보다 조금 약한 동료. 몸 풀기용</span></button>
+  <button class="pbtn" data-lv="1"><b>중 · 데미갓</b><span>신의 피가 섞인 영웅. 나보다 한 수 위</span></button>
+  <button class="pbtn odin" data-lv="2"><b>상 · 오딘</b><span>모든 것의 아버지. 이길 수 있다고 생각하나?</span></button>
+  <button class="linkbtn" data-x="1">그만둔다</button></div>`;
+  document.body.append(ov);
+  ov.addEventListener('click',e=>{ const b=e.target.closest('[data-lv]'); if(b){ ov.remove(); const lv=+b.dataset.lv; startFight(practiceFoe(S.hero,lv),{practice:true,label:['연습 · 동료 전사','연습 · 데미갓','연습 · 오딘'][lv]}); return; }
+    if(e.target===ov||e.target.closest('[data-x]')) ov.remove(); });
+}
+
+/* ---------- 전쟁터: 동료들과 패싸움 → 적장과 1:1 (진짜 죽을 수 있음) ---------- */
+const SOLDIER=`<path d="M10 4a4 4 0 1 1 0 8a4 4 0 1 1 0-8z M6 13 L14 13 L16 28 L13 28 L12 40 L9 40 L8 28 L4 28 Z" /><path d="M17 2 L17 40" stroke-width="1.6" fill="none"/><ellipse cx="4" cy="20" rx="4" ry="7"/>`;
+function newWar(){
+  const me=S.hero, pool=boardList().filter(e=>e.alive&&e.id!==me.id&&!e.sample).slice(0,40);
+  const allies=[]; for(let i=0;i<4;i++){ const e=pool.length?pool.splice(Math.floor(Math.random()*pool.length),1)[0]:null; allies.push(e?{name:e.name,g:e.g,cm:e.cm,outfit:e.outfit,flag:e.flag||''}:(()=>{ const h=newHero(); h.flag=me.flag||''; return {name:h.name,g:h.g,cm:h.cm,outfit:randOutfit(),flag:h.flag}; })()); }
+  let gen=makeFoe(me.name); scaleFoe(gen,me,0.82+Math.random()*0.26); gen.cm=Math.max(gen.cm,Math.round((me.cm||175)*(0.95+Math.random()*0.15))); gen.g.cm=gen.cm; gen.g.armOk=[true,true]; gen.g.legOk=[true,true];
+  if(!gen.weapon){ const wp=pick(WEAPONS.filter(w=>!w.off)); gen.weapon={...wp}; } gen.outfit=Object.assign({},gen.outfit,{helm:gen.outfit.helm||rollGear('helm').id});
+  gen.nick='적장'; gen.flag=pick(FLAGS.filter(f=>f!==me.flag));
+  const foeN=RI(30,90), allyN=foeN+RI(-10,10);
+  return {phase:'intro',allies,gen,foeN,allyN,kills:0,hp:me.maxhp,lines:[],place:pick(['피의 강가','까마귀 언덕','얼어붙은 협곡','불타는 마을','늑대의 숲','해골 평원'])};
+}
+function warView(){
+  const w=ui.war, me=S.hero; if(!w||!me) return topbar()+`<p class="note center">전쟁이 끝났다.</p><button class="btn" data-act="back">돌아간다</button>`;
+  const ally=a=>`<div class="wally"><span class="pt">${drawPortrait(Object.assign({},a,{flag:''}),false)}</span><b>${a.flag?flagSvg(a.flag,'flgrow'):''}${esc(a.name)}</b></div>`;
+  if(w.phase==='intro') return topbar()+`<section class="card panel war"><h2>전쟁터 · ${esc(w.place)}</h2><p class="note">아군 ${w.allyN}명과 적군 ${w.foeN}명이 맞붙는다. 난전 속에선 누구든 죽을 수 있다. 끝까지 살아남아 적장의 목을 베어라.</p>
+    <h3>함께 싸울 동료</h3><div class="wallies">${w.allies.map(ally).join('')}</div>
+    <h3>적장</h3><div class="wgen"><span class="pt">${drawPortrait(Object.assign({},w.gen,{flag:''}),false)}</span><div><b>${w.gen.flag?flagSvg(w.gen.flag,'flgrow'):''}${esc(w.gen.name)}</b><span>${fmtH(w.gen.cm)} · ${esc(w.gen.weapon.name)}</span></div></div>
+    <div class="actions"><button class="btn primary" data-act="warGo">돌격하라!</button><button class="btn" data-act="back">아직은 때가 아니다</button></div></section>`;
+  const rows=n=>Array.from({length:n},(_,i)=>`<svg class="sold" style="--i:${i}" viewBox="0 0 20 42">${SOLDIER}</svg>`).join('');
+  const pct=Math.max(0,w.hp/me.maxhp*100);
+  return topbar()+`<section class="card panel war"><h2>전쟁터 · ${esc(w.place)}</h2><div class="whud"><span>${esc(me.name)}</span><div class="hpbar"><i style="width:${pct}%"></i></div><span>${Math.max(0,Math.round(w.hp))} / ${me.maxhp}</span></div>
+    <div class="wfield${w.phase==='melee'?' clash':''}"><div class="wsky"></div><div class="wline a">${rows(12)}</div><div class="wline b">${rows(12)}</div><i class="wdust d1"></i><i class="wdust d2"></i><i class="wspark s1"></i><i class="wspark s2"></i><i class="wspark s3"></i></div>
+    <div class="log wlog" id="wlog">${w.lines.map(l=>`<p class="${l.k||''}">${esc(l.t)}</p>`).join('')}</div>
+    <div class="actions" id="wact">${w.phase==='gen'?`<p class="note">적군이 무너진다! 적장 ${esc(w.gen.name)}이(가) 도끼를 들고 앞으로 나섰다. 내 처치 ${w.kills}명.</p><button class="btn primary" data-act="warGen">적장과 맞선다</button>`:w.phase==='dead'?`<button class="btn primary" data-act="roll">다시 태어난다</button><button class="btn" data-act="valhalla">발할라로 간다</button>`:''}</div></section>`;
+}
+function warMelee(){
+  const w=ui.war, me=S.hero; w.phase='melee'; render();
+  const A=w.allies, steps=RI(7,10); let k=0;
+  const say=(t,kind)=>{ w.lines.push({t,k:kind}); const lg=$('#wlog'); if(lg){ const p=document.createElement('p'); p.className=kind||''; p.textContent=t; lg.appendChild(p); lg.scrollTop=lg.scrollHeight; } };
+  const setBar=()=>{ const b=document.querySelector('.whud .hpbar i'), v=document.querySelector('.whud span:last-child'); if(b) b.style.width=Math.max(0,w.hp/me.maxhp*100)+'%'; if(v) v.textContent=Math.max(0,Math.round(w.hp))+' / '+me.maxhp; };
+  say(pick(['뿔나팔이 울린다! 방패벽이 부딪친다!','함성과 함께 양군이 뒤엉켰다!','오딘을 위하여! 전사들이 진흙탕으로 돌진한다!']),'info');
+  const tick=()=>{ if(view!=='war'||ui.war!==w) return;
+    k++; const r=Math.random(), al=pick(A).name;
+    if(Math.random()<0.006*(1+k/6)){ // 난전 속 불의의 죽음 (낮은 확률)
+      const cause=pick([`난전 속에서 등 뒤로 창이 박혔다.`,`어디선가 날아온 화살이 목을 꿰뚫었다.`,`발밑의 시체에 걸려 넘어진 순간, 도끼가 내려왔다.`]);
+      w.hp=0; setBar(); say(`${me.name}, ${cause}`,'kill'); return warDie(cause); }
+    if(r<0.38){ const n=Math.random()<0.25?2:1; w.kills+=n; say(n>1?`${me.name}, 적 둘을 한꺼번에 베어 넘겼다!`:pick([`${me.name}, 적 병사의 투구째 머리를 쪼갰다!`,`${me.name}, 방패로 밀쳐 넘어뜨리고 숨통을 끊었다!`,`${me.name}의 일격에 적 병사가 피를 뿜으며 쓰러졌다!`]),'hit'); }
+    else if(r<0.66){ const d=Math.max(1,Math.round(me.maxhp*R(0.04,0.13)*(1-Math.min(0.5,(me.st.def||0)/400)))); w.hp-=d; setBar();
+      say(pick([`적의 창끝이 ${me.name}의 옆구리를 스쳤다. (-${d})`,`화살 한 대가 어깨에 박혔다. (-${d})`,`뒤에서 날아온 몽둥이에 뒤통수를 맞았다. (-${d})`,`방패가 쪼개지며 팔이 저린다. (-${d})`]),'crit');
+      if(w.hp<=0) return warDie('전쟁터의 난전 속에서 쓰러졌다.'); }
+    else if(r<0.86) say(pick([`동료 ${al}, 적 셋을 상대로 버티고 있다!`,`동료 ${al}의 도끼가 적 병사를 두 동강 냈다!`,`동료 ${al}, "등 뒤는 내가 지킨다!"`,`동료 ${al}, 적 깃발을 쓰러뜨렸다!`]),'info');
+    else say(pick([`동료 ${al}, 창에 찔려 쓰러졌다… 발할라에서 보자.`,`아군 방패벽 한쪽이 무너졌다!`,`까마귀 떼가 전장 위를 맴돈다.`]),'miss');
+    if(k>=steps){ w.phase='gen'; render(); return; }
+    ui.tms.push(setTimeout(tick,reduce?200:1050));
+  };
+  ui.tms=ui.tms||[]; ui.tms.push(setTimeout(tick,reduce?200:1200));
+}
+function warDie(cause){ const w=ui.war, me=S.hero; if(!me) return; w.phase='dead'; bury(me,cause); S.fights++; saveState(); setTimeout(()=>{ if(view==='war') render(); },900); }
+
+/* ---------- 나의 발할라: 쓰러진 내 전사들이 살아서 술잔을 든다 ---------- */
+function valhallaView(){
+  const ys=S.yard||[];
+  const folk=ys.map((y,i)=>{ const h={name:y.name,g:Object.assign({},y.g,{expr:pick(['grin','smirk','calm','grin'])}),cm:y.cm||175,outfit:y.outfit||{},weapon:null,flag:y.flag||''};
+    const px=Math.round(70+40*hfrac(h.cm));
+    return `<button class="vfolk" data-act="vsel" data-i="${i}" style="--d:${(i%7)*0.37}s">${drawChar(h,false,px)}<b>${esc(y.name)}</b><em>${y.wins||0}킬</em></button>`; }).join('');
+  const sel=ui.vsel!=null&&ys[ui.vsel]?ys[ui.vsel]:null;
+  return topbar()+`<section class="vhall"><div class="vhsky">${valhallaSky()}</div><div class="vhin"><h2>발할라</h2><p>쓰러진 나의 전사 ${ys.length}명이 오딘의 연회장에서 술잔을 들고 있다.</p>
+    ${sel?`<div class="vcard"><b>${esc(sel.name)}</b><span>${sel.wins||0}킬을 남기고 왔다</span><em>${esc(sel.cause||'')}</em><button class="linkbtn" data-act="vsel" data-i="-1">닫기</button></div>`:''}
+    <div class="vfolks">${folk||'<p class="note center">아직 아무도 오지 않았다. 연회장이 텅 비었다.</p>'}</div>
+    <div class="actions">${S.hero?'<button class="btn" data-act="back">현생으로 돌아간다</button>':'<button class="btn primary" data-act="roll">생명을 얻는다</button>'}</div></div></section>`;
 }
 /* ---------- actions ---------- */
 function roll(){
@@ -3256,28 +3377,35 @@ function mirrorFoe(me){
   f.st.def=Math.max(0,me.st.def+outfitDef(me)-outfitDef(f)); // 옷이 달라도 맷집 합계는 같게
   f.mirror=true; return f;
 }
-function startFight(foeIn){
+function startFight(foeIn,opts){
+  opts=opts||{};
   const me=S.hero, foe=foeIn||mirrorFoe(me);
   const snapMe=JSON.parse(JSON.stringify(me));
-  const A=JSON.parse(JSON.stringify(me)); A.hp=A.maxhp; A.st.def+=outfitDef(me);
+  const hp0=opts.hp?Math.max(1,Math.min(me.maxhp,Math.round(opts.hp))):me.maxhp; // 전쟁터: 패싸움에서 깎인 체력으로 적장과 맞섬
+  const A=JSON.parse(JSON.stringify(me)); A.hp=hp0; A.st.def+=outfitDef(me);
   const B=JSON.parse(JSON.stringify(foe)); B.hp=B.maxhp; B.st.def+=outfitDef(foe);
   const res=fight(A,B);
-  const draw=!!res.draw, win=!draw&&res.winner==='A', practice=!foeIn;
-  const rep={me:snapMe,foe,log:res.log,win,draw,practice,broke:null,gain:null,fled:res.fled||null};
+  const draw=!!res.draw, win=!draw&&res.winner==='A', practice=!!opts.practice||!foeIn;
+  const rep={me:snapMe,foe,log:res.log,win,draw,practice,war:opts.war||null,hp0,label:opts.label||'',broke:null,gain:null,fled:res.fled||null};
   // 연습 결투: 져도 안 죽고, 이겨도 아무것도 안 얻음 (킬·능력치·골드·투구 파밍 금지)
   if(practice){ me.hp=me.maxhp; }
   else if(draw){ me.hp=me.maxhp; sync(me,true); }
-  else if(win){ rep.gain=grow(me,foe); rep.gold=winGold(me); rep.plunder=res.fled?null:plunderHelm(me,foe); rep.wins=me.wins; sync(me,true); }
+  else if(win){ rep.gain=grow(me,foe); rep.gold=winGold(me);
+    if(opts.war){ // 전쟁터는 죽을 확률이 높은 만큼 보상이 큼: 골드 + 능력치 + 전리품 장비
+      const wg=RI(25,60)+(opts.war.kills||0)*3; S.gold=(S.gold||0)+wg; rep.gold+=wg;
+      const k=pick(LEARN_KEYS), add=RI(2,4), nv=Math.min(STCAP(k),(me.st[k]||0)+add); rep.warStat=[k,nv-(me.st[k]||0)]; me.st[k]=nv;
+      if(Math.random()<0.6){ const it=rollGear(pick(['top','bottom','helm'])); rep.warLoot={slot:it.slot,id:it.id,tier:it.tier,worn:giveGear(me,it)}; } }
+    rep.mercy=res.fled?null:'ask'; rep.wins=me.wins; sync(me,true); }
   else if(res.fled==='A'){ cowardize(me); sync(me,true); }
-  else {
-    const last=res.log[res.log.length-1];
-    sync(me,false);
-    S.yard.unshift({name:me.name,g:me.g,cm:me.cm,outfit:me.outfit,wins:me.wins,cause:last?last.text:'전사'});
-    S.yard=S.yard.slice(0,20); S.hero=null;
-  }
+  else if(opts.war&&Math.random()<0.2){ rep.sparedMe=1; me.hp=me.maxhp; sync(me,true); } // 적장이 자비를 베풂
+  else { const last=res.log[res.log.length-1]; bury(me,last?last.text:'전사'); }
   S.fights++; saveState();
   ui.rep=rep; view='battle'; render();
 }
+// 전사의 죽음: 명예의 전당에 기록하고, 묘지(=내 발할라)로 보냄
+function bury(me,cause){ sync(me,false);
+  S.yard.unshift({name:me.name,g:me.g,cm:me.cm,outfit:me.outfit,wins:me.wins,flag:me.flag||'',cause:cause||'전사',t:Date.now()});
+  S.yard=S.yard.slice(0,60); S.hero=null; }
 function setSt(a,b){ [['A',a],['B',b]].forEach(([id,v])=>{ const el=$('#st'+id); if(el&&v!=null){ el.style.width=Math.max(0,Math.min(100,v))+'%'; el.classList.toggle('low',v<30); } }); }
 function setHp(a,b){
   const r=ui.rep;
@@ -3461,7 +3589,7 @@ function wxBolt(id){ const cv=$('#wxl'), fl=$('#wxflash'); if(fl){ fl.classList.
   const st=$('#stage'); if(st){ st.classList.remove('shake'); void st.offsetWidth; st.classList.add('shake'); setTimeout(()=>st.classList.remove('shake'),500); } }
 function play(){
   const r=ui.rep; shown=0; ui.tms=[];
-  setHp(r.me.maxhp,r.foe.maxhp);
+  setHp(r.hp0||r.me.maxhp,r.foe.maxhp);
   const fA=$('#fA'), fB=$('#fB'), st=$('#stage');
   layoutStage();
   if(USE3D&&G3.ok){ [fA,fB].forEach(f=>f.style.transition='none'); place(); fA.classList.add('run'); fB.classList.add('run'); }
@@ -3485,16 +3613,36 @@ function skip(){
   ui.intro=null; ui.mount=null; while(shown<r.log.length){ const e=r.log[shown++]; addLine(e); setHp(e.hpA,e.hpB); if(e.kind==='kill') impact(e); if(e.kind==='flee') ui.flee={id:e.by,t0:performance.now()-3000}; }
   finish();
 }
+// 자비: 이긴 자가 1분 안에 살려줄지 정함. 안 정하면 목을 벤다
+function mercyAsk(r,after){
+  clearInterval(ui.mercyT); const t0=Date.now(), LIM=60;
+  after.innerHTML=`<div class="verdict mercyq"><b>${esc(r.foe.name)}, 발밑에 엎드려 목숨을 구걸한다</b><span>살려줄 것인가, 목을 벨 것인가. <i id="mcnt">${LIM}</i>초 안에 정하지 않으면 벤다.</span></div><div class="mbtns"><button class="btn primary" data-act="mercy" data-m="0">목을 벤다</button><button class="btn" data-act="mercy" data-m="1">살려준다</button></div>`;
+  ui.mercyT=setInterval(()=>{ const left=LIM-Math.floor((Date.now()-t0)/1000), c=$('#mcnt'); if(c) c.textContent=Math.max(0,left); if(left<=0||view!=='battle'||ui.rep!==r){ clearInterval(ui.mercyT); if(r.mercy==='ask') mercyDecide(false,r); } },500);
+}
+function mercyDecide(spare,r){
+  r=r||ui.rep; if(!r||r.mercy!=='ask') return; clearInterval(ui.mercyT);
+  r.mercy=spare?'spared':'killed';
+  const me=S.hero&&S.hero.id===r.me.id?S.hero:null;
+  if(spare){ r.ransom=r.war?RI(20,50):RI(3,12); S.gold=(S.gold||0)+r.ransom; S.mercies=(S.mercies||0)+1;
+    if(me&&S.mercies>=5&&me.tags&&!me.tags.some(t=>t[0]==='자비로운 자')) me.tags.push(['자비로운 자',0]); }
+  else if(me) r.plunder=plunderHelm(me,r.foe);
+  if(me) sync(me,true);
+  if(r.duelId&&window.DuelOnline&&DuelOnline.mercy) DuelOnline.mercy(r.duelId,spare);
+  saveState(); if(view==='battle'&&ui.rep===r) finish();
+}
 function finish(){
   const r=ui.rep, after=$('#after'); if(!after) return;
   if(S.pendingReplay){ S.pendingReplay=null; saveState(); }
   const st=$('#stage'); if(st) st.classList.remove('fighting');
   ['A','B'].forEach(id=>{ const f=$('#f'+id); if(f) f.classList.remove('brawl','run','tangle'); });
   const w=r.win?'A':'B', loser=r.win?'B':'A';
+  if(r.war&&r.win&&r.gain) after.dataset.war='1';
   if(r.practice){ if(!r.win&&$('#a'+loser)&&!$('#a'+loser).dataset.ko&&r.fled!==loser){ act(loser,'fall',0); $('#a'+loser).dataset.ko='1'; } const wf0=$('#f'+w); if(wf0&&!r.draw){ wf0.dataset.ct=performance.now(); wf0.classList.add('cheer'); }
     after.innerHTML=`<div class="verdict ${r.draw?'draw':r.win?'win':'lose'}"><b>연습 결투 · ${r.draw?'무승부':r.win?'이겼다':r.fled==='A'?'도망쳤다':'졌다'}</b><span>연습이다. 아무도 죽지 않고, 얻는 것도 잃는 것도 없다. 진짜 피는 결투장에서.</span></div><button class="btn primary" data-act="back">돌아간다</button>`; return; }
   if(r.draw){ after.innerHTML=`<div class="verdict draw"><b>무승부</b><span>${(r.log.find(e=>e.kind==='peace')||{}).broken?'둘 다 뼈가 부러져 절뚝이며 떠났다. 다음엔 끝장을 보자.':'봄바람에 칼을 거뒀다. 오늘은 아무도 죽지 않았다.'}</span></div><button class="btn primary" data-act="back">돌아간다</button>`; return; }
-  if(r.fled!==loser&&$('#a'+loser)&&!$('#a'+loser).dataset.ko){
+  if(r.win&&r.mercy==='ask'){ mercyAsk(r,after); return; }
+  if(!r.win&&r.sparedMe){ after.innerHTML=`<div class="verdict honor"><b>목숨을 건졌다</b><span>${esc(r.foe.name)}이(가) 칼끝을 목에 댔다가… 고개를 젓더니 칼을 거뒀다. "다음엔 없다."</span></div><button class="btn primary" data-act="back">피를 닦고 돌아간다</button>`; return; }
+  if(r.fled!==loser&&(r.mercy!=='spared')&&$('#a'+loser)&&!$('#a'+loser).dataset.ko){
     const lh=loser==='A'?r.me:r.foe, f=$('#fig'+loser); if(f) f.innerHTML=drawChar(lh,true,Math.round(hfrac(lh.cm)*((ui.stageH||340)-40)));
     act(loser,'fall',0); $('#a'+loser).dataset.ko='1';
   }
@@ -3503,7 +3651,10 @@ function finish(){
   if(r.win){
     const top=Object.entries(r.gain).filter(([k])=>k!=='bulk'&&k!=='loot'&&k!=='learn'&&k!=='honor').sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>{
       const nm=SGROUPS.flatMap(g=>g[1]).find(x=>x[0]===k)[1]; return `${nm} +${v}`; });
-    h+=`<div class="verdict win"><b>${r.fled?'놈이 꽁무니를 뺐다.':r.vline||(r.vline=pick(WIN_LINES))}</b><span>${r.wins}킬 · ${(()=>{ const k=r.gain.learn, v=r.gain[k]||0, nm=k&&(SGROUPS.flatMap(g=>g[1]).find(x=>x[0]===k)||[])[1]; return k?(v>0?`놈에게서 ${nm}을(를) 배웠다 +${v}`:`놈의 ${nm}에서 더 배울 게 없었다`):top.join(' · '); })()}${r.gold?` · <b class="gold">+${fmtG(r.gold)}</b>`:''}</span></div>`;
+    h+=`<div class="verdict win"><b>${r.war?(r.fled?'적장이 꽁무니를 뺐다. 전쟁은 우리의 것이다!':r.mercy==='spared'?'적장이 무릎을 꿇었다. 전쟁은 우리의 것이다!':'적장의 목을 베었다. 전쟁은 우리의 것이다!'):r.fled?'놈이 꽁무니를 뺐다.':r.vline||(r.vline=pick(WIN_LINES))}</b><span>${r.wins}킬 · ${(()=>{ const k=r.gain.learn, v=r.gain[k]||0, nm=k&&(SGROUPS.flatMap(g=>g[1]).find(x=>x[0]===k)||[])[1]; return k?(v>0?`놈에게서 ${nm}을(를) 배웠다 +${v}`:`놈의 ${nm}에서 더 배울 게 없었다`):top.join(' · '); })()}${r.gold?` · <b class="gold">+${fmtG(r.gold)}</b>`:''}</span></div>`;
+    if(r.mercy==='spared') h+=`<div class="verdict mercy"><b>목숨만은 살려줬다</b><span>${esc(r.foe.name)}, 땅에 이마를 찧으며 기어서 도망쳤다.${r.ransom?` 몸값 +${r.ransom} 골드`:''}</span></div>`;
+    if(r.warStat){ const nm=(SGROUPS.flatMap(g=>g[1]).find(x=>x[0]===r.warStat[0])||[])[1]||r.warStat[0]; h+=`<p class="note">전쟁에서 단련됐다: ${nm} +${r.warStat[1]}</p>`; }
+    if(r.warLoot){ const it=gearOf(r.warLoot.slot,r.warLoot.id); if(it) h+=`<div class="plunder">${itemIcon(it)}<div><b>전장에서 전리품을 주웠다</b><span><i class="tierb" style="background:${TIER_C(it.tier)}">${it.tier}</i>${esc(it.name)} · ${r.warLoot.worn?'바로 걸쳤다':'창고에 넣었다'}</span></div></div>`; }
     if(r.gain.honor) h+=`<div class="verdict honor"><b>이름을 되찾았다</b><span>겁쟁이의 오명을 피로 씻었다. 다시 ${esc(r.gain.honor)}(이)라 불린다.</span></div>`;
     if(r.plunder){ const it=gearOf(r.plunder.slot,r.plunder.id); if(it) h+=`<div class="plunder">${itemIcon(it)}<div><b>놈의 투구를 빼앗았다</b><span><i class="tierb" style="background:${TIER_C(it.tier)}">${it.tier}</i>${esc(it.name)} · ${r.plunder.worn?'바로 썼다':'창고에 넣었다 (지금 것이 더 좋다)'}</span></div></div>`; }
   } else if(r.fled==='A'){
@@ -3512,7 +3663,7 @@ function finish(){
     h+=`<div class="verdict lose"><b>전사</b><span>${esc(r.me.name)}, ${r.me.wins}킬을 남기고 쓰러졌다. ${r.vline||(r.vline=pick(LOSE_LINES))}</span></div>`;
   }
   if(r.broke) h+=`<p class="note">${esc(r.broke)}이(가) 부서졌어요.</p>`;
-  h+=r.win||r.fled==='A'?`<button class="btn primary" data-act="back">${r.win?'피가 부족하다':'고개를 숙이고 돌아간다'}</button>`:`<button class="btn primary" data-act="roll">다시 태어난다</button>`;
+  h+=r.win||r.fled==='A'?`<button class="btn primary" data-act="back">${r.win?'피가 부족하다':'고개를 숙이고 돌아간다'}</button>`:`<button class="btn primary" data-act="roll">다시 태어난다</button><button class="btn" data-act="valhalla">발할라로 간다</button>`;
   after.innerHTML=h;
   if(r.win&&r.gain&&r.gain.loot&&!r.gachaShown){ r.gachaShown=1; if(S.pendingReplay===r) saveState(); setTimeout(()=>gacha(r.gain.loot),700); }
 }
@@ -3614,7 +3765,13 @@ app.addEventListener('click',e=>{
     S.renameT--; S.hero.name=v; sync(S.hero,true); saveState(); ui.msg='이름을 바꿨다. 남은 이름변경 쿠폰 '+S.renameT+'장'; render();
   }
   else if(a==='invite'){ ui.code='#'+Array.from({length:4},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[RI(0,31)]).join(''); view='invite'; render(); }
-  else if(a==='accept') startFight();
+  else if(a==='accept') pracPick();
+  else if(a==='mercy') mercyDecide(b.dataset.m==='1');
+  else if(a==='war'){ if(!S.hero) return; ui.war=newWar(); view='war'; render(); window.scrollTo(0,0); }
+  else if(a==='warGo'){ if(ui.war&&ui.war.phase==='intro') warMelee(); }
+  else if(a==='warGen'){ const w=ui.war; if(w&&w.phase==='gen'&&S.hero){ w.phase='done'; startFight(w.gen,{war:{kills:w.kills},hp:w.hp,label:'적장'}); } }
+  else if(a==='valhalla'){ ui.vsel=null; view='valhalla'; render(); window.scrollTo(0,0); }
+  else if(a==='vsel'){ const i=+b.dataset.i; ui.vsel=i>=0?i:null; render(); }
   else if(a==='acceptin'){ if(ui.duelId) DuelOnline.accept(); else { const f=ui.incoming; ui.incoming=null; try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){} startFight(f); } }
   else if(a==='declinein'){ if(ui.duelId) DuelOnline.decline(); else { ui.incoming=null; try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){} view=S.hero?'card':'home'; render(); } }
   else if(a==='joincode'){

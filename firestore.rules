@@ -22,6 +22,14 @@ service cloud.firestore {
         && request.resource.data.status == 'cancelled'
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','decidedAt']);
 
+      // 이긴 사람(받은 쪽)이 진 사람을 살려줄지 딱 한 번 기록
+      allow update: if request.auth != null
+        && request.auth.uid == resource.data.recipientUid
+        && resource.data.status == 'accepted'
+        && !('spared' in resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['spared'])
+        && request.resource.data.spared is bool;
+
       allow update: if request.auth != null
         && request.auth.uid != resource.data.ownerUid
         && resource.data.status == 'pending'

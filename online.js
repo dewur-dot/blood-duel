@@ -186,18 +186,21 @@
     if(!opponent) return false;
     const isDraw=!!result.draw;
     const won=!isDraw&&(isOwner?result.winner==='B':result.winner==='A');
+    const myIdX=isOwner?'B':'A';
+    // 내가 졌고 이긴 쪽(받은 사람)이 아직 살려줄지 정하는 중이면(최대 1분) 잠시 기다림
+    let spared=false;
+    if(isOwner&&!won&&!isDraw&&result.fled!==myIdX){
+      if(data.spared===true) spared=true;
+      else if(data.spared===undefined){ const dt=data.decidedAt&&data.decidedAt.toMillis?Date.now()-data.decidedAt.toMillis():1e9; if(dt<75000){ setTimeout(()=>checkDuels(),Math.max(5000,75000-dt)); if(show){ ui.notice='상대가 너의 목숨을 저울질하고 있다… 잠시 뒤 결과가 나온다.'; render(); } return false; } } }
     const myId=isOwner?'B':'A', iFled=result.fled===myId, theyFled=!!result.fled&&!iFled;
     const rep={me:clone(me),foe:opponent,log:isOwner?flipLog(result.log):result.log,
-      win:won,draw:isDraw,broke:null,gain:null,fled:result.fled?(isOwner?(result.fled==='A'?'B':'A'):result.fled):null};
-    if(isDraw){ me.hp=me.maxhp; sync(me,true); }
-    else if(won){ rep.gain=grow(me,opponent); rep.gold=typeof winGold==='function'?winGold(me):0; rep.plunder=theyFled?null:(typeof plunderHelm==='function'?plunderHelm(me,opponent):null); rep.wins=me.wins; sync(me,true); }
+      win:won,draw:isDraw,sparedMe:spared?1:0,broke:null,gain:null,fled:result.fled?(isOwner?(result.fled==='A'?'B':'A'):result.fled):null};
+    if(isDraw||spared){ me.hp=me.maxhp; sync(me,true); }
+    else if(won){ rep.gain=grow(me,opponent); rep.gold=typeof winGold==='function'?winGold(me):0; if(theyFled) rep.plunder=null; else if(isRecipient&&show){ rep.mercy='ask'; rep.duelId=id; } else rep.plunder=typeof plunderHelm==='function'?plunderHelm(me,opponent):null; rep.wins=me.wins; sync(me,true); }
     else if(iFled&&typeof cowardize==='function'){ cowardize(me); sync(me,true); }
     else{
       const last=result.log[result.log.length-1];
-      sync(me,false);
-      S.yard.unshift({name:me.name,g:me.g,cm:me.cm,outfit:me.outfit,wins:me.wins,
-        cause:last?last.text:'전사'});
-      S.yard=S.yard.slice(0,20); S.hero=null;
+      bury(me,last?last.text:'전사');
     }
     S.fights++;
     if(S.pendingDuel===id) S.pendingDuel=null;
@@ -366,7 +369,12 @@
     }
   }
   const isLocked=action=>!!S.pendingDuel&&['roll','reset','accept','buy','wear','rename'].includes(action);
-  window.DuelOnline={send,open,accept,decline,cancel,checkDuels,isLocked,pushHero,loadBoard,redeem};
+  // 이긴 사람(결투장을 받은 쪽)이 진 사람을 살려줄지 기록 (한 번만)
+  async function mercy(id,spare){
+    try{ const db=await ready; await db.collection('duels').doc(id).update({spared:!!spare}); }
+    catch(error){ console.warn('자비 기록 실패',error&&error.code||error); }
+  }
+  window.DuelOnline={send,open,accept,decline,cancel,checkDuels,isLocked,pushHero,loadBoard,redeem,mercy};
   if(S.hero) pushHero(S.hero,true);
   ready.then(()=>{ const ad=((window.BLOOD_DUEL_SUPPORT||{}).admins)||[]; const u=firebase.auth().currentUser; if(u&&ad.includes(u.uid)){ ui.isAdmin=true; if(view==='card'&&ui.tab==='set') render(); } }).catch(()=>{});
   const match=/#(?:[^#]*&)?duel-id=([A-Za-z0-9]{20})/.exec(location.hash);
