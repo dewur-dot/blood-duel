@@ -1,0 +1,153 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /duels/{duelId} {
+      allow get: if request.auth != null;
+      // 나를 지목한 결투장만 목록으로 볼 수 있음 (랭킹에서 바로 보낸 결투장)
+      allow list: if request.auth != null && resource.data.targetUid == request.auth.uid;
+      allow delete: if false;
+
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly([
+          'version', 'status', 'ownerUid', 'ownerHeroId', 'challenger', 'createdAt', 'targetUid'
+        ])
+        && request.resource.data.version == 1
+        && (!('targetUid' in request.resource.data) || (
+          request.resource.data.targetUid is string
+          && request.resource.data.targetUid != request.auth.uid
+          && (!exists(/databases/$(database)/documents/prefs/$(request.resource.data.targetUid))
+            || (get(/databases/$(database)/documents/prefs/$(request.resource.data.targetUid)).data.noInvite != true
+              && !(request.auth.uid in get(/databases/$(database)/documents/prefs/$(request.resource.data.targetUid)).data.blocked)))))
+        && request.resource.data.status == 'pending'
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerHeroId is string
+        && request.resource.data.challenger is string
+        && request.resource.data.challenger.size() < 15000;
+
+      allow update: if request.auth != null
+        && request.auth.uid == resource.data.ownerUid
+        && resource.data.status == 'pending'
+        && request.resource.data.status == 'cancelled'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','decidedAt']);
+
+      // 이긴 사람(받은 쪽)이 진 사람을 살려줄지 딱 한 번 기록
+      allow update: if request.auth != null
+        && request.auth.uid == resource.data.recipientUid
+        && resource.data.status == 'accepted'
+        && !('spared' in resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['spared'])
+        && request.resource.data.spared is bool;
+
+      allow update: if request.auth != null
+        && request.auth.uid != resource.data.ownerUid
+        && resource.data.status == 'pending'
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.ownerHeroId == resource.data.ownerHeroId
+        && request.resource.data.challenger == resource.data.challenger
+        && request.resource.data.recipientUid == request.auth.uid
+        && (!('targetUid' in resource.data) || resource.data.targetUid == request.auth.uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status', 'recipientUid', 'recipientHeroId', 'recipient', 'result', 'decidedAt'
+        ])
+        && (
+          (request.resource.data.status == 'declined'
+            && request.resource.data.keys().hasOnly([
+              'version', 'status', 'ownerUid', 'ownerHeroId', 'challenger',
+              'createdAt', 'recipientUid', 'decidedAt', 'targetUid'
+            ]))
+          ||
+          (request.resource.data.status == 'accepted'
+            && request.resource.data.recipientHeroId is string
+            && request.resource.data.recipient is string
+            && request.resource.data.recipient.size() < 15000
+            && request.resource.data.result.winner in ['A', 'B']
+            && request.resource.data.result.log is list
+            && request.resource.data.result.log.size() <= 1000)
+        );
+    }
+
+    // ---- 후원 (오딘의 제단) ----
+    // 관리자 ID: support.html?admin 을 열면 보이는 'ID'를 아래 목록에 넣고 규칙을 다시 게시하세요.
+    function isAdmin() {
+      return request.auth != null && request.auth.uid in ['W8sKysNV3Whf4WXSzkocqIvYSdg2', '56b5mfSkMIfsefIvXC5UEeHyHPp2'];
+    }
+    // 후원 신청: 누구나 자기 이름으로 '확인 대기' 신청만 만들 수 있음. 확인/거절은 관리자만.
+    match /donations/{id} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['uid', 'name', 'amount', 'msg', 'status', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 20
+        && request.resource.data.amount is int && request.resource.data.amount >= 1000 && request.resource.data.amount <= 10000000
+        && request.resource.data.msg is string && request.resource.data.msg.size() <= 200;
+      allow get, list: if resource.data.status == 'done'
+        || (request.auth != null && resource.data.uid == request.auth.uid)
+        || isAdmin();
+      allow update, delete: if isAdmin();
+    }
+    // 쿠폰 받을 연락처: 신청한 본인과 관리자만 볼 수 있음 (후원자 명단에는 안 나옴)
+    match /contacts/{id} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['uid', 'contact'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.contact is string && request.resource.data.contact.size() > 0 && request.resource.data.contact.size() <= 60;
+      allow get: if request.auth != null && (resource.data.uid == request.auth.uid || isAdmin());
+      allow list: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+    // 보상 코드: 관리자만 만들고, 코드를 아는 사람이 딱 한 번 '사용함'으로 바꿀 수 있음
+    match /codes/{code} {
+      allow get: if request.auth != null;
+      allow list: if request.auth != null && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isAdmin();
+      allow update: if request.auth != null
+        && resource.data.redeemedBy == null
+        && request.resource.data.redeemedBy == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['redeemedBy', 'redeemedAt']);
+      allow delete: if isAdmin();
+    }
+
+    // 결투장 받기 설정: 누구나 읽고(보내기 전 확인), 자기 것만 씀
+    match /prefs/{uid} {
+      allow get: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['noInvite', 'blocked'])
+        && request.resource.data.noInvite is bool
+        && request.resource.data.blocked is list && request.resource.data.blocked.size() <= 200;
+    }
+
+    // 명예의 전당 시즌 1 기록: 따로 보관, 읽기만 가능 (아무도 고치거나 지울 수 없음)
+    match /heroes/{heroId} {
+      allow get, list: if request.auth != null;
+      allow write: if false;
+    }
+
+    // 명예의 전당 (시즌 2): 실제로 플레이한 전사들. 누구나 읽고, 자기 전사만 쓴다
+    match /heroes2/{heroId} {
+      function valid() {
+        return request.resource.data.keys().hasOnly(['uid', 'name', 'kills', 'alive', 'hero', 'updatedAt'])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.name is string && request.resource.data.name.size() <= 20
+          && request.resource.data.kills is int && request.resource.data.kills >= 0 && request.resource.data.kills <= 99999
+          && request.resource.data.alive is bool
+          && request.resource.data.hero is string && request.resource.data.hero.size() < 15000;
+      }
+      allow get, list: if request.auth != null;
+      allow create: if request.auth != null && valid();
+      allow update: if request.auth != null && resource.data.uid == request.auth.uid && valid();
+      // 결투에서 이긴 사람은 죽인 상대를 '전사'로만 바꿀 수 있음 (그 결투 기록으로 확인)
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['alive', 'killedIn', 'updatedAt'])
+        && request.resource.data.alive == false
+        && request.resource.data.killedIn is string
+        && duelKilled(request.resource.data.killedIn, heroId);
+      allow delete: if false;
+    }
+    function duelKilled(duelId, heroId) {
+      let d = get(/databases/$(database)/documents/duels/$(duelId)).data;
+      return d.status == 'accepted' && !(d.result.get('draw', false) == true) && d.get('spared', false) != true
+        && ((d.ownerHeroId == heroId && d.result.winner == 'B' && d.recipientUid == request.auth.uid)
+          || (d.get('recipientHeroId', '') == heroId && d.result.winner == 'A' && d.ownerUid == request.auth.uid));
+    }
+  }
+}
