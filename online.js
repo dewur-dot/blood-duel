@@ -166,6 +166,7 @@
     return e;
   });
 
+  let mercyWait=null;
   function applyResult(id,data,show){
     if(S.handledDuels.includes(id)) return false;
     const uid=firebase.auth().currentUser.uid;
@@ -191,7 +192,7 @@
     let spared=false;
     if(isOwner&&!won&&!isDraw&&result.fled!==myIdX){
       if(data.spared===true) spared=true;
-      else if(data.spared===undefined){ const dt=data.decidedAt&&data.decidedAt.toMillis?Date.now()-data.decidedAt.toMillis():1e9; if(dt<75000){ setTimeout(()=>checkDuels(),Math.max(5000,75000-dt)); if(show){ ui.notice='상대가 너의 목숨을 저울질하고 있다… 잠시 뒤 결과가 나온다.'; render(); } return false; } } }
+      else if(data.spared===undefined){ const dt=data.decidedAt&&data.decidedAt.toMillis?Date.now()-data.decidedAt.toMillis():1e9; if(dt<75000){ if(!mercyWait){ mercyWait=setTimeout(()=>{ mercyWait=null; checkDuels(); },Math.max(3000,76000-dt)); } const m='상대가 너의 목숨을 저울질하고 있다… 살려줄지, 벨지. 잠시 뒤 결과가 나온다.'; if(show&&ui.notice!==m){ ui.notice=m; render(); } return false; } } }
     const myId=isOwner?'B':'A', iFled=result.fled===myId, theyFled=!!result.fled&&!iFled;
     const rep={me:clone(me),foe:opponent,log:isOwner?flipLog(result.log):result.log,
       win:won,draw:isDraw,sparedMe:spared?1:0,broke:null,gain:null,fled:result.fled?(isOwner?(result.fled==='A'?'B':'A'):result.fled):null};
@@ -381,4 +382,21 @@
   if(match) open(match[1]);
   else checkDuels();
   window.addEventListener('focus',checkDuels);
+  // 보낸 결투장을 실시간으로 지켜봄: 상대가 수락·거절하면 새로고침 없이 바로 결과로 넘어감
+  let watchId=null, unwatch=null, duelReady=false;
+  async function watch(){
+    const id=S.pendingDuel||null;
+    if(id===watchId) return;
+    if(unwatch){ try{ unwatch(); }catch(e){} unwatch=null; }
+    watchId=id; if(!id) return;
+    try{
+      const db=await ready; if(watchId!==id) return;
+      unwatch=db.collection('duels').doc(id).onSnapshot(shot=>{
+        const d=shot.exists?shot.data():null; if(!d||d.status==='pending') return;
+        duelReady=true; checkDuels();
+      },error=>console.warn('결투장 지켜보기 실패',error&&error.code||error));
+    }catch(error){ console.warn('결투장 지켜보기 실패',error); }
+  }
+  setInterval(()=>{ watch(); if(duelReady&&view!=='battle'&&!ui.duelId&&S.pendingDuel){ checkDuels(); } if(!S.pendingDuel) duelReady=false; },2000);
+  watch();
 })();
