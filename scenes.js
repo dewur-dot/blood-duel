@@ -147,13 +147,14 @@ function Valhalla(cv,folk,opt){
     S.folk.forEach(p=>{ if(p.gone) return;
       if(p.held){ p.moving=false; return; }
       if(p.fall){ p.fall.vy+=2.6*dt; p.y+=p.fall.vy*dt; if(p.y>=p.fall.gy){ p.y=p.fall.gy; if(p.fall.vy>0.5){ floatTxt(p.x,p.y-0.2,pick(['쿵!','아이고!','으억!']),'#fff'); p.hitT=t; } p.fall=null; p.until=now+800; p.act='cheer'; } return; }
-      if(S.altar&&now>p.until){ const a=Math.random()*TAU, rr=rnd(0.16,0.3); p.tx=clamp(0.5+Math.cos(a)*rr*1.2,0.05,0.95); p.ty=clamp(0.82+Math.sin(a)*rr*0.35,0.62,0.99); p.act=pick(['walk','cheer','sing','cheer']); p.partner=null; p.until=now+rnd(4000,7000); }
+      if(S.altar&&now>p.until){ p.slot=slotFor(p); p.tx=p.slot[0]+rnd(-0.008,0.008); p.ty=p.slot[1]; p.act='shout'; p.partner=null; p.until=now+rnd(4000,7000); }
       if(now>p.until){ if(p.act==='fight'&&p.partner){ const q=p.partner; q.partner=null; if(q.act==='fight') q.until=now; } nextAct(p,now); }
       const dx=p.tx-p.x, dy=p.ty-p.y, d=Math.hypot(dx,dy); p.moving=false;
       if(p.act==='fight'&&p.partner){ const q=p.partner; if(!p.meet){ p.meet=[q.x,q.y]; q.meet=p.meet; } const mx=p.meet[0], my=p.meet[1]; p.tx=mx+(p.x<q.x?-0.04:0.04)+Math.sin(t*5+p.i)*0.012; p.ty=my; p.dir=p.x<q.x?1:-1;
         if(Math.random()<dt*0.9){ q.hitT=t; floatTxt(q.x,q.y-0.2,pick(['퍽!','쾅!','덤벼라!','하하!','한판 붙자!']),'#fff'); } }
       if(p.act==='throw'&&p.partner&&!p.thrown&&now>p.until-2500){ p.thrown=true; const q=p.partner; p.dir=q.x>p.x?1:-1; p.thrownAt=t; S.props.push({k:pick(['meat','apple','bread']),x0:p.x,y0:p.y-0.13,x1:q.x,y1:q.y-0.1,t0:t,dur:0.9,to:q}); floatTxt(p.x,p.y-0.22,pick(['받아라!','먹어라!','이거나 먹어!']),'#ffe9a8'); }
-      if(d>0.004){ const sp=(p.act==='run'?0.16:0.07)*dt; p.x+=dx/d*Math.min(sp,d); p.y+=dy/d*Math.min(sp,d); p.moving=true; if(Math.abs(dx)>0.002) p.dir=dx>0?1:-1; }
+      if(d>0.004){ const sp=(p.act==='run'||S.altar&&d>0.03?0.2:0.07)*dt; p.x+=dx/d*Math.min(sp,d); p.y+=dy/d*Math.min(sp,d); p.moving=true; if(Math.abs(dx)>0.002) p.dir=dx>0?1:-1; }
+      if(S.altar){ if(!p.moving&&now>(p.nextShout||0)){ p.shoutT=t; p.nextShout=now+rnd(1200,6500); floatTxt(p.x+rnd(-0.03,0.03),p.y-0.19,pick(['우오오오!','오딘이여!!','피를 바쳐라!','나를 살려라!','으아아아!','발할라!!','신이시여!','나를 골라라!','불이다!!']),pick(['#ffb38a','#ffe2a0','#fff'])); } return; }
       if(p.act==='sing'&&Math.random()<dt*1.6) S.fx.push({k:'note',x:p.x+rnd(-0.01,0.02),y:p.y-0.2,t0:t,life:1.8,ch:pick(['♪','♫','♬'])});
       if(p.act==='eat'&&!p.moving&&Math.random()<dt*0.35) floatTxt(p.x,p.y-0.21,pick(['쩝쩝','고기 맛 좋다!','더 가져와라!']),'#ffe9a8');
       if(p.act==='drink'&&!p.moving&&Math.random()<dt*0.4) floatTxt(p.x,p.y-0.21,pick(['벌컥벌컥','캬아!','한 잔 더!','스콜!']),'#ffe9a8');
@@ -162,48 +163,89 @@ function Valhalla(cv,folk,opt){
     S.props=S.props.filter(pr=>{ const u=(t-pr.t0)/pr.dur; if(u>=1){ if(pr.to){ pr.to.hitT=t; S.fx.push({k:'splat',x:pr.x1,y:pr.y1,t0:t,life:0.6}); floatTxt(pr.x1,pr.y1-0.12,pick(['철퍽!','어떤 놈이야!','이 자식이!']),'#fff'); } return false; } return true; });
     S.fx=S.fx.filter(f=>t-f.t0<f.life);
     S.birds.forEach(b=>{ b.x+=b.v*dt; b.f+=dt*(b.k==='peg'?4:8); if(b.v>0&&b.x>1.25) b.x=-0.25; if(b.v<0&&b.x<-0.25) b.x=1.25; });
-    if(bigfest&&Math.random()<dt*6) S.fx.push({k:'conf',x:Math.random(),y:-0.02,vx:rnd(-0.02,0.02),vy:rnd(0.05,0.12),c:pick(['#ff6b6b','#ffd43b','#69db7c','#4dabf7','#e599f7']),t0:t,life:6});
+    if(bigfest&&!S.altar&&Math.random()<dt*6) S.fx.push({k:'conf',x:Math.random(),y:-0.02,vx:rnd(-0.02,0.02),vy:rnd(0.05,0.12),c:pick(['#ff6b6b','#ffd43b','#69db7c','#4dabf7','#e599f7']),t0:t,life:6});
   }
   function frame(now){ if(!alive) return; raf=requestAnimationFrame(frame); if(!cv.isConnected){ stop(); return; }
     const dt=Math.min(0.05,(now-last)/1000); last=now; t+=dt; update(dt,now);
     const {c,W,H}=fitCanvas(cv);
-    sky(c,W,H); mountains(c,W,H); hall(c,W,H); ground(c,W,H); river(c,W,H);
-    S.birds.forEach(b=>{ const x=b.x*W, y=b.y*H+Math.sin(b.f*0.3)*6; if(b.k==='peg') drawPegasus(c,x,y,b.s*W/420,b.f,b.v>0?1:-1); else drawBird(c,x,y,b.s*W/420,b.f,b.k==='eagle'?'#5d4a35':'#232323'); });
-    trees.forEach(([x,y,s],i)=>tree(c,x*W,y*H,s*W/420,i===0));
-    bunting(c,W,H);
+    if(S.altar){ hellSky(c,W,H); hellGround(c,W,H); } else { sky(c,W,H); mountains(c,W,H); hall(c,W,H); ground(c,W,H); river(c,W,H); }
+    if(!S.altar) S.birds.forEach(b=>{ const x=b.x*W, y=b.y*H+Math.sin(b.f*0.3)*6; if(b.k==='peg') drawPegasus(c,x,y,b.s*W/420,b.f,b.v>0?1:-1); else drawBird(c,x,y,b.s*W/420,b.f,b.k==='eagle'?'#5d4a35':'#232323'); });
+    if(!S.altar){ trees.forEach(([x,y,s],i)=>tree(c,x*W,y*H,s*W/420,i===0)); bunting(c,W,H); }
     // 깊이 순서대로: 탁자·모닥불·사람
-    const items=[...(S.altar?[{y:0.8,d:()=>altarDraw(c,W,H)}]:tables.map(tb=>({y:tb.y,d:()=>table(c,W,H,tb)}))),{y:0.665,d:()=>firepit(c,W,H)},...S.folk.filter(p=>!p.gone).map(p=>({y:p.held?5:p.y,p,d:()=>person(c,W,H,p,now)}))];
+    const items=[...(S.altar?[{y:0.8,d:()=>altarDraw(c,W,H)}]:tables.map(tb=>({y:tb.y,d:()=>table(c,W,H,tb)}))),...(S.altar?[]:[{y:0.665,d:()=>firepit(c,W,H)}]),...S.folk.filter(p=>!p.gone).map(p=>({y:p.held?5:p.y,p,d:()=>person(c,W,H,p,now)}))];
     items.sort((a,b)=>a.y-b.y);
     if(opt.render3d){ let batch=[]; const flush=()=>{ if(batch.length){ opt.render3d(c,W,H,t,batch,now); batch.forEach(b=>{ const p=b.p; p._box=[b.x-b.hgt*0.25,b.y-b.hgt,b.hgt*0.5,b.hgt]; }); batch=[]; } };
       items.forEach(o=>{ if(o.p){ const p=o.p, sc=lerp(0.62,1.05,clamp(((p.held?p.hy:p.y)-0.55)/0.42,0,1)); if(p.burn){ const u=(t-p.burn)/1.2; if(u>=1){ p.gone=true; return; } } batch.push({p,x:p.x*W,y:p.y*H,hgt:H*0.2*sc}); } else { flush(); o.d(); } }); flush();
       S.folk.forEach(p=>{ const b=p._box; if(!b) return; if(S.sel===p.i){ c.strokeStyle='#ffd76a'; c.lineWidth=2; c.beginPath(); c.ellipse(b[0]+b[2]/2,b[1]+b[3],b[2]*0.6,b[3]*0.05,0,0,TAU); c.stroke(); c.font='600 11px system-ui,sans-serif'; c.textAlign='center'; const tw=c.measureText(p.name).width+8; c.fillStyle='rgba(30,20,8,.6)'; rr(c,b[0]+b[2]/2-tw/2,b[1]+b[3]+3,tw,14,3); c.fill(); c.fillStyle='#fff3cf'; c.fillText(p.name,b[0]+b[2]/2,b[1]+b[3]+14); } });
     } else items.forEach(o=>o.d());
+    if(S.altar){ c.textAlign='center'; c.font=`800 ${Math.max(11,Math.round(W*0.03))}px system-ui,sans-serif`; c.lineWidth=3; c.strokeStyle='rgba(0,0,0,.8)';
+      const nLive=S.folk.filter(q=>!q.gone&&!q.burn).length, full=nLive<=12; S.folk.forEach(p=>{ if(p.gone||p.burn||!p._box) return; const nm=full?(p.name||''):(p.name||'').split(' ')[0], hw=c.measureText(nm).width/2+3, x=clamp(p._box[0]+p._box[2]/2,hw,W-hw), y=p._box[1]-4; c.strokeText(nm,x,y); c.fillStyle=p.held?'#ffd76a':'#fff'; c.fillText(nm,x,y); }); }
     S.props.forEach(pr=>{ const u=(t-pr.t0)/pr.dur, x=lerp(pr.x0,pr.x1,u)*W, y=lerp(pr.y0,pr.y1,u)*H-Math.sin(u*Math.PI)*H*0.12; c.save(); c.translate(x,y); c.rotate(u*10);
       if(pr.k==='meat'){ c.fillStyle='#a5562a'; c.beginPath(); c.ellipse(0,0,6,4,0,0,TAU); c.fill(); c.fillStyle='#f3e6c8'; c.fillRect(4,-1,5,2); } else if(pr.k==='apple'){ c.fillStyle='#d6332f'; c.beginPath(); c.arc(0,0,4,0,TAU); c.fill(); } else { c.fillStyle='#d9a441'; c.beginPath(); c.ellipse(0,0,6,3.5,0,0,TAU); c.fill(); } c.restore(); });
     S.fx.forEach(f=>{ const u=(t-f.t0)/f.life;
       if(f.k==='txt'){ c.globalAlpha=1-u; c.font='800 12px system-ui,sans-serif'; c.textAlign='center'; c.lineWidth=3; c.strokeStyle='rgba(40,25,5,.8)'; const y=f.y*H-u*22; c.strokeText(f.txt,f.x*W,y); c.fillStyle=f.col; c.fillText(f.txt,f.x*W,y); c.globalAlpha=1; }
       else if(f.k==='note'){ c.globalAlpha=1-u; c.font='700 15px serif'; c.fillStyle='#5a2fa0'; c.fillText(f.ch,f.x*W+Math.sin(u*8)*6,f.y*H-u*40); c.globalAlpha=1; }
       else if(f.k==='splat'){ c.globalAlpha=1-u; c.fillStyle='#c0392b'; for(let i=0;i<6;i++){ const a=i/6*TAU; c.beginPath(); c.arc(f.x*W+Math.cos(a)*u*14,f.y*H-H*0.1+Math.sin(a)*u*10,2.2,0,TAU); c.fill(); } c.globalAlpha=1; }
+      else if(f.k==='boom'){ c.globalAlpha=1-u; const g=c.createRadialGradient(f.x*W,f.y*H,0,f.x*W,f.y*H,30*u+6); g.addColorStop(0,'rgba(255,220,120,.9)'); g.addColorStop(1,'rgba(255,80,20,0)'); c.fillStyle=g; c.beginPath(); c.arc(f.x*W,f.y*H,30*u+6,0,TAU); c.fill(); c.globalAlpha=1; }
       else if(f.k==='spark'){ f.x+=f.vx*0.016; f.y+=f.vy*0.016; c.globalAlpha=1-u; c.fillStyle=f.c; c.beginPath(); c.arc(f.x*W,f.y*H,2.5*(1-u)+0.5,0,TAU); c.fill(); c.globalAlpha=1; }
       else if(f.k==='conf'){ f.x+=f.vx*0.016; f.y+=f.vy*0.016; c.fillStyle=f.c; c.save(); c.translate(f.x*W,f.y*H); c.rotate(t*5+f.t0); c.fillRect(-2,-3,4,6); c.restore(); } });
   }
+  // ---- 부활의 제단으로 가면 세상이 바뀜: 화산 폭발, 불덩이 비, 번개 ----
+  const meteors=[], bolts=[], lavaSp=[];
+  function hellSky(c,W,H){ const g=c.createLinearGradient(0,0,0,H*0.55); g.addColorStop(0,'#120406'); g.addColorStop(.5,'#3a0b08'); g.addColorStop(1,'#8a2410'); c.fillStyle=g; c.fillRect(0,0,W,H);
+    // 연기 구름
+    for(let i=0;i<9;i++){ const x=((i*0.17+t*0.01*(1+i%3))%1.4-0.2)*W, y=(0.06+(i%4)*0.07)*H; c.fillStyle=`rgba(${30+i*4},${12+i*2},${10},.75)`; c.beginPath(); c.ellipse(x,y,W*0.2,H*0.06,0,0,TAU); c.fill(); }
+    // 화산
+    const vx=W*0.5, vy=H*0.53, top=H*0.2;
+    // 먼 산맥
+    c.fillStyle='#200c0a'; c.beginPath(); c.moveTo(0,vy); [[0,0.36],[0.08,0.3],[0.16,0.38],[0.22,0.33],[0.3,0.42],[0.7,0.42],[0.78,0.31],[0.86,0.37],[0.93,0.29],[1,0.35],[1,0.53]].forEach(([a,b2])=>c.lineTo(a*W,b2*H)); c.closePath(); c.fill();
+    const slope=[[-0.62,0.53],[-0.48,0.47],[-0.4,0.44],[-0.3,0.37],[-0.22,0.33],[-0.15,0.26],[-0.1,0.22],[-0.07,0.2],[0.07,0.2],[0.1,0.225],[0.16,0.27],[0.24,0.35],[0.33,0.4],[0.44,0.46],[0.62,0.53]];
+    c.fillStyle='#1b0f0b'; c.beginPath(); slope.forEach(([a,b2],k)=>c[k?'lineTo':'moveTo'](vx+a*W,b2*H)); c.closePath(); c.fill();
+    c.fillStyle='rgba(70,40,30,.45)'; c.beginPath(); c.moveTo(vx-0.62*W,vy); c.lineTo(vx-0.07*W,top); c.lineTo(vx-0.02*W,top); c.lineTo(vx-0.2*W,vy); c.closePath(); c.fill();
+    // 흘러내리는 용암 (흔들리는 굽이 + 맥동)
+    c.save(); c.lineCap='round'; c.shadowColor='#ff4a10'; c.shadowBlur=14;
+    [[-0.05,-1],[0.02,1],[0.055,0.6],[-0.025,-0.4]].forEach(([a,side],k)=>{ c.lineWidth=k<2?5:3; c.strokeStyle=`rgba(255,${100+Math.round(60*Math.sin(t*2+k))},20,.95)`; c.beginPath(); let x=vx+a*W, y=top+2; c.moveTo(x,y);
+      for(let q=1;q<=12;q++){ const u=q/12; y=top+(vy-top)*u; x=vx+a*W+side*W*0.3*u*u+Math.sin(u*9+k*2)*W*0.015; c.lineTo(x,y); } c.stroke(); });
+    c.restore();
+    // 분화구 불기둥
+    const gl=c.createRadialGradient(vx,top,0,vx,top,W*0.25); gl.addColorStop(0,`rgba(255,200,80,${0.8+0.2*Math.sin(t*7)})`); gl.addColorStop(.4,'rgba(255,90,20,.5)'); gl.addColorStop(1,'rgba(255,60,10,0)'); c.fillStyle=gl; c.fillRect(vx-W*0.3,top-H*0.2,W*0.6,H*0.3);
+    if(Math.random()<0.5) lavaSp.push({x:vx+rnd(-6,6),y:top,vx:rnd(-60,60),vy:-rnd(120,260),t0:t,life:rnd(1,2)});
+    for(let i=lavaSp.length-1;i>=0;i--){ const l=lavaSp[i], u=(t-l.t0)/l.life; if(u>=1){ lavaSp.splice(i,1); continue; } const tt=t-l.t0; const x=l.x+l.vx*tt, y=l.y+l.vy*tt+140*tt*tt; c.fillStyle=`rgba(255,${120+Math.round(100*(1-u))},40,${1-u})`; c.beginPath(); c.arc(x,y,3.2*(1-u)+1,0,TAU); c.fill(); }
+    // 번개
+    if(Math.random()<0.012) bolts.push({x:rnd(0.05,0.95)*W,t0:t,seed:Math.random()*1000});
+    for(let i=bolts.length-1;i>=0;i--){ const b=bolts[i], u=(t-b.t0)/0.35; if(u>=1){ bolts.splice(i,1); continue; }
+      c.fillStyle=`rgba(255,240,255,${0.25*(1-u)})`; c.fillRect(0,0,W,H);
+      c.strokeStyle=`rgba(230,220,255,${1-u})`; c.lineWidth=2.5; c.shadowColor='#b9a8ff'; c.shadowBlur=16; c.beginPath(); let x=b.x, y=0; c.moveTo(x,y); for(let k=0;k<10;k++){ y+=H*0.06; x+=Math.sin(b.seed+k*2.3)*W*0.04; c.lineTo(x,y); } c.stroke(); c.shadowBlur=0; } }
+  function hellGround(c,W,H){ const g=c.createLinearGradient(0,H*0.53,0,H); g.addColorStop(0,'#2a1a14'); g.addColorStop(1,'#140c09'); c.fillStyle=g; c.fillRect(0,H*0.53,W,H*0.47);
+    // 용암 강과 갈라진 틈
+    c.save(); c.shadowColor='#ff5a10'; c.shadowBlur=14; c.strokeStyle=`rgba(255,${110+Math.round(30*Math.sin(t*3))},30,.95)`; c.lineWidth=5; c.beginPath(); c.moveTo(0,H*0.545); for(let x=0;x<=W;x+=14) c.lineTo(x,H*0.545+Math.sin(x*0.03+t*0.8)*4); c.stroke();
+    c.lineWidth=2; [[0.1,0.76,0.3,0.8],[0.55,0.95,0.8,0.88],[0.85,0.68,0.98,0.75],[0.38,0.92,0.5,0.99]].forEach(([a,b2,c2,d2])=>{ c.beginPath(); c.moveTo(a*W,b2*H); c.lineTo((a+c2)/2*W,(b2+d2)/2*H+6); c.lineTo(c2*W,d2*H); c.stroke(); }); c.restore();
+    // 불덩이 비
+    if(Math.random()<0.06) meteors.push({x:rnd(-0.1,1.1)*W,y:-20,vx:rnd(-60,20),vy:rnd(220,360),gy:rnd(0.62,0.98)*H});
+    for(let i=meteors.length-1;i>=0;i--){ const m=meteors[i]; m.x+=m.vx*0.016; m.y+=m.vy*0.016;
+      if(m.y>=m.gy){ meteors.splice(i,1); for(let k=0;k<14;k++) S.fx.push({k:'spark',x:m.x/W,y:m.gy/H,vx:rnd(-0.08,0.08),vy:-rnd(0.05,0.25),t0:t,life:rnd(0.4,0.9),c:pick(['#ffb030','#ff5a1a','#ffe08a'])}); S.fx.push({k:'boom',x:m.x/W,y:m.gy/H,t0:t,life:0.5}); continue; }
+      const gr=c.createLinearGradient(m.x,m.y,m.x-m.vx*0.12,m.y-m.vy*0.12); gr.addColorStop(0,'rgba(255,230,140,1)'); gr.addColorStop(1,'rgba(255,80,20,0)'); c.strokeStyle=gr; c.lineWidth=5; c.beginPath(); c.moveTo(m.x,m.y); c.lineTo(m.x-m.vx*0.12,m.y-m.vy*0.12); c.stroke();
+      c.fillStyle='#fff1b0'; c.beginPath(); c.arc(m.x,m.y,4,0,TAU); c.fill(); } }
   // 부활의 제단: 왼쪽 제물의 불구덩이(세 명), 가운데 부활의 돌제단
-  const PYRE={x:0.27,y:0.84,r:0.11}, ALTAR={x:0.7,y:0.82,r:0.12};
+  const PYRE={x:0.25,y:0.86,r:0.14}, ALTAR={x:0.75,y:0.86,r:0.14};
   function altarDraw(c,W,H){
-    // 불구덩이
-    const px=PYRE.x*W, py=PYRE.y*H; c.fillStyle='#4a3e36'; c.beginPath(); c.ellipse(px,py,W*0.1,H*0.03,0,0,TAU); c.fill(); c.fillStyle='#2a1a10'; c.beginPath(); c.ellipse(px,py-2,W*0.085,H*0.022,0,0,TAU); c.fill();
-    for(let i=0;i<7;i++){ const h=H*(0.06+0.03*Math.sin(t*8+i*1.7)); const g=c.createLinearGradient(0,py-h,0,py); g.addColorStop(0,'rgba(255,230,140,0)'); g.addColorStop(.35,'#ff9a2a'); g.addColorStop(1,'#d8341a'); c.fillStyle=g; const fx=px+(i-3)*W*0.022; c.beginPath(); c.moveTo(fx-W*0.018,py); c.quadraticCurveTo(fx-W*0.02,py-h*0.6,fx+Math.sin(t*6+i)*3,py-h); c.quadraticCurveTo(fx+W*0.02,py-h*0.5,fx+W*0.018,py); c.fill(); }
-    // 부활 제단
-    const ax=ALTAR.x*W, ay=ALTAR.y*H, gl=c.createRadialGradient(ax,ay-H*0.03,0,ax,ay-H*0.03,W*0.16); gl.addColorStop(0,`rgba(255,240,170,${0.55+0.2*Math.sin(t*2)})`); gl.addColorStop(1,'rgba(255,230,140,0)'); c.fillStyle=gl; c.fillRect(ax-W*0.2,ay-H*0.2,W*0.4,H*0.25);
-    c.fillStyle='#8c8c84'; c.fillRect(ax-W*0.1,ay-H*0.03,W*0.2,H*0.035); c.fillStyle='#a8a89e'; c.fillRect(ax-W*0.11,ay-H*0.045,W*0.22,H*0.017);
-    c.fillStyle='#ffd76a'; c.font=`700 ${Math.round(W*0.03)}px serif`; c.textAlign='center'; c.fillText('ᛉ ᛟ ᛉ',ax,ay-H*0.008);
-    c.strokeStyle=`rgba(255,215,110,${0.5+0.3*Math.sin(t*3)})`; c.lineWidth=2; c.beginPath(); c.ellipse(ax,ay+H*0.01,W*0.13,H*0.03,0,0,TAU); c.stroke();
-    // 글씨
-    c.font=`800 ${Math.round(W*0.032)}px system-ui,sans-serif`; c.lineWidth=3; c.strokeStyle='rgba(0,0,0,.6)'; c.fillStyle='#ffe2b0';
-    const off=opt.offerCount?opt.offerCount():0; c.strokeText(`제물 ${off}/3`,px,py+H*0.06); c.fillText(`제물 ${off}/3`,px,py+H*0.06);
-    c.strokeText('부활의 제단',ax,ay+H*0.065); c.fillText('부활의 제단',ax,ay+H*0.065); }
+    const stone=(x,y,w,h)=>{ c.fillStyle='#3a332e'; c.beginPath(); c.moveTo(x-w*0.6,y); c.lineTo(x-w*0.5,y-h*0.35); c.lineTo(x+w*0.5,y-h*0.35); c.lineTo(x+w*0.6,y); c.closePath(); c.fill(); c.fillStyle='#5a504a'; c.fillRect(x-w*0.45,y-h,w*0.9,h*0.66); c.fillStyle='#6e6560'; c.fillRect(x-w*0.52,y-h*1.08,w*1.04,h*0.12); };
+    // 제물의 제단 (왼쪽): 피의 룬과 타오르는 불그릇
+    const px=PYRE.x*W, py=PYRE.y*H, pw=W*0.24, ph=H*0.1; stone(px,py,pw,ph);
+    c.fillStyle=`rgba(200,20,20,${0.6+0.3*Math.sin(t*4)})`; c.font=`700 ${Math.round(W*0.03)}px serif`; c.textAlign='center'; c.fillText('ᚦ ᛞ ᚦ',px,py-ph*0.45);
+    for(let i=0;i<7;i++){ const h=H*(0.06+0.03*Math.sin(t*9+i*1.7)); const g=c.createLinearGradient(0,py-ph*1.08-h,0,py-ph*1.08); g.addColorStop(0,'rgba(255,230,140,0)'); g.addColorStop(.35,'#ff9a2a'); g.addColorStop(1,'#d8341a'); c.fillStyle=g; const fx=px+(i-3)*pw*0.12; c.beginPath(); c.moveTo(fx-pw*0.07,py-ph*1.08); c.quadraticCurveTo(fx-pw*0.08,py-ph*1.08-h*0.6,fx+Math.sin(t*6+i)*3,py-ph*1.08-h); c.quadraticCurveTo(fx+pw*0.08,py-ph*1.08-h*0.5,fx+pw*0.07,py-ph*1.08); c.fill(); }
+    // 부활의 제단 (오른쪽): 금빛 룬과 하늘로 솟는 빛기둥
+    const ax=ALTAR.x*W, ay=ALTAR.y*H, aw=W*0.24, ah=H*0.1;
+    const beam=c.createLinearGradient(0,0,0,ay); beam.addColorStop(0,'rgba(255,240,180,0)'); beam.addColorStop(1,`rgba(255,235,160,${0.35+0.15*Math.sin(t*2.5)})`); c.fillStyle=beam; c.fillRect(ax-aw*0.3,0,aw*0.6,ay-ah);
+    const gl=c.createRadialGradient(ax,ay-ah,0,ax,ay-ah,W*0.18); gl.addColorStop(0,`rgba(255,240,170,${0.6+0.2*Math.sin(t*2)})`); gl.addColorStop(1,'rgba(255,230,140,0)'); c.fillStyle=gl; c.fillRect(ax-W*0.2,ay-H*0.25,W*0.4,H*0.3);
+    stone(ax,ay,aw,ah); c.fillStyle='#ffd76a'; c.font=`700 ${Math.round(W*0.034)}px serif`; c.fillText('ᛉ ᛟ ᛉ',ax,ay-ah*0.45);
+    c.strokeStyle=`rgba(255,215,110,${0.5+0.3*Math.sin(t*3)})`; c.lineWidth=2; c.beginPath(); c.ellipse(ax,ay+H*0.012,aw*0.65,H*0.03,0,0,TAU); c.stroke();
+    c.font=`800 ${Math.round(W*0.034)}px system-ui,sans-serif`; c.lineWidth=3; c.strokeStyle='rgba(0,0,0,.75)';
+    const off=opt.offerCount?opt.offerCount():0; c.fillStyle='#ff9a7a'; c.strokeText(`제물의 제단 ${off}/3`,px,py+H*0.055); c.fillText(`제물의 제단 ${off}/3`,px,py+H*0.055);
+    c.fillStyle='#ffe2a0'; c.strokeText('부활의 제단',ax,ay+H*0.065); c.fillText('부활의 제단',ax,ay+H*0.065); }
   function inZone(p,z){ return Math.hypot((p.x-z.x),(p.fy-z.y)*1.6)<z.r; }
-  function setAltar(on){ S.altar=!!on; const now=performance.now(); S.folk.forEach(p=>{ p.until=now+rnd(0,600); p.partner=null; }); }
+  function slotFor(p){ const live=S.folk.filter(q=>!q.gone&&!q.burn), k=Math.max(0,live.indexOf(p)), n=live.length; return [n>1?0.08+0.84*k/(n-1):0.5,0.6+(n>4?(k%2)*0.065:0)]; }
+  function setAltar(on){ S.altar=!!on; const now=performance.now(); S.folk.forEach(p=>{ p.until=now+rnd(0,600); p.partner=null; p.nextShout=now+rnd(300,4000); if(S.altar&&!p.gone&&!p.held){ const sl=slotFor(p); p.x=sl[0]; p.y=sl[1]; p.tx=p.x; p.ty=p.y; p.act='shout'; } }); }
   function remove(p,burn){ if(burn){ p.burn=t; for(let i=0;i<26;i++) S.fx.push({k:'spark',x:p.x+rnd(-0.03,0.03),y:p.y-rnd(0,0.15),vx:rnd(-0.03,0.03),vy:-rnd(0.05,0.2),t0:t,life:rnd(0.6,1.4),c:pick(['#ffb030','#ff5a1a','#ffe08a'])}); S.fx.push({k:'txt',x:p.x,y:p.y-0.2,txt:'영혼이 불타 사라진다…',col:'#ffb35c',t0:t,life:2}); } else p.gone=true; }
   function stop(){ alive=false; cancelAnimationFrame(raf); }
   // 잡아서 옮기기: 누르면 등덜미를 잡혀 축 늘어지고, 놓으면 떨어짐
