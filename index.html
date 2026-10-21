@@ -3270,6 +3270,48 @@ function warDie(cause){ const w=ui.war, me=S.hero; if(!me) return; w.phase='dead
   setTimeout(()=>{ const a=$('#wact'); if(a&&view==='war') a.innerHTML=`<div class="verdict lose"><b>전사</b><span>${esc(w.name)}, 전쟁터에서 쓰러졌다. 까마귀들이 몰려든다.</span></div><button class="btn primary" data-act="roll">다시 태어난다</button><button class="btn" data-act="valhalla">발할라로 간다</button>`; },1400); }
 
 /* ---------- 나의 발할라: 쓰러진 내 전사들이 살아서 잔치를 벌임 ---------- */
+/* ---------- 발할라 3D: 결투 아바타 그대로 먹고 마시고 싸우고 춤춤 ---------- */
+function vhProps(J){ if(J._props) return J._props; const P={};
+  const mk=(hand,build)=>{ const a=J.arm[hand]; if(!a||!a.wr) return null; const g=add3(a.wr,N3(null)); g.S=[0,0,0]; build(g); return g; };
+  P.mug=mk(1,g=>{ add3(g,cyl('#b97a34',0,-0.045,0.02,0.032,0.075)); add3(g,cyl('#fff6d8',0,0.032,0.02,0.034,0.016)); add3(g,box('#7a4e20',0.036,-0.01,0.02,0.012,0.04,0.012)); });
+  P.meat=mk(0,g=>{ add3(g,sph('#9a4f22',0,-0.05,0.025,0.045,0.03,0.03)); add3(g,cyl('#f1e6c8',0,0.0,0.025,0.008,0.05)); });
+  P.horn=mk(1,g=>{ const n=add3(g,cyl('#efe2c2',0,-0.02,0.04,0.016,0.11)); n.R=[0.9,0,0]; });
+  J._props=P; return P; }
+function vhShow(P,which){ ['mug','meat','horn'].forEach(k=>{ if(P[k]) P[k].S=which.includes(k)?[1,1,1]:[0,0,0]; }); }
+function vhPose(p,t,J){ const ph=p.ph+t*6.2, sn=Math.sin(ph), act=p.act, A={};
+  const walk=(sp,amp)=>{ const q=t*2*Math.PI*sp+p.ph, s1=Math.sin(q); return {a0:amp*0.7*s1,a1:-amp*0.7*s1,e0:-30,e1:-30,l0:-amp*s1,l1:amp*s1,k0:amp*0.9*Math.max(0,Math.sin(q-1.1)),k1:amp*0.9*Math.max(0,Math.sin(q-1.1+Math.PI)),ln:amp/6,tw:5*s1}; };
+  if(p.moving) return {A:p.act==='run'?walk(1.7,48):walk(1.0,26),R:p.dir>0?1.2:-1.2,props:act==='drink'||act==='sit'?['mug']:[],lower:0};
+  if(act==='fight'){ const base={a1:-52,e1:-118,a0:-34,e0:-138,z0:-14,z1:-10,l1:-24,k1:30,l0:14,k0:24,ln:12,tw:12}; const per=1.05, tt=((t+p.ph)%per)/per, nm=['jab','cross','onetwo','jab'][Math.floor((t+p.ph)/per)%4]; const set=KF3[nm]; for(const L in base) A[L]=base[L]; if(set) for(const L in set) A[L]=kfv(set[L],tt);
+    if(p.hitT&&t-p.hitT<0.6){ const r=(t-p.hitT)/0.6, e=r<0.14?r/0.14:Math.pow(1-(r-0.14)/0.86,2); A.ln-=24*e; A.tw+=16*e; A.e0+=26*e; A.e1+=22*e; }
+    return {A,R:p.dir>0?0.85:-0.85,props:[]}; }
+  if(act==='throw'){ const u=p.thrown?Math.min(1,0.45+(t-(p.thrownAt||t))*1.2):Math.min(0.42,(t%2)*0.21); const set=KF3.stone; for(const L in set) A[L]=kfv(set[L],u); return {A,R:p.dir>0?0.85:-0.85,props:p.thrown?[]:['meat']}; }
+  if(act==='dance'){ const q=t*2*Math.PI/0.8+p.ph, s1=Math.sin(q); return {A:{a0:-150+30*s1,a1:-150-30*s1,e0:-40,e1:-40,z0:-30,z1:-30,l0:-30*Math.max(0,s1),l1:-30*Math.max(0,-s1),k0:50*Math.max(0,s1),k1:50*Math.max(0,-s1),tw:25*s1,ln:-6},R:Math.sin(t*1.4+p.ph)*2.2,props:[],bob:Math.abs(s1)*0.05}; }
+  if(act==='cheer'){ const s1=Math.sin(t*7+p.ph); return {A:{a0:-165,a1:-160,e0:-20+8*s1,e1:-20-8*s1,z:-30,ln:-8,k0:12+10*Math.abs(s1),k1:12+10*Math.abs(s1)},R:0.3*p.dir,props:['mug'],bob:Math.abs(s1)*0.06}; }
+  if(act==='sing'){ const s1=Math.sin(t*2+p.ph); return {A:{a1:-150,e1:-60,a0:-40,e0:-110,z1:-20,ln:-10+4*s1,tw:10*s1,l0:4,l1:-4},R:0.4*p.dir+0.2*s1,props:['horn']}; }
+  if(act==='drink'){ const k=0.5+0.5*Math.sin(t*1.1+p.ph); return {A:{a1:-95-55*k,e1:-110-25*k,a0:-20,e0:-40,ln:-4-14*k,tw:6,l0:6,l1:-6},R:0.35*p.dir,props:['mug']}; }
+  if(act==='eat'){ const k=Math.max(0,Math.sin(t*2.4+p.ph)); return {A:{a0:-100-40*k,e0:-120-20*k,a1:-50,e1:-90,ln:10-6*k,tw:-6,l0:6,l1:-6},R:0.35*p.dir,props:['meat','mug']}; }
+  if(act==='sit'){ const k=Math.max(0,Math.sin(t*0.9+p.ph)), alt=Math.floor((t+p.ph)/5)%2; const A2={free:1,l0:-88,l1:-88,k0:92,k1:92,ln:4,tw:0};
+    if(alt){ A2.a1=-60-90*k; A2.e1=-100-30*k; A2.a0=-30; A2.e0=-60; } else { A2.a0=-60-80*k; A2.e0=-110-20*k; A2.a1=-40; A2.e1=-80; }
+    return {A:A2,R:0,props:alt?['mug']:['meat'],sit:1}; }
+  // 그 외: 서서 숨쉬기
+  return {A:{a0:-6,a1:6,e0:-16,e1:-12,ln:2,tw:4*Math.sin(t+p.ph)},R:0.5*p.dir,props:[]}; }
+function vh3dRender(c,W,H,t,batch){
+  if(!(USE3D&&G3.ok)) return false;
+  const d=Math.min(1.5,devicePixelRatio||1), cw=Math.round(W*d), ch=Math.round(H*d);
+  const figs=[];
+  batch.forEach(b=>{ const p=b.p, info=p.info||{}; if(!info.hero) return;
+    if(!p._J){ p._J=build3(info.hero,false); }
+    const J=p._J, P=vhProps(J), ps=vhPose(p,t,J);
+    vhShow(P,ps.props||[]);
+    J.root.R=[0,ps.R||0,0]; J.root.T=[0,0,0];
+    pose3(J,ps.A,0);
+    if(ps.sit) J.root.T=[0,-J.D.legL*0.52,0];
+    const s=b.hgt*Math.pow(clamp2((info.hero.cm||175)/175,0.4,2.9),0.7), yb=H-b.y+(ps.bob||0)*s, z=(b.y/H-0.5)*1200;
+    figs.push({J,M:M4.mul(M4.T(b.x,yb,z),M4.S(s,s,s)),des:false,roll:0}); b.hgt=s; });
+  if(!figs.length) return true;
+  g3render(figs,{l:0,r:W,b:0,t:H},cw,ch);
+  c.save(); c.setTransform(1,0,0,1,0,0); c.drawImage(G3.cv,0,0,c.canvas.width,c.canvas.height); c.restore(); return true; }
+const clamp2=(v,a,b)=>Math.max(a,Math.min(b,v));
 function valhallaView(){
   const n=(S.yard||[]).length;
   return topbar()+`<section class="vhall"><div class="vhtitle"><h2>발할라</h2><p>${n?`쓰러진 나의 전사 ${n}명이 오딘의 연회장에서 ${n>=8?'떠들썩한 잔치를 벌이고 있다':'술잔을 기울이고 있다'}. 전사를 눌러보라.`:'아직 아무도 오지 않았다. 연회장이 고요하다.'}</p></div>
@@ -3278,9 +3320,9 @@ function valhallaView(){
 }
 function valhallaRun(){
   const cv=$('#vhcv'); if(!cv||!window.BDScenes) return;
-  const folk=(S.yard||[]).map(y=>{ const h={name:y.name,g:Object.assign({},y.g,{expr:pick(['grin','grin','smirk','calm'])}),cm:y.cm||175,outfit:y.outfit||{},weapon:null,flag:y.flag||''};
-    return {svg:drawChar(h,false,258),name:y.name,wins:y.wins||0,cause:y.cause||'',h:Math.pow((y.cm||175)/175,0.5)}; });
-  BDScenes.Valhalla(cv,folk,{onSelect:f=>{ const v=$('#vcard'); if(!v) return; if(!f){ v.hidden=true; return; } v.hidden=false; v.innerHTML=`<b>${esc(f.name)}</b><span>${f.wins}킬을 남기고 발할라에 왔다</span><em>${esc(f.cause)}</em>`; }});
+  const folk=(S.yard||[]).slice(0,USE3D&&G3.ok?30:60).map(y=>{ // 3D는 폰이 버티게 최근 30명까지 const h={name:y.name,g:Object.assign({},y.g,{expr:pick(['grin','grin','smirk','calm'])}),cm:y.cm||175,outfit:y.outfit||{},weapon:null,flag:y.flag||''};
+    return {svg:USE3D&&G3.ok?'':drawChar(h,false,258),hero:h,name:y.name,wins:y.wins||0,cause:y.cause||'',h:Math.pow((y.cm||175)/175,0.5)}; });
+  ui.vh=BDScenes.Valhalla(cv,folk,{render3d:USE3D&&G3.ok?vh3dRender:null,onSelect:f=>{ const v=$('#vcard'); if(!v) return; if(!f){ v.hidden=true; return; } v.hidden=false; v.innerHTML=`<b>${esc(f.name)}</b><span>${f.wins}킬을 남기고 발할라에 왔다</span><em>${esc(f.cause)}</em>`; }});
 }
 /* ---------- actions ---------- */
 function roll(){
