@@ -48,7 +48,7 @@
       <text x="450" y="180" fill="#f0e6d2" font-size="58" font-weight="800" font-family="serif">${xml(hero.name)}</text>
       <text x="450" y="225" fill="#d8762a" font-size="27" font-weight="700" font-family="sans-serif">${xml(hero.nick||'이름 없는 전사')}</text>
       <line x1="450" y1="258" x2="1110" y2="258" stroke="#5a5046" stroke-width="2"/>
-      <text x="450" y="315" fill="#aaa090" font-size="25" font-family="sans-serif">신장</text><text x="610" y="315" fill="#f0e6d2" font-size="31" font-weight="700" font-family="sans-serif">${xml(hero.cm)} cm</text>
+      <text x="450" y="315" fill="#aaa090" font-size="25" font-family="sans-serif">신장</text><text x="610" y="315" fill="#f0e6d2" font-size="31" font-weight="700" font-family="sans-serif">${xml(typeof fmtH==="function"?fmtH(hero.cm):hero.cm+" cm")}</text>
       <text x="790" y="315" fill="#aaa090" font-size="25" font-family="sans-serif">전적</text><text x="920" y="315" fill="#f0e6d2" font-size="31" font-weight="700" font-family="sans-serif">${xml(hero.wins||0)} 승</text>
       <text x="450" y="380" fill="#aaa090" font-size="25" font-family="sans-serif">체력</text><text x="610" y="380" fill="#f0e6d2" font-size="31" font-weight="700" font-family="sans-serif">${xml(hero.maxhp||stats.hp||0)}</text>
       <text x="790" y="380" fill="#aaa090" font-size="25" font-family="sans-serif">힘</text><text x="920" y="380" fill="#f0e6d2" font-size="31" font-weight="700" font-family="sans-serif">${xml(stats.str||0)}</text>
@@ -74,9 +74,15 @@
   const KAKAO_KEY='363a5ec461b3de7d399600c177f25fdf';
   let kakaoReady=null;
   function loadKakao(){ if(kakaoReady) return kakaoReady; kakaoReady=new Promise((res,rej)=>{ if(window.Kakao){ res(window.Kakao); return; } const s=document.createElement('script'); s.src='https://t1.kakaocdn.net/kakao_js_sdk/2.8.4/kakao.min.js'; s.crossOrigin='anonymous'; s.onload=()=>res(window.Kakao); s.onerror=()=>{ kakaoReady=null; rej(new Error('kakao-load')); }; document.head.appendChild(s); }); return kakaoReady; }
+  // 모바일 공유처럼 내 초상화 + 결투장 문구 카드를 카카오 이미지 서버에 올려서 씀 (미리 올려둬서 버튼 누르면 바로 열림)
+  let kakaoImg={key:'',p:null};
+  function prepareKakao(){ if(!S.hero) return null; const key=S.hero.id+'|'+(ui.letter||'')+'|'+S.hero.name; if(kakaoImg.key===key&&kakaoImg.p) return kakaoImg.p;
+    kakaoImg={key,p:(async()=>{ try{ const K=await loadKakao(); if(!K.isInitialized()) K.init(KAKAO_KEY); const file=await profileShareFile(S.hero); if(!file) return null; const res=await K.Share.uploadImage({file:[file]}); return res&&res.infos&&res.infos.original&&res.infos.original.url||null; }catch(e){ console.warn('카카오 이미지 올리기 실패',e); return null; } })()};
+    return kakaoImg.p; }
   async function kakaoShare(link,hero,letter){
     const K=await loadKakao(); if(!K.isInitialized()) K.init(KAKAO_KEY);
-    const img=new URL('og.jpg',location.origin+location.pathname).href;
+    let up=null; try{ up=await Promise.race([prepareKakao(),new Promise(r=>setTimeout(()=>r(null),2500))]); }catch(_){}
+    const img=up||new URL('og.jpg',location.origin+location.pathname).href;
     K.Share.sendDefault({objectType:'feed',content:{title:`⚔ ${hero.name}의 결투 신청`,description:letter?`"${letter.slice(0,80)}"`:`${fmtH(hero.cm)} · ${hero.wins||0}킬 · 덤비든가 도망치든가`,imageUrl:img,imageWidth:1200,imageHeight:630,link:{mobileWebUrl:link,webUrl:link}},
       buttons:[{title:'결투장 열기',link:{mobileWebUrl:link,webUrl:link}}]});
   }
@@ -440,7 +446,7 @@
     try{ const db=await ready; await db.collection('duels').doc(id).update({spared:!!spare}); }
     catch(error){ console.warn('자비 기록 실패',error&&error.code||error); }
   }
-  window.DuelOnline={send,open,accept,decline,cancel,checkDuels,isLocked,pushHero,loadBoard,redeem,mercy,sendTo,declineId,setNoInvite,unblockAll};
+  window.DuelOnline={prepareKakao,send,open,accept,decline,cancel,checkDuels,isLocked,pushHero,loadBoard,redeem,mercy,sendTo,declineId,setNoInvite,unblockAll};
   if(S.hero) pushHero(S.hero,true);
   ready.then(()=>{ const ad=((window.BLOOD_DUEL_SUPPORT||{}).admins)||[]; const u=firebase.auth().currentUser; if(u&&ad.includes(u.uid)){ ui.isAdmin=true; if(view==='card'&&ui.tab==='set') render(); } }).catch(()=>{});
   const match=/#(?:[^#]*&)?duel-id=([A-Za-z0-9]{20})/.exec(location.hash);

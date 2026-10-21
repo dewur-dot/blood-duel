@@ -3789,6 +3789,7 @@ function showCode(text){ const e=$('#codeshow'); if(e){ e.value=text; e.style.di
 // 결투장 던지기: 어디로 보낼지 고르는 창 (카카오톡 · 다른 앱 · 링크 복사)
 function sendDuel(){
   if(!window.DuelOnline){ ui.msg='결투 연결을 불러오지 못했습니다.'; render(); return; }
+  try{ DuelOnline.prepareKakao&&DuelOnline.prepareKakao(); }catch(_){}
   const ov=document.createElement('div'); ov.className='overlay';
   ov.innerHTML=`<div class="sheet prac"><h2>어디로 던질까</h2>
     <button class="pbtn kakaosel" data-s="kakao"><b>카카오톡으로 보내기</b><span>친구·대화방을 골라 결투장 카드를 보낸다</span></button>
