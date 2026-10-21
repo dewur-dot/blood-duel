@@ -251,6 +251,20 @@ svg.dead{filter:saturate(.35) brightness(.78)}
 .tabs{display:flex;gap:6px}
 .nav{background:none;border:1px solid var(--line);color:var(--soft);font-family:var(--serif);font-weight:800;font-size:13px;padding:2px 12px;letter-spacing:.1em}
 .nav.on{border-color:var(--ember);color:var(--ember)}
+.realms{margin-top:6px}.realms button.on{background:#2b2236;border-color:#6d5a8a}
+.podium{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:6px;align-items:end;margin:4px 0 12px;padding:10px 4px 6px;background:radial-gradient(ellipse at 50% 30%,rgba(216,118,42,.16),transparent 70%)}
+.podium.valh{background:radial-gradient(ellipse at 50% 20%,rgba(246,211,107,.18),transparent 70%),linear-gradient(180deg,#1d1622,transparent)}
+.seat{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;padding:0;color:var(--bone);font:inherit;cursor:pointer;min-width:0}
+.tbox{position:relative;width:100%;aspect-ratio:120/150}
+.tbox .throne{position:absolute;inset:0;width:100%;height:100%}
+.tbox .tface{position:absolute;left:18%;right:18%;top:14%;bottom:12%;overflow:hidden;border-radius:2px}
+.tbox .tface svg{width:100%;height:100%;display:block}
+.tbox .tarms{position:absolute;left:0;right:0;bottom:0;width:100%;height:auto}
+.tbox .crown{position:absolute;left:50%;top:-18%;transform:translateX(-50%);font-size:30px;color:#f6d36b;text-shadow:0 0 10px rgba(246,211,107,.8),0 2px 0 #000}
+.seat.r1 .tbox{transform:translateY(-8px)}
+.seat .rnk{font-family:var(--serif);font-size:18px;line-height:1}.seat.r1 .rnk{color:#f6d36b;font-size:22px}.seat.r2 .rnk{color:#d5dadf}.seat.r3 .rnk{color:#e2a16a}
+.seat .tn{display:flex;align-items:center;gap:4px;font-weight:700;font-size:13px;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.seat .tn .flgrow{flex:none}
+.seat em{font-style:normal;color:var(--ember);font-size:13px;font-weight:700}
 .rboard{display:flex;flex-direction:column;gap:6px}
 .rrow{display:grid;grid-template-columns:20px 48px 34px 1fr auto;gap:8px;align-items:center;text-align:left;background:rgba(0,0,0,.3);border:1px solid var(--line);padding:6px 10px;min-width:0}
 .rrow.me{border-color:var(--ember)}
@@ -586,7 +600,7 @@ function fight(A,B){
     if(ia.stun>0){ ia.stun--;
       if(ia.groin>0){ ia.groin--; att.stam=Math.min(att.maxSta,att.stam+4); push({text:pick([`${att.name}, 낭심을 부여잡고 꼼짝도 못 한다.`,`${att.name}, 바닥에 웅크린 채 신음만 낸다.`,`${att.name}, 아직도 일어나지 못하고 있다.`]),kind:'stun',groin:1,by,target:by,word:'끄으윽'}); return; }
       push({text:`${att.name}, 비틀거리며 제대로 공격하지 못했다.`,kind:'stun',by,target:by,word:'휘청'}); return; }
-    if((wx==='storm'&&Math.random()<0.11)||(wx==='rain'&&Math.random()<0.03)){ const d=RI(2,9); att.hp-=d;
+    if((wx==='storm'&&Math.random()<0.06)||(wx==='rain'&&Math.random()<0.015)){ const d=RI(2,9); att.hp-=d;
       const t=pick([`${att.name}, 진창에 발이 쭉 미끄러져 나동그라졌다! (-${d})`,`${att.name}, 빗물에 미끄러져 등으로 철퍼덕 떨어졌다! (-${d})`,`${att.name}, 달려들다 물웅덩이에 미끄러져 꼴사납게 자빠졌다! (-${d})`]);
       if(att.hp<=0) lethal(att,`${att.name}, 미끄러져 머리를 돌에 박고 일어나지 못했다.`,null,'쿵'); else push({text:t,kind:'self',by,target:by,word:'미끌',dmg:d}); return; }
     // 체력이 바닥나면(최대의 5% 또는 5 이하) 도망치기도 함
@@ -627,7 +641,7 @@ function fight(A,B){
       att.stam=Math.min(att.maxSta,att.stam+att.maxSta*0.18); def.stam=Math.min(def.maxSta,def.stam+def.maxSta*0.08);
       return;
     }
-    const fum=Math.max(1,Math.min(6,2+(60-att.st.bal)/16+(ia.leg?4:0)));
+    const fum=Math.max(0.5,Math.min(3.5,1+(60-att.st.bal)/25+(ia.leg?2.5:0)));
     if(Math.random()*100<fum){
       const d=RI(5,14); att.hp-=d;
       push({text:`${att.name}, 발이 엉켜 넘어졌다. (-${d})`,kind:'self',by,target:by,word:'철퍼덕',dmg:d});
@@ -711,7 +725,7 @@ function fight(A,B){
   })();
   while(alive()&&rounds<30&&!fled){
     rounds++;
-    for(const v of [A,B]){ const iv=inj(v); if(iv.bleed>0&&alive()){ v.hp-=iv.bleed; push({text:`${v.name}의 상처에서 피가 뚝뚝 떨어진다. (-${iv.bleed})`,kind:'self',by:null,target:idOf(v),word:'뚝',dmg:iv.bleed}); if(v.hp<=0) lethal(v,`${v.name}, 피를 너무 많이 흘리고 쓰러졌다.`,null,'쿵'); } }
+    for(const v of [A,B]){ const iv=inj(v); if(iv.bleed>0&&alive()){ v.hp-=iv.bleed; push({text:`${v.name}의 상처에서 피가 뚝뚝 떨어진다. (-${iv.bleed})`,kind:'env',by:null,target:idOf(v),word:'뚝',dmg:iv.bleed}); if(v.hp<=0) lethal(v,`${v.name}, 피를 너무 많이 흘리고 쓰러졌다.`,null,'쿵'); } }
     if(!alive()) break;
     if(wx==='snow'||wx==='heat'){ for(const v of [A,B]){ if(!alive()) break; const d=RI(1,10); v.hp-=d;
         if(v.hp<=0) lethal(v,wx==='snow'?`${v.name}, 꽁꽁 얼어붙어 그대로 쓰러졌다.`:`${v.name}, 더위를 먹고 눈이 뒤집혀 쓰러졌다.`,null,'쿵');
@@ -2737,7 +2751,7 @@ function sync(h,alive){
 function boardList(){
   const m=new Map(); (ui.board||[]).forEach(e=>m.set(e.id,e));
   S.board.forEach(e=>{ if(e.sample) return; const r=m.get(e.id); if(!r||e.kills>r.kills||(r.alive&&!e.alive)) m.set(e.id,e); });
-  return [...m.values()].sort((a,b)=>b.kills-a.kills).slice(0,50);
+  return [...m.values()].sort((a,b)=>b.kills-a.kills).slice(0,200);
 }
 function seedBoard(){
   if(S.seeded) return;
@@ -2920,24 +2934,40 @@ function cardView(){
   else body=settingsHtml();
   return topbar()+subtabs()+body;
 }
+// 명예의 전당: 시즌 → 현생(살아있는 자) / 발할라(전사한 자). 1·2·3위는 왕좌에 앉힌다
+function throneSvg(rank,valh){
+  const C=[['#f6d36b','#b8862a','#6a4a12'],['#e4e7ea','#9aa3ab','#4c535a'],['#e7a86a','#a8652e','#5a3416']][rank-1];
+  const wood=valh?'#3b2a1e':'#4a2c1a';
+  return `<svg class="throne" viewBox="0 0 120 150" aria-hidden="true"><defs><linearGradient id="tg${rank}${valh?1:0}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C[0]}"/><stop offset=".55" stop-color="${C[1]}"/><stop offset="1" stop-color="${C[2]}"/></linearGradient></defs>
+  <path d="M16 140 L16 34 Q16 14 34 10 L44 2 L52 10 L60 0 L68 10 L76 2 L86 10 Q104 14 104 34 L104 140 Z" fill="${wood}" stroke="url(#tg${rank}${valh?1:0})" stroke-width="4"/>
+  <path d="M26 132 L26 38 Q26 22 40 20 L80 20 Q94 22 94 38 L94 132 Z" fill="${valh?'#5a1f1a':'#6b1712'}" opacity=".9"/>
+  <circle cx="60" cy="9" r="5" fill="url(#tg${rank}${valh?1:0})"/></svg>`;
+}
+function throneArms(rank){ const C=['#d8a640','#a9b1b8','#b8743a'][rank-1];
+  return `<svg class="tarms" viewBox="0 0 120 40" aria-hidden="true"><path d="M2 10 Q2 4 10 4 L26 4 Q32 4 32 10 L32 40 L2 40 Z" fill="#3f2616" stroke="${C}" stroke-width="3"/><path d="M118 10 Q118 4 110 4 L94 4 Q88 4 88 10 L88 40 L118 40 Z" fill="#3f2616" stroke="${C}" stroke-width="3"/><rect x="24" y="22" width="72" height="18" fill="#2c1a10" stroke="${C}" stroke-width="2"/></svg>`; }
+function podium(list,valh,s1){
+  const top=list.slice(0,3); if(!top.length) return '';
+  const order=[1,0,2].filter(i=>top[i]);
+  return `<div class="podium${valh?' valh':''}">${order.map(i=>{ const e=top[i], r=i+1;
+    return `<button class="seat r${r}" data-act="detail" data-id="${e.id}"${s1?' data-s="1"':''}><div class="tbox">${throneSvg(r,valh)}<div class="tface">${drawPortrait(Object.assign({},e,{flag:''}),!e.alive)}</div>${throneArms(r)}${r===1?'<span class="crown">♛</span>':''}</div><b class="rnk">${r}</b><span class="tn">${e.flag?flagSvg(e.flag,'flgrow'):''}${esc(e.name)}</span><em>${e.kills}킬</em></button>`; }).join('')}</div>`;
+}
 function rankView(){
-  const s1=ui.season===1;
+  const s1=ui.season===1, valh=ui.realm==='valh';
   const tabs=`<div class="seasons"><button class="${s1?'':'on'}" data-act="season" data-s="2">시즌 2 · 지금</button><button class="${s1?'on':''}" data-act="season" data-s="1">시즌 1 · 옛 전설</button></div>`;
-  if(s1){
-    const l1=(ui.board1||[]).slice(0,30);
-    const rows1=l1.map((e,i)=>`<button class="rrow old" data-act="detail" data-id="${e.id}" data-s="1"><span class="rk">${i+1}</span><span class="pt">${drawPortrait(Object.assign({},e,{flag:''}),!e.alive)}</span><span class="rf">${e.flag?flagSvg(e.flag,'flgrow'):'<i class="noflag"></i>'}</span><span class="rn"><b>${esc(e.name)}</b><em>${e.flag&&FLAGN[e.flag]?FLAGN[e.flag]+' · ':''}${esc(e.nick||'')}</em></span><span class="rkl"><b>${e.kills}</b>킬</span></button>`).join('');
-    return topbar()+`<section class="card panel"><h2>명예의 전당 · 시즌 1</h2><p class="note">세상이 무너지기 전, 첫 시대의 살육자들. 기록은 돌에 새겨져 더는 바뀌지 않는다.${ui.board1Err?' 지금은 서버에 닿지 않는다.':''}</p>${tabs}</section><div class="rboard">${rows1||`<p class="note center">${ui.board1?'남은 기록이 없다.':'돌판을 파내는 중…'}</p>`}</div>`;
-  }
-  const list=boardList();
-  const rows=list.slice(0,30).map((e,i)=>{
-    const me=S.hero&&e.id===S.hero.id;
-    return `<button class="rrow${me?' me':''}" data-act="detail" data-id="${e.id}"><span class="rk">${i+1}</span><span class="pt">${drawPortrait(Object.assign({},e,{flag:''}),!e.alive)}</span><span class="rf">${e.flag?flagSvg(e.flag,'flgrow'):'<i class="noflag"></i>'}</span><span class="rn"><b>${esc(e.name)}</b><em>${e.flag&&FLAGN[e.flag]?FLAGN[e.flag]+' · ':''}${esc(e.nick)}${me?' · 나':''}${e.alive?'':' · 전사'}</em></span><span class="rkl"><b>${e.kills}</b>킬</span></button>`;
-  }).join('');
-  // 국가별 킬 합계
-  const nat={}; list.forEach(e=>{ if(!e.flag) return; const n=nat[e.flag]||(nat[e.flag]={k:0,c:0}); n.k+=e.kills; n.c++; });
-  const top=Object.entries(nat).sort((a,b)=>b[1].k-a[1].k).slice(0,5);
-  const natHtml=top.length?`<section class="card panel"><h2>국가 전쟁</h2><div class="nats">${top.map(([f,v],i)=>`<div class="nat${i===0?' first':''}"><span class="nrk">${i+1}</span>${flagSvg(f,'flgnat')}<span class="nn"><b>${FLAGN[f]||''}</b><em>전사 ${v.c}명</em></span><span class="rkl"><b>${v.k}</b>킬</span></div>`).join('')}</div><p class="note">조국의 이름으로 피를 흘리려면 초상화의 국기 칸을 눌러라.</p></section>`:'';
-  return topbar()+natHtml+`<section class="card panel"><h2>명예의 전당 · 시즌 2</h2><p class="note">가장 많이 죽인 자가 위에 선다. 누르면 그 살육자의 몸을 볼 수 있다. ${ui.boardErr?' 지금은 서버에 닿지 않아 내 기록만 보인다.':''}</p>${tabs}</section><div class="rboard">${rows||'<p class="note center">아직 아무도 피를 보지 않았다. 첫 번째 학살자가 되어라.</p>'}</div>`;
+  const realms=`<div class="seasons realms"><button class="${valh?'':'on'}" data-act="realm" data-r="live">현생 · 살아있는 자</button><button class="${valh?'on':''}" data-act="realm" data-r="valh">발할라 · 전사한 자</button></div>`;
+  const all=s1?(ui.board1||[]):boardList();
+  const list=all.filter(e=>valh?!e.alive:e.alive).sort((a,b)=>b.kills-a.kills).slice(0,30);
+  const myId=S.hero&&S.hero.id;
+  const rows=list.slice(3).map((e,i)=>{ const me=!s1&&e.id===myId;
+    return `<button class="rrow${me?' me':''}${s1?' old':''}" data-act="detail" data-id="${e.id}"${s1?' data-s="1"':''}><span class="rk">${i+4}</span><span class="pt">${drawPortrait(Object.assign({},e,{flag:''}),!e.alive)}</span><span class="rf">${e.flag?flagSvg(e.flag,'flgrow'):'<i class="noflag"></i>'}</span><span class="rn"><b>${esc(e.name)}</b><em>${e.flag&&FLAGN[e.flag]?FLAGN[e.flag]+' · ':''}${esc(e.nick||'')}${me?' · 나':''}</em></span><span class="rkl"><b>${e.kills}</b>킬</span></button>`; }).join('');
+  let natHtml='';
+  if(!s1){ const nat={}; all.forEach(e=>{ if(!e.flag) return; const n=nat[e.flag]||(nat[e.flag]={k:0,c:0}); n.k+=e.kills; n.c++; });
+    const top=Object.entries(nat).sort((a,b)=>b[1].k-a[1].k).slice(0,5);
+    natHtml=top.length?`<section class="card panel"><h2>국가 전쟁</h2><div class="nats">${top.map(([f,v],i)=>`<div class="nat${i===0?' first':''}"><span class="nrk">${i+1}</span>${flagSvg(f,'flgnat')}<span class="nn"><b>${FLAGN[f]||''}</b><em>전사 ${v.c}명</em></span><span class="rkl"><b>${v.k}</b>킬</span></div>`).join('')}</div><p class="note">조국의 이름으로 피를 흘리려면 초상화의 국기 칸을 눌러라.</p></section>`:''; }
+  const err=s1?ui.board1Err:ui.boardErr;
+  const head=`<section class="card panel"><h2>명예의 전당 · 시즌 ${s1?1:2}</h2><p class="note">${valh?'쓰러진 전사들은 발할라의 연회장에서 술잔을 든다. 죽기 전에 가장 많이 죽인 자가 위에 앉는다.':'아직 숨이 붙어 있는 살육자들. 가장 많이 죽인 자가 위에 선다.'}${err?' 지금은 서버에 닿지 않아 일부만 보인다.':''}</p>${tabs}${realms}</section>`;
+  const empty=`<p class="note center">${s1&&!ui.board1?'돌판을 파내는 중…':valh?'아직 발할라에 간 자가 없다.':'살아 있는 학살자가 없다. 네가 첫 번째가 되어라.'}</p>`;
+  return topbar()+head+(list.length?podium(list,valh,s1)+`<div class="rboard">${rows}</div>`:empty)+(valh?'':natHtml);
 }
 function detailView(){
   const e=ui.detail;
@@ -3508,6 +3538,7 @@ app.addEventListener('click',e=>{
   else if(a==='cancelduel') DuelOnline.cancel();
   else if(a==='roll'){ if(!ui.rolling) warpIn(roll); }
   else if(a==='go'){ const v=b.dataset.v; view=v==='rank'?'rank':(S.hero?'card':'home'); ui.msg=''; render(); if(view==='rank'&&window.DuelOnline&&DuelOnline.loadBoard) DuelOnline.loadBoard(ui.season===1?1:2); }
+  else if(a==='realm'){ ui.realm=b.dataset.r==='valh'?'valh':'live'; render(); }
   else if(a==='season'){ ui.season=b.dataset.s==='1'?1:2; render(); if(window.DuelOnline&&DuelOnline.loadBoard&&(ui.season===2||!ui.board1)) DuelOnline.loadBoard(ui.season); }
   else if(a==='detail'){ ui.detail=(b.dataset.s==='1'?(ui.board1||[]):boardList()).find(x=>x.id===b.dataset.id)||null; view='detail'; render(); window.scrollTo(0,0); }
   else if(a==='shop'){ ui.tab='shop'; ui.msg=''; render(); }

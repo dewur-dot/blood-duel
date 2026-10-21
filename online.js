@@ -336,7 +336,7 @@
     const old=season===1;
     try{
       const db=await ready;
-      const qs=await db.collection(old?'heroes':'heroes2').orderBy('kills','desc').limit(50).get();
+      const qs=await db.collection(old?'heroes':'heroes2').orderBy('kills','desc').limit(200).get(); // 현생·발할라로 나눠 보여주려고 넉넉히
       const list=[];
       qs.forEach(doc=>{ const d=doc.data(), h=d&&unpackDuel(d.hero); if(!h) return;
         list.push({id:doc.id,name:h.name,flag:h.flag||'',nick:h.nick,g:h.g,st:h.st,cm:h.cm,kg:h.kg,outfit:h.outfit,weapon:h.weapon,tags:h.tags,kills:Math.max(0,d.kills|0),alive:d.alive!==false}); });
