@@ -428,6 +428,21 @@
       },error=>console.warn('받은 결투장 확인 실패',error&&error.code||error));
     }catch(error){ console.warn('받은 결투장 확인 실패',error); }
   }
+  /* 운영자가 게임 안에서 특정 전사에게 쿠폰을 내림 → 받은 사람은 '받은 쿠폰'에서 바로 사용 */
+  let couponOff=null;
+  async function watchCoupons(){
+    try{ const db=await ready, uid=firebase.auth().currentUser.uid; if(couponOff) return;
+      couponOff=db.collection('codes').where('uid','==',uid).onSnapshot(qs=>{
+        const list=[]; qs.forEach(doc=>{ const d=doc.data(); if(d.redeemedBy) return; if(d.donationId==='gift'&&d.to!==uid) return; list.push({id:doc.id,gold:d.gold|0,rename:!!d.rename,note:d.note||'',gift:d.donationId==='gift',at:(d.createdAt&&d.createdAt.seconds)||0}); });
+        list.sort((a,b)=>b.at-a.at); const before=(ui.coupons||[]).map(x=>x.id).join(); ui.coupons=list;
+        if(list.map(x=>x.id).join()!==before&&view!=='battle'&&view!=='war') render();
+      },error=>console.warn('받은 쿠폰 확인 실패',error&&error.code||error));
+    }catch(error){ console.warn('받은 쿠폰 확인 실패',error); }
+  }
+  async function giveCoupon(toUid,gold,rename,note){
+    const db=await ready, A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', b=new Uint32Array(12); crypto.getRandomValues(b); const code=Array.from(b,x=>A[x%A.length]).join('');
+    await db.collection('codes').doc(code).set({uid:toUid,to:toUid,donationId:'gift',gold:Math.max(0,gold|0),rename:!!rename,note:String(note||'').slice(0,60),redeemedBy:null,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    return code; }
   async function declineId(id,block){
     try{
       const db=await ready, uid=firebase.auth().currentUser.uid, ref=db.collection('duels').doc(id);
@@ -457,7 +472,7 @@
     catch(error){ console.warn('상대 전사 표시 실패',error&&error.code||error); }
     if(ui.board){ const e=ui.board.find(x=>x.id===heroId); if(e) e.alive=false; }
   }
-  window.DuelOnline={prepareKakao,send,open,accept,decline,cancel,checkDuels,isLocked,pushHero,loadBoard,redeem,mercy,sendTo,declineId,setNoInvite,unblockAll};
+  window.DuelOnline={prepareKakao,send,open,accept,decline,cancel,checkDuels,isLocked,pushHero,loadBoard,redeem,giveCoupon,mercy,sendTo,declineId,setNoInvite,unblockAll};
   if(S.hero) pushHero(S.hero,true);
   ready.then(()=>{ const ad=((window.BLOOD_DUEL_SUPPORT||{}).admins)||[]; const u=firebase.auth().currentUser; if(u&&ad.includes(u.uid)){ ui.isAdmin=true; if(view==='card'&&ui.tab==='set') render(); } }).catch(()=>{});
   const match=/#(?:[^#]*&)?duel-id=([A-Za-z0-9]{20})/.exec(location.hash);
@@ -480,7 +495,7 @@
     }catch(error){ console.warn('결투장 지켜보기 실패',error); }
   }
   setInterval(()=>{ watch(); if(duelReady&&view!=='battle'&&!ui.duelId&&S.pendingDuel){ checkDuels(); } if(!S.pendingDuel) duelReady=false; },2000);
-  watch(); watchInbox();
+  watch(); watchInbox(); watchCoupons();
   // 예전에 내가 죽인 상대들도 한 번 훑어서 명예의 전당에 '전사'로 표시
   setTimeout(async()=>{ if(S.retroDead2) return; try{ const db=await ready, uid=firebase.auth().currentUser.uid;
     for(const id of (S.handledDuels||[]).slice(-40)){ try{ const sh=await db.collection('duels').doc(id).get(); if(!sh.exists) continue; const d=sh.data(); if(d.status!=='accepted'||!d.result||d.result.draw||d.spared===true) continue;

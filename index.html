@@ -394,6 +394,7 @@ svg.dead{filter:saturate(.35) brightness(.78)}
 .goldbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;margin-bottom:10px;border:1px solid #6a5a2a;border-radius:8px;background:rgba(201,162,60,.08)}
 .goldbar b{color:#E8C164;font-size:17px;white-space:nowrap}.goldbar span{font-size:12px;color:var(--soft,#a89c8e);text-align:right}.goldbar a{color:#E8C164}
 b.gold{color:#E8C164}.shopmsg{color:#E8C164}
+.coupons{margin-top:12px;border:1px solid var(--line2);padding:10px;display:grid;gap:8px}.cprow{display:flex;justify-content:space-between;align-items:center;gap:8px}.cprow .btn{white-space:nowrap;flex-shrink:0}.cprow span{display:grid}.cprow em{font-size:12px;opacity:.75;font-style:normal}.givecp input{width:100%;box-sizing:border-box;margin:4px 0;padding:10px;background:#16120f;color:var(--bone,#f0e6d2);border:1px solid #5a5046;font-size:15px}.giverow{display:flex;gap:10px;align-items:center}.giverow input[type=number]{flex:1}.giverow label{white-space:nowrap;font-size:14px}.giverow label input{width:auto;margin:0 4px 0 0}
 .redeem{display:flex;gap:8px;margin-top:12px}.redeem input{flex:1;min-width:0;padding:10px;border-radius:8px;border:1px solid #5a5046;background:#16120f;color:var(--bone,#f0e6d2);font-size:16px;letter-spacing:.12em;text-transform:uppercase}
 .closed{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.82);animation:bornin .35s ease-out both}
 .closed.out{opacity:0;transition:opacity .25s}
@@ -559,7 +560,7 @@ body.bview .after{gap:8px}
 <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
 <script src="./firebase-config.js"></script>
 <script src="./support-config.js?v=10211545"></script>
-<script src="./scenes.js?v=10211630"></script>
+<script src="./scenes.js?v=10211652"></script>
 <script>
 //ENGINE-START
 const RI=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
@@ -2984,10 +2985,13 @@ function recordHtml(){
   return o+`<section class="yard"><h2>전사들의 묘지</h2>`+S.yard.map((y,i)=>
     `<div class="stone"><div>${fig3d({g:y.g,name:y.name,weapon:null,outfit:y.outfit},true,Math.round(hfrac(y.cm||175)*110),'static')}</div><div><b>${S.yard.length-i}대 · ${esc(y.name)}</b><span>${y.wins}킬 · ${esc(y.cause)}</span>${ui.isAdmin?(ui.revConf===i?`<span class="revq">${S.hero?`지금 전사 ${esc(S.hero.name)}는 사라진다. `:''}정말 되살릴까? <button class="linkbtn" data-act="revive" data-i="${i}">되살린다</button><button class="linkbtn" data-act="revno">그만</button></span>`:`<button class="linkbtn" data-act="revask" data-i="${i}">운영자 · 되살리기</button>`):''}</div></div>`).join('')+`</section>`;
 }
+function couponTxt(c){ return `${c.gold?fmtG(c.gold):''}${c.gold&&c.rename?' + ':''}${c.rename?'이름변경 쿠폰 1장':''}`; }
+function couponList(){ const l=ui.coupons||[]; if(!l.length) return '';
+  return `<div class="coupons"><b>받은 쿠폰 ${l.length}장</b>${l.map(c=>`<div class="cprow"><span><b>${couponTxt(c)}</b><em>${c.gift?'오딘이 내린 하사품':'바친 공물의 보답'}${c.note?' · "'+esc(c.note)+'"':''}</em></span><button class="btn primary small" data-act="useCoupon" data-code="${esc(c.id)}">사용하기</button></div>`).join('')}</div>`; }
 function settingsHtml(){
   return (ui.isAdmin?`<a class="btn adminbtn" href="./support.html?admin">운영자 · 후원 확인 페이지</a>`:'')+`<section class="card panel"><h2>오딘에게 청원</h2><p class="note">후원하면 골드와 이름변경 쿠폰을 담은 쿠폰 코드를 받는다. 1,000원 = 1,000 골드, 5,000원 = 7,000 골드, 1만원이면 14,000 골드에 이름변경 쿠폰 1장.</p>`+
     (ui.askSupport?`<div class="confirm2"><b>후원 링크로 이동하시겠습니까?</b><div class="confirm"><button class="btn primary" data-act="gosupport">간다</button><button class="btn" data-act="nosupport">아니</button></div></div>`:`<button class="btn primary sacrifice" data-act="asksupport">오딘에게 제물을 바친다</button>`)+
-    `<div class="redeem"><input id="codeRedeem" maxlength="16" placeholder="쿠폰 코드 입력" autocomplete="off" autocapitalize="characters"><button class="btn" data-act="redeem">받기</button></div><div class="note" id="redeemMsg">${esc(ui.rmsg||'')}</div><p class="note">지금 골드 ${fmtG(S.gold||0)} · 이름변경 쿠폰 ${S.renameT||0}장</p></section>`+
+    `<div class="redeem"><input id="codeRedeem" maxlength="16" placeholder="쿠폰 코드 입력" autocomplete="off" autocapitalize="characters"><button class="btn" data-act="redeem">받기</button></div><div class="note" id="redeemMsg">${esc(ui.rmsg||'')}</div>${couponList()}<p class="note">지금 골드 ${fmtG(S.gold||0)} · 이름변경 쿠폰 ${S.renameT||0}장</p></section>`+
     `<section class="card panel"><h2>결투장 받기</h2><p class="note">명예의 전당에서 다른 전사가 너를 눌러 바로 결투장을 던질 수 있다.</p><button class="btn${S.noInvite?' primary':''}" data-act="noinvite">${S.noInvite?'결투장 받지 않는 중 · 다시 받기':'결투장을 받지 않는다 (모두 거부)'}</button>${(S.blocked||[]).length?`<button class="linkbtn" data-act="unblock">차단한 ${S.blocked.length}명 모두 풀어주기</button>`:''}</section>`+
     `<section class="card panel"><h2>세상을 불태우기</h2><p class="note">오딘은 불평 따위 듣지 않는다. 대신 세상을 통째로 불태워 줄 수는 있다.</p><div class="setrow"><div><b>세상을 불태우기</b><span>전사, 묘지, 전적, 국기, 랭킹 전부 잿더미가 된다. 되돌릴 수 없다.</span></div>`+
     (ui.confirmReset?`<div class="confirm"><button class="btn danger" data-act="reset">불태워라</button><button class="btn" data-act="noreset">취소</button></div>`:`<button class="btn" data-act="askreset">불태우기</button>`)+`</div></section>`;
@@ -3065,7 +3069,8 @@ function detailView(){
   let myUid=''; try{ myUid=firebase.auth().currentUser.uid; }catch(_){}
   const can=e.uid&&e.alive&&ui.season!==1&&S.hero&&e.uid!==myUid&&!(S.hero&&e.id===S.hero.id);
   const ch=can?`<button class="btn primary chbtn" data-act="challenge" data-uid="${esc(e.uid)}" data-id="${esc(e.id)}" data-name="${esc(e.name)}">⚔ ${esc(e.name)}에게 결투장을 던진다</button>`:'';
-  return topbar()+`<button class="linkbtn" data-act="go" data-v="rank" style="align-self:flex-start">← 랭킹으로</button>`+ch+profile(e,{kills:e.kills,status:e.alive?'생존':'전사',alive:e.alive,weapon:false});
+  const give=ui.isAdmin&&e.uid?`<section class="card panel givecp"><h2>운영자 · 쿠폰 내리기</h2><p class="note">${esc(e.name)}의 주인에게 바로 쿠폰을 보낸다. 받은 사람 화면에 바로 알림이 뜨고, '오딘에게 청원'의 받은 쿠폰에서 눌러서 쓴다.</p><div class="giverow"><input id="gvGold" type="number" min="0" step="1000" placeholder="골드" value="1000"><label><input id="gvRen" type="checkbox"> 이름변경 쿠폰</label></div><input id="gvNote" maxlength="60" placeholder="한마디 (선택)"><button class="btn primary" data-act="giveCoupon" data-uid="${esc(e.uid)}" data-name="${esc(e.name)}">쿠폰을 내린다</button><div class="note" id="gvMsg">${esc(ui.gvMsg||'')}</div></section>`:'';
+  return topbar()+`<button class="linkbtn" data-act="go" data-v="rank" style="align-self:flex-start">← 랭킹으로</button>`+ch+profile(e,{kills:e.kills,status:e.alive?'생존':'전사',alive:e.alive,weapon:false})+give;
 }
 const flg=h=>h&&h.flag?flagSvg(h.flag)+' ':'';
 const isFlag=f=>/^[\u{1F1E6}-\u{1F1FF}]{2}$/u.test(f||'');
@@ -3173,6 +3178,8 @@ function render(){
   document.body.classList.toggle('nobody',nobody);
   if(S.resetNotice&&!ui.notice){ ui.notice='세상이 다시 시작됐다. 모든 전사가 초기화되고 명예의 전당도 새로 열렸다. (골드와 쿠폰은 그대로)'; S.resetNotice=0; saveState(); }
   if(S.pendingDuel&&S.hero&&!['battle','war','born','rolling','nation'].includes(view)) app.insertAdjacentHTML('afterbegin',`<section class="pendbar"><span>⏳ ${S.pendingTo?esc(S.pendingTo)+'에게 ':''}보낸 결투장 · 답을 기다리는 중</span><button class="linkbtn" data-act="cancelduel">결투장 거두기</button></section>`);
+  if((ui.coupons||[]).length&&!(view==='card'&&ui.tab==='set')&&!['battle','war','born','rolling','nation','incoming'].includes(view)){ const c=ui.coupons[0];
+    app.insertAdjacentHTML('afterbegin',`<section class="inbox cpban"><b>🎁 ${c.gift?'오딘이 너에게 하사품을 내렸다':'공물의 보답이 도착했다'}: ${couponTxt(c)}</b>${c.note?`<i>"${esc(c.note)}"</i>`:''}${ui.coupons.length>1?`<span>외 ${ui.coupons.length-1}장 더</span>`:''}<div><button class="btn primary" data-act="useCoupon" data-code="${esc(c.id)}">바로 받는다</button><button class="btn" data-act="couponGo">받은 쿠폰 보기</button></div></section>`); }
   if((ui.inbox||[]).length&&S.hero&&!S.noInvite&&!['battle','war','born','rolling','nation','incoming'].includes(view)){ const it=ui.inbox[0];
     app.insertAdjacentHTML('afterbegin',`<section class="inbox"><b>⚔ ${esc(it.name)}이(가) 너에게 결투장을 던졌다!</b>${it.letter?`<i>"${esc(it.letter)}"</i>`:''}${ui.inbox.length>1?`<span>외 ${ui.inbox.length-1}장 더</span>`:''}<div><button class="btn primary" data-act="inboxOpen" data-id="${it.id}">결투장을 본다</button><button class="btn" data-act="inboxNo" data-id="${it.id}">찢어버린다</button><button class="linkbtn" data-act="inboxBlock" data-id="${it.id}">이 자 차단</button></div></section>`); }
   if(ui.notice&&view!=='battle'&&!nobody) app.insertAdjacentHTML('afterbegin',`<section class="card note">${esc(ui.notice)} <button class="linkbtn" data-act="dismissnotice">닫기</button></section>`);
@@ -3893,6 +3900,13 @@ app.addEventListener('click',e=>{
   else if(a==='asksupport'){ ui.askSupport=true; render(); }
   else if(a==='nosupport'){ ui.askSupport=false; render(); }
   else if(a==='gosupport'){ ui.askSupport=false; location.href=SUPPORT_URL; }
+  else if(a==='useCoupon'){ ui.tab='set'; if(window.DuelOnline&&DuelOnline.redeem){ DuelOnline.redeem(b.dataset.code); ui.coupons=(ui.coupons||[]).filter(c=>c.id!==b.dataset.code); } }
+  else if(a==='couponGo'){ view=S.hero?'card':'home'; ui.tab='set'; render(); }
+  else if(a==='giveCoupon'){ const gold=Math.max(0,Math.floor(+(($('#gvGold')||{}).value)||0)), ren=!!(($('#gvRen')||{}).checked), note=(($('#gvNote')||{}).value||'').replace(/[<>]/g,'').trim(), m=$('#gvMsg');
+    if(!gold&&!ren){ if(m) m.textContent='골드나 이름변경 쿠폰 중 하나는 있어야 한다.'; return; }
+    b.disabled=true; if(m) m.textContent='보내는 중…';
+    DuelOnline.giveCoupon(b.dataset.uid,gold,ren,note).then(code=>{ ui.gvMsg=`${b.dataset.name}에게 ${couponTxt({gold,rename:ren})}을 내렸다. (코드 ${code})`; if(m) m.textContent=ui.gvMsg; b.disabled=false; })
+      .catch(e=>{ console.error(e); if(m) m.textContent=e&&e.code==='permission-denied'?'운영자 권한이 없다. 규칙을 확인해라.':'보내지 못했다.'; b.disabled=false; }); }
   else if(a==='redeem'){ const v=(($('#codeRedeem')||{}).value||'').toUpperCase().replace(/[^A-Z0-9]/g,''); if(window.DuelOnline&&DuelOnline.redeem) DuelOnline.redeem(v); }
   else if(a==='rename'){
     const inp=$('#nameInput'); const v=(inp?inp.value:'').replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,12);
@@ -4383,6 +4397,6 @@ function animTick(now){
 requestAnimationFrame(animTick);
 render();
 </script>
-<script src="./online.js?v=10211630"></script>
+<script src="./online.js?v=10211652"></script>
 </body>
 </html>
