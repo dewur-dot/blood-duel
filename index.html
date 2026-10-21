@@ -253,7 +253,27 @@ svg.dead{filter:saturate(.35) brightness(.78)}
 .nav.on{border-color:var(--ember);color:var(--ember)}
 .realms{margin-top:6px}.realms button.on{background:#2b2236;border-color:#6d5a8a}
 .podium{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:6px;align-items:end;margin:4px 0 12px;padding:10px 4px 6px;background:radial-gradient(ellipse at 50% 30%,rgba(216,118,42,.16),transparent 70%)}
-.podium.valh{background:radial-gradient(ellipse at 50% 20%,rgba(246,211,107,.18),transparent 70%),linear-gradient(180deg,#1d1622,transparent)}
+.podium{position:relative;overflow:hidden}.podium>.seat{position:relative;z-index:2}
+.podium.valh{padding-top:118px;background:linear-gradient(180deg,#9fd2e6 0%,#cfe6df 45%,#efe2b6 100%);border:1px solid #c9a24a}
+.podium.valh .seat .tn,.podium.valh .seat .rnk{text-shadow:0 1px 2px #000,0 0 6px #000}
+.vsky{position:absolute;inset:0;z-index:0;pointer-events:none}
+.vrays{position:absolute;left:50%;top:22%;width:220%;aspect-ratio:1;transform:translate(-50%,-50%);background:repeating-conic-gradient(from 0deg,rgba(255,226,140,.55) 0deg 6deg,rgba(255,226,140,0) 6deg 18deg);-webkit-mask:radial-gradient(circle,#000 0%,transparent 60%);mask:radial-gradient(circle,#000 0%,transparent 60%);animation:vspin 60s linear infinite}
+@keyframes vspin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.vgate{position:absolute;left:50%;top:4px;width:46%;transform:translateX(-50%);animation:vglow 3.5s ease-in-out infinite}
+@keyframes vglow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.18)}}
+.vbow{position:absolute;left:-5%;right:-5%;top:6%;width:110%;height:34%}
+.vcloud{position:absolute;border-radius:50%;background:rgba(255,255,255,.75);filter:blur(6px)}
+.vcloud.c1{width:40%;height:16%;left:-6%;top:12%;animation:vdrift 26s linear infinite alternate}.vcloud.c2{width:36%;height:14%;right:-8%;top:24%;animation:vdrift 32s linear infinite alternate-reverse}.vcloud.c3{width:120%;height:16%;left:-10%;top:96px;opacity:.9}
+@keyframes vdrift{to{transform:translateX(30px)}}
+.veagle{position:absolute;width:11%;top:4%;left:-15%;animation:vfly 14s linear infinite}.veagle.e2{width:8%;top:14%;animation-duration:19s;animation-delay:-7s}
+.veagle .wing{transform-origin:0 8px;animation:vflap .7s ease-in-out infinite alternate}
+@keyframes vfly{0%{transform:translate(0,0)}50%{transform:translate(65vw,-10px)}100%{transform:translate(130vw,6px)}}
+@keyframes vflap{from{transform:scaleY(1)}to{transform:scaleY(-.5)}}
+.vdeer{position:absolute;width:15%;left:3%;top:58px;animation:vgraze 6s ease-in-out infinite}
+@keyframes vgraze{0%,100%{transform:translateX(0)}50%{transform:translateX(10px)}}
+.vhorse{position:absolute;width:18%;right:3%;top:50px;transform-origin:20% 100%;animation:vrear 4.5s ease-in-out infinite}
+@keyframes vrear{0%,70%,100%{transform:rotate(0)}82%{transform:rotate(-14deg)}90%{transform:rotate(-8deg)}}
+@media (prefers-reduced-motion:reduce){.vrays,.veagle,.veagle .wing,.vdeer,.vhorse,.vcloud{animation:none}}
 .seat{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;padding:0;color:var(--bone);font:inherit;cursor:pointer;min-width:0}
 .tbox{position:relative;width:100%;aspect-ratio:120/150}
 .tbox .throne{position:absolute;inset:0;width:100%;height:100%}
@@ -2945,10 +2965,27 @@ function throneSvg(rank,valh){
 }
 function throneArms(rank){ const C=['#d8a640','#a9b1b8','#b8743a'][rank-1];
   return `<svg class="tarms" viewBox="0 0 120 40" aria-hidden="true"><path d="M2 10 Q2 4 10 4 L26 4 Q32 4 32 10 L32 40 L2 40 Z" fill="#3f2616" stroke="${C}" stroke-width="3"/><path d="M118 10 Q118 4 110 4 L94 4 Q88 4 88 10 L88 40 L118 40 Z" fill="#3f2616" stroke="${C}" stroke-width="3"/><rect x="24" y="22" width="72" height="18" fill="#2c1a10" stroke="${C}" stroke-width="2"/></svg>`; }
+// 발할라 하늘: 금빛 후광, 빛나는 문, 무지개 다리, 날아다니는 독수리, 사슴과 말 (모두 코드로 그린 그림)
+function valhallaSky(){
+  const eagle=`<path d="M0 6 Q-9 -4 -22 2 Q-12 2 -6 8 Q-2 9 0 12 Q2 9 6 8 Q12 2 22 2 Q9 -4 0 6 Z M-2 10 L0 16 L2 10 Z" fill="#5d6f86"/>`;
+  const deer=`<path d="M8 40 L10 24 Q4 20 6 14 L2 6 L6 9 L4 0 L8 8 L10 2 L10 10 Q14 12 14 16 L36 16 Q44 16 44 24 L42 40 L39 40 L39 27 L20 27 L16 40 L13 40 L14 27 Q11 26 11 24 Z" fill="#8fb4c8" opacity=".85"/>`;
+  const horse=`<path d="M10 44 L14 28 Q4 22 8 14 L16 4 Q20 0 24 4 L22 10 Q30 16 44 16 Q56 16 58 24 Q62 22 66 30 Q60 28 58 30 L56 44 L52 44 L52 32 L32 32 L24 46 L20 46 L24 32 Q18 30 18 28 L14 44 Z" fill="#9dbfd2" opacity=".85"/>`;
+  return `<div class="vsky" aria-hidden="true"><div class="vrays"></div>
+  <svg class="vgate" viewBox="0 0 200 160"><defs><radialGradient id="vg"><stop offset="0" stop-color="#fff6cf"/><stop offset=".45" stop-color="#ffd76a"/><stop offset="1" stop-color="#ffd76a" stop-opacity="0"/></radialGradient></defs>
+  <circle cx="100" cy="70" r="80" fill="url(#vg)" opacity=".75"/>
+  <path d="M55 160 L55 60 L100 22 L145 60 L145 160 Z" fill="#e9dcb8" opacity=".38" stroke="#f6d36b" stroke-width="2"/>
+  <path d="M75 160 L75 78 Q100 46 125 78 L125 160 Z" fill="#fff1b8" opacity=".85"/></svg>
+  <svg class="vbow" viewBox="0 0 400 200" preserveAspectRatio="none"><g fill="none" stroke-width="7" opacity=".38"><path d="M-20 200 Q200 -60 420 200" stroke="#ff6b6b"/><path d="M-8 200 Q200 -45 408 200" stroke="#ffc24b"/><path d="M4 200 Q200 -30 396 200" stroke="#fff06b"/><path d="M16 200 Q200 -15 384 200" stroke="#7de08a"/><path d="M28 200 Q200 0 372 200" stroke="#6bb8ff"/><path d="M40 200 Q200 15 360 200" stroke="#a88bff"/></g></svg>
+  <i class="vcloud c1"></i><i class="vcloud c2"></i><i class="vcloud c3"></i>
+  <svg class="veagle e1" viewBox="-24 -6 48 24"><g class="wing">${eagle}</g></svg>
+  <svg class="veagle e2" viewBox="-24 -6 48 24"><g class="wing">${eagle}</g></svg>
+  <svg class="vdeer" viewBox="0 0 48 42">${deer}</svg>
+  <svg class="vhorse" viewBox="0 0 68 48">${horse}</svg></div>`;
+}
 function podium(list,valh,s1){
   const top=list.slice(0,3); if(!top.length) return '';
   const order=[1,0,2].filter(i=>top[i]);
-  return `<div class="podium${valh?' valh':''}">${order.map(i=>{ const e=top[i], r=i+1;
+  return `<div class="podium${valh?' valh':''}">${valh?valhallaSky():''}${order.map(i=>{ const e=top[i], r=i+1;
     return `<button class="seat r${r}" data-act="detail" data-id="${e.id}"${s1?' data-s="1"':''}><div class="tbox">${throneSvg(r,valh)}<div class="tface">${drawPortrait(Object.assign({},e,{flag:''}),!e.alive)}</div>${throneArms(r)}${r===1?'<span class="crown">♛</span>':''}</div><b class="rnk">${r}</b><span class="tn">${e.flag?flagSvg(e.flag,'flgrow'):''}${esc(e.name)}</span><em>${e.kills}킬</em></button>`; }).join('')}</div>`;
 }
 function rankView(){
