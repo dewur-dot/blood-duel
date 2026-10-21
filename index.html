@@ -94,7 +94,7 @@ body.nobody .top,body.nobody .subtabs{display:none}
 @keyframes inboxp{0%,100%{box-shadow:0 0 0 rgba(255,90,40,0)}50%{box-shadow:0 0 18px rgba(255,90,40,.5)}}
 .chbtn{margin:6px 0}
 .pendbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;margin:6px 0;border:1px dashed #8a6a3a;border-radius:8px;background:#1d1610;font-size:13px}.pendbar .linkbtn{padding:2px 6px}
-.kakaobtn{background:#FEE500!important;color:#191919!important;border-color:#FEE500!important;font-weight:800}
+.pbtn.kakaosel{background:#FEE500;border-color:#FEE500;color:#191919}.pbtn.kakaosel span{opacity:.75}
 .natpick{padding:18px 4px 30px}.natpick h2{font-family:var(--serif);font-size:24px;text-align:center;margin:6px 0 6px;color:var(--bone)}.natpick .note{text-align:center;margin-bottom:14px}
 .natgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .natbtn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;background:#151110;border:1px solid var(--line);border-radius:3px;color:var(--bone);font:inherit;font-size:13px;cursor:pointer}
@@ -3102,7 +3102,7 @@ function inviteView(){
     `<textarea id="letter" maxlength="200" rows="4" placeholder="적에게 던질 한마디 (최대 200자)">${esc(ui.letter||'')}</textarea>`+
     `<div class="cnt" id="lcnt">${(ui.letter||'').length} / 200</div>`+
     `<div class="note" id="sendmsg">${esc(ui.msg||'')}</div><textarea id="codeshow" rows="3" readonly style="display:none"></textarea></section>`+
-    `<div class="actions"><button class="btn primary kakaobtn" data-act="send">결투장 던지기 · 카카오톡</button><button class="btn warbtn" data-act="war"><b>전쟁터로 나간다</b><span>배를 타고 적의 해안으로 · 진짜 죽을 수 있다 · 골드·장비·능력치</span></button><button class="btn" data-act="copycode">결투 링크 복사</button>${S.pendingDuel?'<button class="btn" data-act="cancelduel">보낸 결투장 취소</button>':'<button class="btn" data-act="accept">연습 결투</button>'}<button class="btn" data-act="back">돌아가기</button></div>`;
+    `<div class="actions"><button class="btn primary" data-act="send">결투장 던지기</button><button class="btn warbtn" data-act="war"><b>전쟁터로 나간다</b><span>배를 타고 적의 해안으로 · 진짜 죽을 수 있다 · 골드·장비·능력치</span></button><button class="btn" data-act="copycode">결투 링크 복사</button>${S.pendingDuel?'<button class="btn" data-act="cancelduel">보낸 결투장 취소</button>':'<button class="btn" data-act="accept">연습 결투</button>'}<button class="btn" data-act="back">돌아가기</button></div>`;
 }
 function incomingView(){
   const f=ui.incoming;
@@ -3786,9 +3786,18 @@ function copyText(text,okMsg){
   try{ navigator.clipboard.writeText(text).then(()=>say(okMsg),fallback); }catch(e){ fallback(); }
 }
 function showCode(text){ const e=$('#codeshow'); if(e){ e.value=text; e.style.display='block'; e.select(); } }
+// 결투장 던지기: 어디로 보낼지 고르는 창 (카카오톡 · 다른 앱 · 링크 복사)
 function sendDuel(){
   if(!window.DuelOnline){ ui.msg='결투 연결을 불러오지 못했습니다.'; render(); return; }
-  DuelOnline.send(false);
+  const ov=document.createElement('div'); ov.className='overlay';
+  ov.innerHTML=`<div class="sheet prac"><h2>어디로 던질까</h2>
+    <button class="pbtn kakaosel" data-s="kakao"><b>카카오톡으로 보내기</b><span>친구·대화방을 골라 결투장 카드를 보낸다</span></button>
+    ${navigator.share?'<button class="pbtn" data-s="share"><b>다른 앱으로 보내기</b><span>이 기기의 공유 창을 연다</span></button>':''}
+    <button class="pbtn" data-s="copy"><b>결투 링크 복사</b><span>복사해서 아무 데나 붙여넣는다</span></button>
+    <button class="linkbtn" data-x="1">그만둔다</button></div>`;
+  document.body.append(ov);
+  ov.addEventListener('click',e=>{ const b=e.target.closest('[data-s]'); if(b){ ov.remove(); const m=b.dataset.s; DuelOnline.send(m==='kakao'?'kakao':m==='share'?'share':true); return; }
+    if(e.target===ov||e.target.closest('[data-x]')) ov.remove(); });
 }
 document.addEventListener('change',e=>{ if(e.target&&e.target.id==='flagSel'&&S.hero){ const v=e.target.value; S.flag=FLAGS.includes(v)?v:''; S.hero.flag=S.flag; sync(S.hero,true); saveState(); render(); } });
 document.addEventListener('input',e=>{ if(e.target&&e.target.id==='letter'){ ui.letter=e.target.value.slice(0,200); const c=$('#lcnt'); if(c) c.textContent=ui.letter.length+' / 200'; } });

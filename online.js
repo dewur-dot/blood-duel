@@ -128,10 +128,12 @@
       const link=baseUrl()+'?invite='+ref.id+'#duel-id='+ref.id;
       const intro=`⚔ ${S.hero.name}의 결투 신청`+(ui.letter?`\n\n"${ui.letter}"`:'');
       const message=intro+`\n\n${link}`;
-      if(!copyOnly||copyOnly==='kakao'){ // 결투장 던지기 = 카카오톡으로 보내기 (안 되면 기기 공유 → 링크 복사)
+      if(copyOnly==='kakao'){
         try{ await kakaoShare(link,S.hero,ui.letter||''); say('카카오톡 보내기 창을 열었다. 친구를 골라 보내라.'); return; }
-        catch(error){ console.warn('카카오 공유 실패',error); }
+        catch(error){ console.warn('카카오 공유 실패',error); const why=String(error&&(error.message||error.msg||error)||''); try{ await navigator.clipboard.writeText(message); }catch(_){}
+          say('카카오톡 보내기를 열지 못했다'+(why?` (${why.slice(0,80)})`:'')+'. 대신 결투 링크를 복사해 뒀으니 카톡에 붙여넣어라.'); return; }
       }
+      if(copyOnly==='share') copyOnly=false;
       if(!copyOnly&&navigator.share){
         try{
           const file=await profileShareFile(S.hero);
