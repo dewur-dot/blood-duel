@@ -92,6 +92,7 @@ body.nobody .top,body.nobody .subtabs{display:none}
 .inbox b{font-size:16px;color:#ffd0a8}.inbox i{font-size:13px;opacity:.85}.inbox span{font-size:12px;opacity:.7}.inbox div{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.inbox .btn{flex:1;min-width:120px}
 @keyframes inboxp{0%,100%{box-shadow:0 0 0 rgba(255,90,40,0)}50%{box-shadow:0 0 18px rgba(255,90,40,.5)}}
 .chbtn{margin:6px 0}
+.pendbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;margin:6px 0;border:1px dashed #8a6a3a;border-radius:8px;background:#1d1610;font-size:13px}.pendbar .linkbtn{padding:2px 6px}
 .natpick{padding:18px 4px 30px}.natpick h2{font-family:var(--serif);font-size:24px;text-align:center;margin:6px 0 6px;color:var(--bone)}.natpick .note{text-align:center;margin-bottom:14px}
 .natgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .natbtn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;background:#151110;border:1px solid var(--line);border-radius:3px;color:var(--bone);font:inherit;font-size:13px;cursor:pointer}
@@ -3107,6 +3108,7 @@ function incomingView(){
     `<div class="invp"><div class="portrait">${USE3D?fig3d(f,false,0,'bust'):drawPortrait(f,false)}</div></div>`+
     `<h1 class="name">${flg(f)}${esc(f.name)}</h1><div class="nick">${esc(f.nick)} · ${fmtH(f.cm)} · ${f.wins}킬</div>`+
     (f.letter?`<div class="letter">${esc(f.letter).replace(/\n/g,'<br>')}</div>`:'')+`</section>`+
+    (S.hero&&S.pendingDuel?`<p class="note center">이 결투를 받으면 ${S.pendingTo?esc(S.pendingTo)+'에게 ':''}보낸 결투장은 자동으로 거둬진다.</p>`:'')+
     (S.hero?`<div class="actions"><button class="btn primary" data-act="acceptin">덤벼라</button><button class="btn" data-act="declinein">등을 보인다 (겁쟁이)</button></div>`
       :`<div class="actions"><p class="note">싸우려면 육신부터 있어야 한다. 먼저 태어나라.</p><button class="btn primary" data-act="roll">나도 태어나기</button><button class="btn" data-act="declinein">등을 보인다 (겁쟁이)</button></div>`);
 }
@@ -3155,6 +3157,7 @@ function render(){
   app.innerHTML=nobody?homeView():views[view]();
   document.body.classList.toggle('nobody',nobody);
   if(S.resetNotice&&!ui.notice){ ui.notice='세상이 다시 시작됐다. 모든 전사가 초기화되고 명예의 전당도 새로 열렸다. (골드와 쿠폰은 그대로)'; S.resetNotice=0; saveState(); }
+  if(S.pendingDuel&&S.hero&&!['battle','war','born','rolling','nation'].includes(view)) app.insertAdjacentHTML('afterbegin',`<section class="pendbar"><span>⏳ ${S.pendingTo?esc(S.pendingTo)+'에게 ':''}보낸 결투장 · 답을 기다리는 중</span><button class="linkbtn" data-act="cancelduel">결투장 거두기</button></section>`);
   if((ui.inbox||[]).length&&S.hero&&!S.noInvite&&!['battle','war','born','rolling','nation','incoming'].includes(view)){ const it=ui.inbox[0];
     app.insertAdjacentHTML('afterbegin',`<section class="inbox"><b>⚔ ${esc(it.name)}이(가) 너에게 결투장을 던졌다!</b>${it.letter?`<i>"${esc(it.letter)}"</i>`:''}${ui.inbox.length>1?`<span>외 ${ui.inbox.length-1}장 더</span>`:''}<div><button class="btn primary" data-act="inboxOpen" data-id="${it.id}">결투장을 본다</button><button class="btn" data-act="inboxNo" data-id="${it.id}">찢어버린다</button><button class="linkbtn" data-act="inboxBlock" data-id="${it.id}">이 자 차단</button></div></section>`); }
   if(ui.notice&&view!=='battle'&&!nobody) app.insertAdjacentHTML('afterbegin',`<section class="card note">${esc(ui.notice)} <button class="linkbtn" data-act="dismissnotice">닫기</button></section>`);
@@ -3256,14 +3259,16 @@ function warRun(){
   const say=(t,kind)=>{ w.lines.push({t,k:kind}); const lg=$('#wlog'); if(lg){ const p=document.createElement('p'); p.className=kind||''; p.textContent=t; lg.appendChild(p); lg.scrollTop=lg.scrollHeight; } };
   const setBar=()=>{ const b=$('#whp'), v=$('#whpv'), k=$('#wkill'); if(b) b.style.width=Math.max(0,w.hp/me.maxhp*100)+'%'; if(v) v.textContent=Math.max(0,Math.round(w.hp))+' / '+me.maxhp; if(k) k.textContent=w.kills; };
   say(pick(['폭풍을 뚫고 노를 젓는다. 적의 해안이 보인다!','용머리 배가 파도를 가른다. 전사들이 방패를 두드린다!','"오딘이여, 오늘 우리를 지켜보소서!" 노꾼들이 함성을 지른다.']),'info');
-  later2(()=>{ if(w.sc) w.sc.land(); say('배가 모래톱에 처박혔다! 상륙하라!','crit'); w.phase='melee'; },3400);
+  const land=()=>{ if(w.landed) return; w.landed=1; if(w.sc) w.sc.land(); say('배가 모래톱에 처박혔다! 상륙하라!','crit'); w.phase='melee'; };
   // 상륙 뒤엔 결투와 똑같은 3D 몸·동작으로 난전 (3D를 못 쓰는 폰은 그림 장면 그대로)
-  later2(()=>{ if(USE3D&&G3.ok&&!B2D()){ try{ if(w.sc&&w.sc.stop) w.sc.stop(); w.sc=war3d(cv,{heroName:me.name,hero:me,gen:w.gen,genName:w.gen.name}); }catch(e){ console.error(e); } } },4900);
+  const go3d=()=>{ if(w.is3d) return; w.is3d=1; if(USE3D&&G3.ok&&!B2D()){ try{ if(w.sc&&w.sc.stop) w.sc.stop(); w.sc=war3d(cv,{heroName:me.name,hero:me,gen:w.gen,genName:w.gen.name}); }catch(e){ console.error(e); } } };
+  later2(land,3400); later2(go3d,4900);
   const steps=RI(12,16); let k=0;
   const tick=()=>{ k++;
     const r=Math.random();
     if(Math.random()<0.005*(1+k/6)){ const cause=pick(['난전 속에서 등 뒤로 창이 박혔다.','어디선가 날아온 화살이 목을 꿰뚫었다.','발밑의 시체에 걸려 넘어진 순간, 도끼가 내려왔다.']);
       w.hp=0; setBar(); if(w.sc) w.sc.heroDie(); say(`${me.name}, ${cause}`,'kill'); return warDie(cause); }
+    if(w.fast&&k>steps) return 'end';
     if(r<0.4){ const n=Math.random()<0.25?2:1; w.kills+=n; setBar(); if(w.sc) w.sc.heroKill(n); say(n>1?`${me.name}, 적 둘을 한꺼번에 베어 넘겼다!`:pick([`${me.name}, 적의 투구째 머리를 쪼갰다!`,`${me.name}, 방패로 밀쳐 넘어뜨리고 숨통을 끊었다!`,`${me.name}의 도끼에 적이 피를 뿜으며 쓰러졌다!`,`${me.name}, 달려드는 적의 목을 단칼에 날렸다!`]),'hit'); }
     else if(r<0.66){ const d=Math.max(1,Math.round(me.maxhp*R(0.04,0.12)*(1-Math.min(0.5,(me.st.def||0)/400)))); w.hp-=d; setBar(); if(w.sc) w.sc.heroHit();
       say(pick([`적의 창끝이 옆구리를 스쳤다. (-${d})`,`화살 한 대가 어깨에 박혔다. (-${d})`,`뒤에서 날아온 몽둥이에 뒤통수를 맞았다. (-${d})`,`방패가 쪼개지며 팔이 저린다. (-${d})`]),'crit');
@@ -3272,10 +3277,14 @@ function warRun(){
     else if(r<0.9){ if(w.sc) w.sc.allyFall(); say(pick(['옆에서 싸우던 동료가 쓰러졌다… 발할라에서 보자.','아군 방패벽 한쪽이 무너졌다!']),'miss'); }
     else say(pick(['양쪽에서 새 전사들이 끝없이 쏟아져 나온다!','까마귀 떼가 전장 위를 맴돈다.','진흙과 피가 발목까지 차오른다.']),'info');
     if(k>=steps){ w.phase='gen'; if(w.sc) w.sc.general(); say(`적군이 무너진다! 적장 ${w.gen.name}이(가) 앞으로 나섰다.`,'crit');
-      const a=$('#wact'); if(a) a.innerHTML=`<button class="btn primary" data-act="warGen">적장과 맞선다</button>`; return; }
-    later2(tick,reduce?250:1250);
+      const a=$('#wact'); if(a) a.innerHTML=`<button class="btn primary" data-act="warGen">적장과 맞선다</button>`; return 'end'; }
+    if(!w.fast) later2(tick,reduce?250:1250);
+    return 'cont';
   };
   later2(tick,5200);
+  // 건너뛰기: 남은 난전을 한 번에 치르고 적장 앞으로
+  w.skip=()=>{ if(w.phase==='gen'||w.phase==='dead'||w.phase==='done') return; (ui.tms||[]).forEach(clearTimeout); ui.tms=[]; w.fast=true; land(); go3d(); let st; do{ st=tick(); }while(st==='cont'); };
+  const a=$('#wact'); if(a) a.innerHTML=`<button class="btn" data-act="warSkip">건너뛰기 · 바로 적장 앞으로</button>`;
 }
 function warDie(cause){ const w=ui.war, me=S.hero; if(!me) return; w.phase='dead'; bury(me,cause); S.fights++; saveState();
   setTimeout(()=>{ const a=$('#wact'); if(a&&view==='war') a.innerHTML=`<div class="verdict lose"><b>전사</b><span>${esc(w.name)}, 전쟁터에서 쓰러졌다. 까마귀들이 몰려든다.</span></div><button class="btn primary" data-act="roll">다시 태어난다</button><button class="btn" data-act="valhalla">발할라로 간다</button>`; },1400); }
@@ -3828,7 +3837,8 @@ app.addEventListener('click',e=>{
   else if(a==='noinvite'){ if(window.DuelOnline&&DuelOnline.setNoInvite) DuelOnline.setNoInvite(!S.noInvite); }
   else if(a==='unblock'){ if(window.DuelOnline&&DuelOnline.unblockAll) DuelOnline.unblockAll(); }
   else if(a==='mercy') mercyDecide(b.dataset.m==='1');
-  else if(a==='war'){ if(!S.hero||S.pendingDuel) { if(S.pendingDuel){ ui.notice='보낸 결투장의 답을 기다리는 동안엔 전쟁에 나갈 수 없다.'; render(); } return; } ui.war=newWar(); view='war'; render(); window.scrollTo(0,0); warRun(); }
+  else if(a==='war'){ if(!S.hero||S.pendingDuel) { if(S.pendingDuel){ ui.notice='보낸 결투장의 답을 기다리는 동안엔 전쟁에 나갈 수 없다. 위의 "결투장 거두기"로 거둘 수 있다.'; render(); } return; } ui.war=newWar(); view='war'; render(); window.scrollTo(0,0); warRun(); }
+  else if(a==='warSkip'){ if(ui.war&&ui.war.skip) ui.war.skip(); }
   else if(a==='warGen'){ const w=ui.war; if(w&&w.phase==='gen'&&S.hero){ w.phase='done'; const ratio=Math.max(0.35,Math.min(1,w.hp/S.hero.maxhp+R(-0.12,0.12))); startFight(w.gen,{war:{kills:w.kills},hp:w.hp,foeHp:w.gen.maxhp*ratio,label:'적장'}); } }
   else if(a==='valhalla'){ view='valhalla'; render(); window.scrollTo(0,0); valhallaRun(); }
   else if(a==='acceptin'){ if(ui.duelId) DuelOnline.accept(); else { const f=ui.incoming; ui.incoming=null; try{ history.replaceState(null,'',location.pathname+location.search); }catch(_){} startFight(f); } }

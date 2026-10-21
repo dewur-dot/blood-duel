@@ -112,7 +112,7 @@
       if(!S.pendingDuel){
         await ref.set({version:1,status:'pending',ownerUid:uid,ownerHeroId:S.hero.id,
           challenger:packDuel(S.hero,letter),createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-        S.pendingDuel=ref.id; saveState(); render();
+        S.pendingDuel=ref.id; S.pendingTo=''; saveState(); render();
       }
       remember(ref.id);
       const link=baseUrl()+'?invite='+ref.id+'#duel-id='+ref.id;
@@ -318,8 +318,10 @@
       S.pendingDuel=null; S.handledDuels.push(id); saveState();
       ui.notice='보낸 결투장을 취소했습니다.'; render();
     }catch(error){
-      if(error.message==='already-decided'){ await checkDuels(); }
-      else say(reason(error));
+      if(error.message==='already-decided'){ await checkDuels(); if(S.pendingDuel){ ui.notice='상대가 이미 답했다. 결과를 불러오는 중이다…'; render(); } }
+      else { // 서버가 거부해도 묶여 있지 않게: 상태를 다시 보고, 대기 중이 아니면 내 쪽에서 풀어줌
+        try{ const db=await ready, shot=await db.collection('duels').doc(S.pendingDuel).get(); if(!shot.exists||shot.data().status==='cancelled'||shot.data().status==='declined'){ S.handledDuels.push(S.pendingDuel); S.pendingDuel=null; saveState(); ui.notice='보낸 결투장을 거뒀다.'; render(); return; } }catch(_){ }
+        say(reason(error)); }
     }
   }
   /* 랭킹: 실제로 플레이한 전사들 */
@@ -384,7 +386,7 @@
       const ref=db.collection('duels').doc();
       await ref.set({version:1,status:'pending',ownerUid:uid,ownerHeroId:S.hero.id,targetUid:target.uid,
         challenger:packDuel(S.hero,ui.letter||''),createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-      S.pendingDuel=ref.id; remember(ref.id); saveState();
+      S.pendingDuel=ref.id; S.pendingTo=target.name||''; remember(ref.id); saveState();
       ui.notice=`${target.name||'상대'}에게 결투장을 던졌다. 놈이 받으면 바로 결투가 시작된다.`; view=S.hero?'card':'home'; render();
     }catch(error){ ui.notice=reason(error); render(); }
     finally{ sending=false; }
@@ -416,7 +418,7 @@
   }
   async function setNoInvite(on){ S.noInvite=!!on; saveState(); if(on) ui.inbox=[]; render(); await savePrefs(); }
   async function unblockAll(){ S.blocked=[]; saveState(); render(); await savePrefs(); }
-  const isLocked=action=>!!S.pendingDuel&&['roll','reset','accept','buy','wear','rename'].includes(action);
+  const isLocked=action=>!!S.pendingDuel&&['roll','reset','buy','wear','rename'].includes(action); // 연습 결투는 아무것도 안 바뀌니 대기 중에도 가능
   // 이긴 사람(결투장을 받은 쪽)이 진 사람을 살려줄지 기록 (한 번만)
   async function mercy(id,spare){
     try{ const db=await ready; await db.collection('duels').doc(id).update({spared:!!spare}); }
