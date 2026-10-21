@@ -3521,7 +3521,7 @@ function impact(e){
     stageShake();
   } else if(e.kind==='kill'){
     const r=ui.rep, h=e.target==='A'?r.me:r.foe;
-    const f=$('#fig'+e.target); if(f) f.innerHTML=drawChar(h,true,Math.round(hfrac(h.cm)*((ui.stageH||340)-40)));
+    const f=$('#fig'+e.target); if(f) f.innerHTML=drawChar(h,true,(ui.hh&&ui.hh[e.target])||Math.round(hfrac(h.cm)*((ui.stageH||340)-40))); // 키 비율대로 잡힌 크기 그대로 (작은 놈 시체가 커지던 버그)
     act(e.target,'fall',0);
     const el=$('#a'+e.target); if(el) el.dataset.ko='1';
     const fi=$('#f'+e.target); if(fi) fi.classList.remove('brawl');
@@ -3710,7 +3710,7 @@ function finish(){
   if(r.win&&r.mercy==='ask'){ mercyAsk(r,after); return; }
   if(!r.win&&r.sparedMe){ after.innerHTML=`<div class="verdict honor"><b>목숨을 건졌다</b><span>${esc(r.foe.name)}이(가) 칼끝을 목에 댔다가… 고개를 젓더니 칼을 거뒀다. "다음엔 없다."</span></div><button class="btn primary" data-act="back">피를 닦고 돌아간다</button>`; return; }
   if(r.fled!==loser&&(r.mercy!=='spared')&&$('#a'+loser)&&!$('#a'+loser).dataset.ko){
-    const lh=loser==='A'?r.me:r.foe, f=$('#fig'+loser); if(f) f.innerHTML=drawChar(lh,true,Math.round(hfrac(lh.cm)*((ui.stageH||340)-40)));
+    const lh=loser==='A'?r.me:r.foe, f=$('#fig'+loser); if(f) f.innerHTML=drawChar(lh,true,(ui.hh&&ui.hh[loser])||Math.round(hfrac(lh.cm)*((ui.stageH||340)-40)));
     act(loser,'fall',0); $('#a'+loser).dataset.ko='1';
   }
   const wf=$('#f'+w); if(wf){ wf.dataset.ct=performance.now(); wf.classList.add('cheer'); }
