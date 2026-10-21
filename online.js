@@ -343,7 +343,7 @@
       const qs=await db.collection(old?'heroes':'heroes2').orderBy('kills','desc').limit(200).get(); // 현생·발할라로 나눠 보여주려고 넉넉히
       const list=[];
       qs.forEach(doc=>{ const d=doc.data(), h=d&&unpackDuel(d.hero); if(!h) return;
-        list.push({id:doc.id,name:h.name,flag:h.flag||'',nick:h.nick,g:h.g,st:h.st,cm:h.cm,kg:h.kg,outfit:h.outfit,weapon:h.weapon,tags:h.tags,kills:Math.max(0,d.kills|0),alive:d.alive!==false}); });
+        list.push({id:doc.id,name:h.name,flag:h.flag||'',nick:h.nick,g:h.g,st:h.st,cm:h.cm,kg:h.kg,outfit:h.outfit,weapon:h.weapon,tags:h.tags,kills:Math.max(0,d.kills|0),alive:d.alive!==false,uid:d.uid||''}); });
       if(old){ ui.board1=list; ui.board1Err=false; } else { ui.board=list; ui.boardErr=false; }
     }catch(error){ console.warn('랭킹 불러오기 실패',error&&error.code||error); if(old) ui.board1Err=true; else ui.boardErr=true; }
     if(view==='rank') render();
@@ -369,13 +369,60 @@
       show(error.message==='no-code'?'그런 코드는 없다.':error.message==='used'?'이미 누군가 써버린 코드다.':reason(error));
     }
   }
+  /* ---- 게임 안에서 바로 결투장 보내기 (랭킹에서 상대를 골라) + 받기 거부·차단 ---- */
+  async function prefsOf(db,uid){ try{ const s=await db.collection('prefs').doc(uid).get(); return s.exists?s.data():{}; }catch(_){ return {}; } }
+  async function sendTo(target){
+    if(!S.hero){ say('먼저 전사를 만들어 주세요.'); return; }
+    if(!target||!target.uid){ say('이 전사에게는 결투장을 보낼 수 없다.'); return; }
+    if(S.pendingDuel){ ui.notice='이미 보낸 결투장이 있다. 답을 받거나 취소한 뒤에 다시 던져라.'; render(); return; }
+    if(sending) return; sending=true;
+    try{
+      const db=await ready, uid=firebase.auth().currentUser.uid;
+      if(target.uid===uid){ ui.notice='자기 자신에게 결투장을 던질 순 없다.'; render(); return; }
+      const pf=await prefsOf(db,target.uid);
+      if(pf.noInvite||(Array.isArray(pf.blocked)&&pf.blocked.includes(uid))){ ui.notice=`${target.name||'그 전사'}는 결투장을 받지 않는다.`; render(); return; }
+      const ref=db.collection('duels').doc();
+      await ref.set({version:1,status:'pending',ownerUid:uid,ownerHeroId:S.hero.id,targetUid:target.uid,
+        challenger:packDuel(S.hero,ui.letter||''),createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+      S.pendingDuel=ref.id; remember(ref.id); saveState();
+      ui.notice=`${target.name||'상대'}에게 결투장을 던졌다. 놈이 받으면 바로 결투가 시작된다.`; view=S.hero?'card':'home'; render();
+    }catch(error){ ui.notice=reason(error); render(); }
+    finally{ sending=false; }
+  }
+  // 나에게 온 결투장 실시간 확인
+  let inboxOff=null;
+  async function watchInbox(){
+    try{
+      const db=await ready, uid=firebase.auth().currentUser.uid; if(inboxOff) return;
+      inboxOff=db.collection('duels').where('targetUid','==',uid).where('status','==','pending').onSnapshot(qs=>{
+        const list=[]; qs.forEach(doc=>{ const d=doc.data(), h=unpackDuel(d.challenger); if(h&&!(S.blocked||[]).includes(d.ownerUid)) list.push({id:doc.id,name:h.name,owner:d.ownerUid,letter:h.letter||''}); });
+        const before=(ui.inbox||[]).map(x=>x.id).join(); ui.inbox=S.noInvite?[]:list;
+        if(ui.inbox.map(x=>x.id).join()!==before&&view!=='battle'&&view!=='war') render();
+      },error=>console.warn('받은 결투장 확인 실패',error&&error.code||error));
+    }catch(error){ console.warn('받은 결투장 확인 실패',error); }
+  }
+  async function declineId(id,block){
+    try{
+      const db=await ready, uid=firebase.auth().currentUser.uid, ref=db.collection('duels').doc(id);
+      const item=(ui.inbox||[]).find(x=>x.id===id);
+      await db.runTransaction(async tr=>{ const cur=await tr.get(ref); if(!cur.exists||cur.data().status!=='pending') return; tr.update(ref,{status:'declined',recipientUid:uid,decidedAt:firebase.firestore.FieldValue.serverTimestamp()}); });
+      if(block&&item&&item.owner){ S.blocked=Array.from(new Set((S.blocked||[]).concat(item.owner))).slice(-200); saveState(); await savePrefs(); }
+      ui.inbox=(ui.inbox||[]).filter(x=>x.id!==id); ui.notice=block?`${item?item.name:'그 자'}를 차단했다. 다시는 결투장을 못 던진다.`:'결투장을 찢어버렸다.'; render();
+    }catch(error){ ui.notice=reason(error); render(); }
+  }
+  async function savePrefs(){
+    try{ const db=await ready, uid=firebase.auth().currentUser.uid; await db.collection('prefs').doc(uid).set({noInvite:!!S.noInvite,blocked:(S.blocked||[]).slice(-200)}); }
+    catch(error){ console.warn('설정 저장 실패',error&&error.code||error); }
+  }
+  async function setNoInvite(on){ S.noInvite=!!on; saveState(); if(on) ui.inbox=[]; render(); await savePrefs(); }
+  async function unblockAll(){ S.blocked=[]; saveState(); render(); await savePrefs(); }
   const isLocked=action=>!!S.pendingDuel&&['roll','reset','accept','buy','wear','rename'].includes(action);
   // 이긴 사람(결투장을 받은 쪽)이 진 사람을 살려줄지 기록 (한 번만)
   async function mercy(id,spare){
     try{ const db=await ready; await db.collection('duels').doc(id).update({spared:!!spare}); }
     catch(error){ console.warn('자비 기록 실패',error&&error.code||error); }
   }
-  window.DuelOnline={send,open,accept,decline,cancel,checkDuels,isLocked,pushHero,loadBoard,redeem,mercy};
+  window.DuelOnline={send,open,accept,decline,cancel,checkDuels,isLocked,pushHero,loadBoard,redeem,mercy,sendTo,declineId,setNoInvite,unblockAll};
   if(S.hero) pushHero(S.hero,true);
   ready.then(()=>{ const ad=((window.BLOOD_DUEL_SUPPORT||{}).admins)||[]; const u=firebase.auth().currentUser; if(u&&ad.includes(u.uid)){ ui.isAdmin=true; if(view==='card'&&ui.tab==='set') render(); } }).catch(()=>{});
   const match=/#(?:[^#]*&)?duel-id=([A-Za-z0-9]{20})/.exec(location.hash);
@@ -398,5 +445,5 @@
     }catch(error){ console.warn('결투장 지켜보기 실패',error); }
   }
   setInterval(()=>{ watch(); if(duelReady&&view!=='battle'&&!ui.duelId&&S.pendingDuel){ checkDuels(); } if(!S.pendingDuel) duelReady=false; },2000);
-  watch();
+  watch(); watchInbox();
 })();

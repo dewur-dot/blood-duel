@@ -88,6 +88,10 @@ body.nobody .top,body.nobody .subtabs{display:none}
 .vhall{display:flex;flex-direction:column;gap:8px;margin-top:6px}
 .vhtitle{text-align:center}.vhtitle h2{font-family:var(--serif);font-size:30px;margin:4px 0 0;color:#f6d36b;text-shadow:0 0 14px rgba(246,211,107,.6)}.vhtitle p{font-size:13px;opacity:.85;margin:4px 0 0}
 .vhcv{display:block;width:100%;height:min(72vh,560px);border:1px solid #c9a24a;border-radius:6px;cursor:pointer;background:#cfe6df}
+.inbox{display:flex;flex-direction:column;gap:6px;padding:12px;margin:6px 0;border:1px solid #c9542a;background:linear-gradient(180deg,#4a1a10,#2a0e08);border-radius:8px;animation:inboxp 1.6s ease-in-out infinite}
+.inbox b{font-size:16px;color:#ffd0a8}.inbox i{font-size:13px;opacity:.85}.inbox span{font-size:12px;opacity:.7}.inbox div{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.inbox .btn{flex:1;min-width:120px}
+@keyframes inboxp{0%,100%{box-shadow:0 0 0 rgba(255,90,40,0)}50%{box-shadow:0 0 18px rgba(255,90,40,.5)}}
+.chbtn{margin:6px 0}
 .natpick{padding:18px 4px 30px}.natpick h2{font-family:var(--serif);font-size:24px;text-align:center;margin:6px 0 6px;color:var(--bone)}.natpick .note{text-align:center;margin-bottom:14px}
 .natgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .natbtn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;background:#151110;border:1px solid var(--line);border-radius:3px;color:var(--bone);font:inherit;font-size:13px;cursor:pointer}
@@ -2967,6 +2971,7 @@ function settingsHtml(){
   return (ui.isAdmin?`<a class="btn adminbtn" href="./support.html?admin">운영자 · 후원 확인 페이지</a>`:'')+`<section class="card panel"><h2>오딘에게 청원</h2><p class="note">후원하면 골드와 이름변경 쿠폰을 담은 쿠폰 코드를 받는다. 1,000원 = 1,000 골드, 5,000원 = 7,000 골드, 1만원이면 14,000 골드에 이름변경 쿠폰 1장.</p>`+
     (ui.askSupport?`<div class="confirm2"><b>후원 링크로 이동하시겠습니까?</b><div class="confirm"><button class="btn primary" data-act="gosupport">간다</button><button class="btn" data-act="nosupport">아니</button></div></div>`:`<button class="btn primary sacrifice" data-act="asksupport">오딘에게 제물을 바친다</button>`)+
     `<div class="redeem"><input id="codeRedeem" maxlength="16" placeholder="쿠폰 코드 입력" autocomplete="off" autocapitalize="characters"><button class="btn" data-act="redeem">받기</button></div><div class="note" id="redeemMsg">${esc(ui.rmsg||'')}</div><p class="note">지금 골드 ${fmtG(S.gold||0)} · 이름변경 쿠폰 ${S.renameT||0}장</p></section>`+
+    `<section class="card panel"><h2>결투장 받기</h2><p class="note">명예의 전당에서 다른 전사가 너를 눌러 바로 결투장을 던질 수 있다.</p><button class="btn${S.noInvite?' primary':''}" data-act="noinvite">${S.noInvite?'결투장 받지 않는 중 · 다시 받기':'결투장을 받지 않는다 (모두 거부)'}</button>${(S.blocked||[]).length?`<button class="linkbtn" data-act="unblock">차단한 ${S.blocked.length}명 모두 풀어주기</button>`:''}</section>`+
     `<section class="card panel"><h2>세상을 불태우기</h2><p class="note">오딘은 불평 따위 듣지 않는다. 대신 세상을 통째로 불태워 줄 수는 있다.</p><div class="setrow"><div><b>세상을 불태우기</b><span>전사, 묘지, 전적, 국기, 랭킹 전부 잿더미가 된다. 되돌릴 수 없다.</span></div>`+
     (ui.confirmReset?`<div class="confirm"><button class="btn danger" data-act="reset">불태워라</button><button class="btn" data-act="noreset">취소</button></div>`:`<button class="btn" data-act="askreset">불태우기</button>`)+`</div></section>`;
 }
@@ -3040,7 +3045,10 @@ function rankView(){
 function detailView(){
   const e=ui.detail;
   if(!e) return rankView();
-  return topbar()+`<button class="linkbtn" data-act="go" data-v="rank" style="align-self:flex-start">← 랭킹으로</button>`+profile(e,{kills:e.kills,status:e.alive?'생존':'전사',alive:e.alive,weapon:false});
+  let myUid=''; try{ myUid=firebase.auth().currentUser.uid; }catch(_){}
+  const can=e.uid&&e.alive&&ui.season!==1&&S.hero&&e.uid!==myUid&&!(S.hero&&e.id===S.hero.id);
+  const ch=can?`<button class="btn primary chbtn" data-act="challenge" data-uid="${esc(e.uid)}" data-id="${esc(e.id)}" data-name="${esc(e.name)}">⚔ ${esc(e.name)}에게 결투장을 던진다</button>`:'';
+  return topbar()+`<button class="linkbtn" data-act="go" data-v="rank" style="align-self:flex-start">← 랭킹으로</button>`+ch+profile(e,{kills:e.kills,status:e.alive?'생존':'전사',alive:e.alive,weapon:false});
 }
 const flg=h=>h&&h.flag?flagSvg(h.flag)+' ':'';
 const isFlag=f=>/^[\u{1F1E6}-\u{1F1FF}]{2}$/u.test(f||'');
@@ -3146,6 +3154,8 @@ function render(){
   app.innerHTML=nobody?homeView():views[view]();
   document.body.classList.toggle('nobody',nobody);
   if(S.resetNotice&&!ui.notice){ ui.notice='세상이 다시 시작됐다. 모든 전사가 초기화되고 명예의 전당도 새로 열렸다. (골드와 쿠폰은 그대로)'; S.resetNotice=0; saveState(); }
+  if((ui.inbox||[]).length&&S.hero&&!S.noInvite&&!['battle','war','born','rolling','nation','incoming'].includes(view)){ const it=ui.inbox[0];
+    app.insertAdjacentHTML('afterbegin',`<section class="inbox"><b>⚔ ${esc(it.name)}이(가) 너에게 결투장을 던졌다!</b>${it.letter?`<i>"${esc(it.letter)}"</i>`:''}${ui.inbox.length>1?`<span>외 ${ui.inbox.length-1}장 더</span>`:''}<div><button class="btn primary" data-act="inboxOpen" data-id="${it.id}">결투장을 본다</button><button class="btn" data-act="inboxNo" data-id="${it.id}">찢어버린다</button><button class="linkbtn" data-act="inboxBlock" data-id="${it.id}">이 자 차단</button></div></section>`); }
   if(ui.notice&&view!=='battle'&&!nobody) app.insertAdjacentHTML('afterbegin',`<section class="card note">${esc(ui.notice)} <button class="linkbtn" data-act="dismissnotice">닫기</button></section>`);
   mount3d();
   document.body.classList.toggle('bview',view==='battle');
@@ -3800,6 +3810,11 @@ app.addEventListener('click',e=>{
   }
   else if(a==='invite'){ ui.code='#'+Array.from({length:4},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[RI(0,31)]).join(''); view='invite'; render(); }
   else if(a==='accept') pracPick();
+  else if(a==='challenge'){ if(window.DuelOnline&&DuelOnline.sendTo) DuelOnline.sendTo({uid:b.dataset.uid,id:b.dataset.id,name:b.dataset.name}); }
+  else if(a==='inboxOpen'){ if(window.DuelOnline) DuelOnline.open(b.dataset.id); }
+  else if(a==='inboxNo'||a==='inboxBlock'){ if(window.DuelOnline&&DuelOnline.declineId) DuelOnline.declineId(b.dataset.id,a==='inboxBlock'); }
+  else if(a==='noinvite'){ if(window.DuelOnline&&DuelOnline.setNoInvite) DuelOnline.setNoInvite(!S.noInvite); }
+  else if(a==='unblock'){ if(window.DuelOnline&&DuelOnline.unblockAll) DuelOnline.unblockAll(); }
   else if(a==='mercy') mercyDecide(b.dataset.m==='1');
   else if(a==='war'){ if(!S.hero||S.pendingDuel) { if(S.pendingDuel){ ui.notice='보낸 결투장의 답을 기다리는 동안엔 전쟁에 나갈 수 없다.'; render(); } return; } ui.war=newWar(); view='war'; render(); window.scrollTo(0,0); warRun(); }
   else if(a==='warGen'){ const w=ui.war; if(w&&w.phase==='gen'&&S.hero){ w.phase='done'; startFight(w.gen,{war:{kills:w.kills},hp:w.hp,label:'적장'}); } }
