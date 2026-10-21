@@ -219,9 +219,6 @@ function War(cv,opt){
     // 무기 (앞손)와 팀 방패 (팀 구분)
     c.save(); c.translate(w*0.24,-h*0.5); drawWeapon(c,h,s.weapon,-0.5+sw*2.2); c.restore();
     if(sw>0.75){ c.strokeStyle='rgba(255,255,255,.85)'; c.lineWidth=2; c.beginPath(); c.arc(w*0.25,-h*0.55,h*0.32,-1.2,0.5); c.stroke(); }
-    const R=h*0.11; c.fillStyle=TEAM[s.team].shieldMain; c.beginPath(); c.arc(-w*0.22,-h*0.46,R,0,TAU); c.fill(); c.strokeStyle='#2a1a0a'; c.lineWidth=R*0.18; c.stroke();
-    c.strokeStyle='rgba(255,255,255,.45)'; c.lineWidth=R*0.14; c.beginPath(); c.moveTo(-w*0.22,-h*0.46-R); c.lineTo(-w*0.22,-h*0.46+R); c.moveTo(-w*0.22-R,-h*0.46); c.lineTo(-w*0.22+R,-h*0.46); c.stroke();
-    c.fillStyle='#ddd'; c.beginPath(); c.arc(-w*0.22,-h*0.46,R*0.25,0,TAU); c.fill();
     c.restore();
     if(s.hero){ c.font=`800 ${Math.round(11*W/420)}px system-ui,sans-serif`; c.textAlign='center'; c.fillStyle='#ffd76a'; c.strokeStyle='rgba(0,0,0,.75)'; c.lineWidth=3; c.strokeText(opt.heroName||'나',x,y-h*1.06); c.fillText(opt.heroName||'나',x,y-h*1.06);
       c.fillStyle='#ffd76a'; c.beginPath(); c.moveTo(x-5,y-h*1.03); c.lineTo(x+5,y-h*1.03); c.lineTo(x,y-h*0.97); c.fill(); } }
