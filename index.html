@@ -575,6 +575,20 @@ body.bview .act.recoil{animation-duration:.667s}body.bview .act.big,body.bview .
 body.bview .word,body.bview .dmgn{animation-duration:1.167s}body.bview .stage.shake{animation-duration:.333s}
 body.bview .sandp{animation-duration:.5s}body.bview .stonep{animation-duration:.417s}body.bview .dustc{animation-duration:1.042s}
 body.bview .fighter{transition-duration:2.333s}body.bview .fighter.run .act{animation-duration:.458s}
+/* 새 결투장: 무대 이미지를 전면에 사용하고 데스크톱에서는 결투가 화면의 중심이 된다. */
+body.bview{background:linear-gradient(90deg,rgba(5,6,9,.9),rgba(5,6,9,.5) 22%,rgba(5,6,9,.5) 78%,rgba(5,6,9,.9)),url('assets/duel-arena.webp') center/cover fixed #0c0c0e}
+body.bview #app{max-width:760px}
+body.bview .stage{background:#211b1a url('assets/duel-arena.webp') center center/cover no-repeat;border:2px solid #a87544;box-shadow:0 0 0 1px #1b0d08,0 0 0 5px rgba(20,13,11,.72),0 24px 60px rgba(0,0,0,.7)}
+body.bview .sbg{display:none}
+body.bview .stage::after{background:radial-gradient(ellipse 80% 74% at 50% 44%,transparent 48%,rgba(5,5,8,.42) 100%),linear-gradient(180deg,rgba(4,7,12,.16),transparent 32%,transparent 72%,rgba(16,6,3,.3));box-shadow:inset 0 0 0 1px rgba(255,197,122,.28)}
+body.bview .st3d{filter:brightness(1.17) saturate(1.12) drop-shadow(0 12px 9px rgba(0,0,0,.82))}
+body.bview .hud>div{border-color:#9c6235;background:linear-gradient(180deg,rgba(57,37,27,.97),rgba(17,15,16,.98));box-shadow:inset 0 1px rgba(255,210,143,.22),0 8px 24px rgba(0,0,0,.52)}
+body.bview .hud>div.r{border-color:#9c6235;background:linear-gradient(180deg,rgba(57,37,27,.97),rgba(17,15,16,.98))}
+body.bview .hud .nm{color:#ffe3bd;font-size:clamp(14px,2.1vw,19px)}
+body.bview .log{border:1px solid #8c5b3b;background:linear-gradient(180deg,rgba(30,22,20,.97),rgba(12,11,12,.98));box-shadow:0 12px 30px rgba(0,0,0,.45)}
+body:not(.bview){background:linear-gradient(90deg,rgba(7,8,11,.91),rgba(7,8,11,.68) 50%,rgba(7,8,11,.91)),url('assets/duel-arena.webp') center top/cover fixed #0d0d10}
+.portrait,.pt{background:linear-gradient(180deg,rgba(14,15,19,.17),rgba(10,7,6,.62)),url('assets/duel-arena.webp') center/cover #1a1716}
+@media(min-width:700px){body.bview .stage{height:clamp(390px,calc(100dvh - 310px),570px)}body.bview .log{height:120px}}
 /* 공통 화면: 석재와 가죽을 겹친 듯한 깊이, 초상화에 집중되는 조명 */
 body{background-image:radial-gradient(ellipse 70% 36% at 50% -6%,rgba(105,69,43,.28),transparent 72%),radial-gradient(ellipse 90% 65% at 50% 110%,rgba(42,26,23,.24),transparent 72%),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 .top{padding:4px 0 12px;border-bottom:1px solid #655044;box-shadow:0 1px rgba(246,202,147,.07)}
@@ -4248,7 +4262,7 @@ function battle3d(now){
     const fm=new DOMMatrix(getComputedStyle(f).transform==='none'?undefined:getComputedStyle(f).transform);
     const am=new DOMMatrix(getComputedStyle(a).transform==='none'?undefined:getComputedStyle(a).transform);
     const cxr=id==='B'?1-L.cxr:L.cxr;
-    const s0=L.fig*hpx, s=Number.isFinite(s0)&&s0>4?Math.min(s0,Hs*0.95):Hs*0.5; // 어떤 경우에도 무대보다 커지지 않게
+    const s0=L.fig*hpx*1.25, s=Number.isFinite(s0)&&s0>4?Math.min(s0,Hs*0.95):Hs*0.5; // 넓어진 결투장에서 전사가 또렷하게 보이되 무대를 넘지 않게
     J.root.R=[0,id==='A'?0.85:-0.85,0];
     if(K){ // 죽음: 뒤로 붕 날아가 등으로 떨어지고, 한 번 튕긴 뒤 축 늘어짐
       const x0=f.offsetLeft+sw*cxr+fm.e, y0=Hs-(f.offsetTop+f.offsetHeight)+L.ground*hpx-fm.f;
@@ -4322,17 +4336,11 @@ function battle3d(now){
     pose3(J,fighterAngles3(f,now),0);
     figs.push({J,M:M4.mul(M4.mul(M4.T(x,ybot,0),M4.RZ(roll)),M4.S(s,s*sya,s)),des:ko,roll});
   });
-  // 1) 3D 배경: 원근 카메라가 높고 먼 곳에서 스윽 내려와 결투 각도로 (배경에는 사람이 없음)
+  // 결투장의 환경 그림은 CSS 배경으로 합성하고, WebGL은 전사만 투명하게 그린다.
   let u=1; if(ui.intro){ u=Math.max(0,Math.min(1,(now-ui.intro.t0)/ui.intro.D)); if(u>=1&&now-ui.intro.t0>ui.intro.D+50) ui.intro=null; }
-  const gy=ui.b3.gy??(ui.b3.gy=Math.max(0,Math.min(Hs*0.3,ui.b3.yA??Hs*0.06))); if(!ui.b3.world||ui.b3.wW!==W){ ui.b3.world=arena3d(W,gy); ui.b3.wW=W; }
-  const e=1-Math.pow(1-u,2.4), Dz=2600, lerp=(a,b)=>a+(b-a)*e;
-  const eye=[W/2+lerp(-W*0.5,0),lerp(Hs*0.5+1500,Hs*0.5),lerp(Dz+3600,Dz)], tgt=[W/2,lerp(gy,Hs*0.5),lerp(-300,0)];
-  const PV=M4.mul(M4.persp(2*Math.atan(Hs/2/Dz),W/Hs,60,90000),M4.look(eye,tgt,[0,1,0]));
-  const sbg=st.querySelector('.sbg'); if(sbg&&!sbg._sky){ sbg._sky=1; sbg.querySelectorAll('path,ellipse:not(.cl),rect:not(:first-of-type),circle').forEach(n=>{ if(!n.closest('g[fill="#fff"]')) n.style.display='none'; }); }
-  g3render([{J:{root:ui.b3.world,noHead:true},M:M4.I(),des:false}],{PV},cw,ch);
-  // 2) 사람은 정사영으로 그 위에 그림 (어떤 경우에도 화면을 뚫고 커지지 않음)
+  // 사람은 정사영으로 그림 (어떤 경우에도 화면을 뚫고 커지지 않음)
   const Z=1+1.3*Math.pow(1-u,1.4);
-  g3render(figs,{l:W/2-W/2*Z,r:W/2+W/2*Z,b:0,t:Hs*Z,keep:1},cw,ch);
+  g3render(figs,{l:W/2-W/2*Z,r:W/2+W/2*Z,b:0,t:Hs*Z},cw,ch);
   const ctx=cv.getContext('2d'); ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cw,ch); ctx.drawImage(G3.cv,0,0,cw,ch);
 }
 function g3frame(now){
