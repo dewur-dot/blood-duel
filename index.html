@@ -560,7 +560,7 @@ body.bview .after{gap:8px}
 <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
 <script src="./firebase-config.js"></script>
 <script src="./support-config.js?v=10211545"></script>
-<script src="./scenes.js?v=10211652"></script>
+<script src="./scenes.js?v=10221025"></script>
 <script>
 //ENGINE-START
 const RI=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
@@ -3177,7 +3177,7 @@ function render(){
   app.innerHTML=nobody?homeView():views[view]();
   document.body.classList.toggle('nobody',nobody);
   if(S.resetNotice&&!ui.notice){ ui.notice='세상이 다시 시작됐다. 모든 전사가 초기화되고 명예의 전당도 새로 열렸다. (골드와 쿠폰은 그대로)'; S.resetNotice=0; saveState(); }
-  if(S.pendingDuel&&S.hero&&!['battle','war','born','rolling','nation'].includes(view)) app.insertAdjacentHTML('afterbegin',`<section class="pendbar"><span>⏳ ${S.pendingTo?esc(S.pendingTo)+'에게 ':''}보낸 결투장 · 답을 기다리는 중</span><button class="linkbtn" data-act="cancelduel">결투장 거두기</button></section>`);
+  if(S.pendingDuel&&!['battle','war','born','rolling','nation'].includes(view)) app.insertAdjacentHTML('afterbegin',`<section class="pendbar"><span>⏳ ${S.pendingTo?esc(S.pendingTo)+'에게 ':''}보낸 결투장 · 답을 기다리는 중</span><button class="linkbtn" data-act="cancelduel">결투장 거두기</button></section>`);
   if((ui.coupons||[]).length&&!(view==='card'&&ui.tab==='set')&&!['battle','war','born','rolling','nation','incoming'].includes(view)){ const c=ui.coupons[0];
     app.insertAdjacentHTML('afterbegin',`<section class="inbox cpban"><b>🎁 ${c.gift?'오딘이 너에게 하사품을 내렸다':'공물의 보답이 도착했다'}: ${couponTxt(c)}</b>${c.note?`<i>"${esc(c.note)}"</i>`:''}${ui.coupons.length>1?`<span>외 ${ui.coupons.length-1}장 더</span>`:''}<div><button class="btn primary" data-act="useCoupon" data-code="${esc(c.id)}">바로 받는다</button><button class="btn" data-act="couponGo">받은 쿠폰 보기</button></div></section>`); }
   if((ui.inbox||[]).length&&S.hero&&!S.noInvite&&!['battle','war','born','rolling','nation','incoming'].includes(view)){ const it=ui.inbox[0];
@@ -3512,7 +3512,7 @@ function reviveYard(i){ const y=S.yard[i]; if(!y) return;
   ui.notice=`${h.name}, 발할라에서 끌려 내려왔다. 다시 피를 볼 시간이다.`; view='card'; ui.tab='stat'; render(); window.scrollTo(0,0); }
 function bury(me,cause){ sync(me,false);
   S.yard.unshift({name:me.name,g:me.g,cm:me.cm,outfit:me.outfit,wins:me.wins,flag:me.flag||'',cause:cause||'전사',t:Date.now()});
-  S.yard=S.yard.slice(0,60); S.hero=null; }
+  S.yard=S.yard.slice(0,60); S.hero=null; if(window.DuelOnline&&DuelOnline.dropPending) DuelOnline.dropPending(); }
 function setSt(a,b){ [['A',a],['B',b]].forEach(([id,v])=>{ const el=$('#st'+id); if(el&&v!=null){ el.style.width=Math.max(0,Math.min(100,v))+'%'; el.classList.toggle('low',v<30); } }); }
 function setHp(a,b){
   const r=ui.rep;
@@ -4397,6 +4397,6 @@ function animTick(now){
 requestAnimationFrame(animTick);
 render();
 </script>
-<script src="./online.js?v=10211652"></script>
+<script src="./online.js?v=10221025"></script>
 </body>
 </html>

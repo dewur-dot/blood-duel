@@ -1,7 +1,8 @@
 (function(){
   'use strict';
   const config=window.BLOOD_DUEL_FIREBASE_CONFIG;
-  let ready, checking=false, sending=false;
+  let ready, checking=false, sending=false, sendingAt=0;
+  const busy=()=>{ if(sending&&Date.now()-sendingAt<20000) return true; sending=true; sendingAt=Date.now(); return false; }; // 공유창이 안 닫혀도 20초 뒤엔 풀림
   if(config&&config.projectId&&window.firebase){
     try{
       firebase.initializeApp(config);
@@ -91,8 +92,7 @@
   }
   async function send(copyOnly){
     if(!S.hero){ say('먼저 전사를 만들어 주세요.'); return; }
-    if(sending) return;
-    sending=true;
+    if(busy()){ say('결투장을 보내는 중이다. 잠시 뒤 다시 눌러라.'); return; }
     try{
       const db=await ready;
       const uid=firebase.auth().currentUser.uid;
@@ -191,6 +191,7 @@
     return e;
   });
 
+  async function heroDead(db,heroId){ if(!heroId) return false; try{ const sh=await db.collection('heroes2').doc(heroId).get(); return sh.exists&&sh.data().alive===false; }catch(_){ return false; } }
   let mercyWait=null;
   function applyResult(id,data,show){
     if(S.handledDuels.includes(id)) return false;
@@ -254,12 +255,9 @@
             applyResult(outgoingId,outgoing,true);
             throw new Error('outgoing-decided');
           }
-          if(outgoing.status==='pending'&&outgoing.ownerUid===firebase.auth().currentUser.uid){
-            await outgoingRef.update({status:'cancelled',decidedAt:firebase.firestore.FieldValue.serverTimestamp()});
-          }
-        }
-        if(!S.handledDuels.includes(outgoingId)) S.handledDuels.push(outgoingId);
-        S.pendingDuel=null; saveState();
+          if(outgoing.status!=='pending'){ if(!S.handledDuels.includes(outgoingId)) S.handledDuels.push(outgoingId); S.pendingDuel=null; saveState(); }
+        } else { S.pendingDuel=null; saveState(); }
+        // 내가 보낸 결투장은 그대로 둔다. 이 결투에서 죽으면 그때 거둬진다.
       }
       const ref=db.collection('duels').doc(id);
       const shot=await ref.get();
@@ -268,6 +266,7 @@
       if(data.ownerUid===firebase.auth().currentUser.uid) throw new Error('own-duel');
       const opponent=unpackDuel(data.challenger);
       if(!opponent) throw new Error('bad-challenge');
+      if(await heroDead(db,data.ownerHeroId)){ try{ await ref.update({status:'declined',decidedAt:firebase.firestore.FieldValue.serverTimestamp()}); }catch(_){ } throw new Error('dead-owner'); }
       const me=clone(S.hero), a=clone(me), b=clone(opponent);
       a.hp=a.maxhp; b.hp=b.maxhp;
       a.st.def+=outfitDef(me); b.st.def+=outfitDef(opponent);
@@ -285,6 +284,7 @@
     }catch(error){
       if(error.message==='outgoing-decided') say('먼저 도착한 결투 결과를 확인해 주세요.');
       else if(error.message==='already-decided'){ clearLink(); closedDuel('이미 초대가 종료된 결투장입니다'); }
+      else if(error.message==='dead-owner'){ clearLink(); closedDuel('결투장을 보낸 전사는 이미 죽었다'); }
       else say(reason(error));
       if(button){ button.disabled=false; button.textContent='덤벼라'; }
     }
@@ -331,6 +331,18 @@
     finally{ checking=false; }
   }
 
+  // 보낸 결투장이 서버에서 아직 대기 중인지 확인. 이미 끝났으면 묶임을 풀고 결과는 checkDuels가 처리
+  async function stillPending(){
+    const id=S.pendingDuel; if(!id) return false;
+    try{ const db=await ready, sh=await db.collection('duels').doc(id).get();
+      if(sh.exists&&sh.data().status==='pending'&&(!S.hero||sh.data().ownerHeroId===S.hero.id)) return true;
+      if(sh.exists&&sh.data().status==='pending') dropPending(); else if(S.pendingDuel===id){ S.pendingDuel=null; saveState(); }
+      return false; }catch(_){ return true; } }
+  // 전사가 죽거나 바뀌면 그 전사가 보낸 결투장은 서버에서도 거둬들이고 묶임을 푼다
+  function dropPending(){
+    const id=S.pendingDuel; if(!id) return; S.pendingDuel=null; S.pendingTo=''; saveState();
+    ready.then(db=>{ const ref=db.collection('duels').doc(id); return db.runTransaction(async t=>{ const sh=await t.get(ref); if(sh.exists&&sh.data().status==='pending') t.update(ref,{status:'cancelled',decidedAt:firebase.firestore.FieldValue.serverTimestamp()}); }); }).catch(e=>console.warn('결투장 거두기 실패',e&&e.code||e));
+  }
   async function cancel(){
     if(!S.pendingDuel) return;
     try{
@@ -401,8 +413,9 @@
   async function sendTo(target){
     if(!S.hero){ say('먼저 전사를 만들어 주세요.'); return; }
     if(!target||!target.uid){ say('이 전사에게는 결투장을 보낼 수 없다.'); return; }
-    if(S.pendingDuel){ ui.notice='이미 보낸 결투장이 있다. 답을 받거나 취소한 뒤에 다시 던져라.'; render(); return; }
-    if(sending) return; sending=true;
+    if(S.pendingDuel&&!(await stillPending())){ await checkDuels(); if(!S.hero) return; }
+    if(S.pendingDuel){ ui.notice='이미 보낸 결투장이 있다. 답을 받거나 위의 "결투장 거두기"로 취소한 뒤에 다시 던져라.'; render(); return; }
+    if(busy()){ ui.notice='결투장을 보내는 중이다. 잠시 뒤 다시 눌러라.'; render(); return; }
     try{
       const db=await ready, uid=firebase.auth().currentUser.uid;
       if(target.uid===uid){ ui.notice='자기 자신에게 결투장을 던질 순 없다.'; render(); return; }
@@ -458,7 +471,7 @@
   }
   async function setNoInvite(on){ S.noInvite=!!on; saveState(); if(on) ui.inbox=[]; render(); await savePrefs(); }
   async function unblockAll(){ S.blocked=[]; saveState(); render(); await savePrefs(); }
-  const isLocked=action=>!!S.pendingDuel&&['roll','reset','buy','wear','rename'].includes(action); // 연습 결투는 아무것도 안 바뀌니 대기 중에도 가능
+  const isLocked=action=>!!S.pendingDuel&&!!S.hero&&['roll','reset','buy','wear','rename'].includes(action); // 연습 결투는 아무것도 안 바뀌니 대기 중에도 가능
   // 이긴 사람(결투장을 받은 쪽)이 진 사람을 살려줄지 기록 (한 번만)
   async function mercy(id,spare){
     try{ const db=await ready; await db.collection('duels').doc(id).update({spared:!!spare}); }
@@ -472,7 +485,7 @@
     catch(error){ console.warn('상대 전사 표시 실패',error&&error.code||error); }
     if(ui.board){ const e=ui.board.find(x=>x.id===heroId); if(e) e.alive=false; }
   }
-  window.DuelOnline={prepareKakao,send,open,accept,decline,cancel,checkDuels,isLocked,pushHero,loadBoard,redeem,giveCoupon,mercy,sendTo,declineId,setNoInvite,unblockAll};
+  window.DuelOnline={dropPending,prepareKakao,send,open,accept,decline,cancel,checkDuels,isLocked,pushHero,loadBoard,redeem,giveCoupon,mercy,sendTo,declineId,setNoInvite,unblockAll};
   if(S.hero) pushHero(S.hero,true);
   ready.then(()=>{ const ad=((window.BLOOD_DUEL_SUPPORT||{}).admins)||[]; const u=firebase.auth().currentUser; if(u&&ad.includes(u.uid)){ ui.isAdmin=true; if(view==='card'&&ui.tab==='set') render(); } }).catch(()=>{});
   const match=/#(?:[^#]*&)?duel-id=([A-Za-z0-9]{20})/.exec(location.hash);
@@ -496,6 +509,7 @@
   }
   setInterval(()=>{ watch(); if(duelReady&&view!=='battle'&&!ui.duelId&&S.pendingDuel){ checkDuels(); } if(!S.pendingDuel) duelReady=false; },2000);
   watch(); watchInbox(); watchCoupons();
+  setTimeout(async()=>{ if(S.pendingDuel&&!(await stillPending())) checkDuels(); },2500); // 예전에 묶인 결투장 풀기
   // 예전에 내가 죽인 상대들도 한 번 훑어서 명예의 전당에 '전사'로 표시
   setTimeout(async()=>{ if(S.retroDead2) return; try{ const db=await ready, uid=firebase.auth().currentUser.uid;
     for(const id of (S.handledDuels||[]).slice(-40)){ try{ const sh=await db.collection('duels').doc(id).get(); if(!sh.exists) continue; const d=sh.data(); if(d.status!=='accepted'||!d.result||d.result.draw||d.spared===true) continue;
