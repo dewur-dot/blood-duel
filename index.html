@@ -548,6 +548,33 @@ body.bview .log{height:clamp(84px,15dvh,150px);padding:6px 10px;font-size:13px;l
 body.bview .log p{margin:0 0 3px}
 body.bview .after .btn{min-height:44px;font-size:15px;padding:8px}
 body.bview .after{gap:8px}
+/* 결투 화면: 황혼의 전장, 읽기 쉬운 상태 표시와 짧고 선명한 타격 효과 */
+body.bview .hud{gap:8px}
+body.bview .hud>div{min-width:0;padding:7px 9px 6px;border:1px solid #574337;background:linear-gradient(155deg,rgba(54,39,31,.96),rgba(19,16,15,.96));box-shadow:inset 0 1px rgba(255,228,188,.08),0 4px 12px rgba(0,0,0,.22)}
+body.bview .hud>div.r{border-color:#513b39;background:linear-gradient(205deg,rgba(49,33,32,.96),rgba(19,16,15,.96))}
+body.bview .hud .nm{min-height:18px;text-shadow:0 1px 2px #000}
+body.bview .hpbar{height:9px;border-color:#65473c;background:#241716;overflow:hidden}
+body.bview .hpbar i{background:linear-gradient(180deg,#ee7059 0%,#b72922 48%,#7e1718 100%);box-shadow:inset 0 1px rgba(255,204,173,.55),0 0 8px rgba(226,57,39,.3)}
+body.bview .hpbar i.low{background:linear-gradient(180deg,#ffb35d,#cb4a1c 55%,#813016)}
+body.bview .stbar{height:4px;overflow:hidden;background:#272018}
+body.bview .stbar i{background:linear-gradient(90deg,#8d693b,#e9c77b)}
+body.bview .stage{isolation:isolate;border-color:#81604a;box-shadow:0 0 0 1px #090706,0 12px 28px rgba(0,0,0,.45),inset 0 0 24px rgba(0,0,0,.24)}
+body.bview .stage::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:radial-gradient(ellipse 72% 70% at 50% 48%,transparent 44%,rgba(18,10,11,.32) 100%),linear-gradient(180deg,rgba(35,18,24,.16),transparent 32%,transparent 72%,rgba(16,9,8,.3));box-shadow:inset 0 0 0 1px rgba(255,210,153,.12)}
+body.bview .st3d{filter:saturate(.78) contrast(1.1) sepia(.08)}
+body.bview .log{border-color:#574438;background:linear-gradient(180deg,#171311,#100e0d);box-shadow:inset 0 1px rgba(255,222,166,.06)}
+body.bview .log p{padding:2px 0;border-bottom:1px solid rgba(167,124,77,.1)}
+body.bview .log p:last-child{color:#ead3b3}
+body.bview .word{filter:drop-shadow(0 2px 5px #230b08)}
+body.bview .dmgn{color:#ffad75;filter:drop-shadow(0 2px 6px #3a0b06)}
+.hitburst{position:absolute;width:70px;height:70px;margin:-35px;pointer-events:none;z-index:4;border-radius:50%;background:radial-gradient(circle,rgba(255,246,202,.94) 0 4%,rgba(255,175,83,.68) 8%,rgba(212,49,32,.36) 22%,transparent 56%);box-shadow:0 0 24px rgba(255,122,55,.35);animation:burst .35s ease-out forwards}
+.hitburst::before,.hitburst::after{content:"";position:absolute;left:50%;top:50%;width:78px;height:3px;background:linear-gradient(90deg,transparent,#ffd8a0 36% 64%,transparent);transform:translate(-50%,-50%) rotate(32deg)}
+.hitburst::after{transform:translate(-50%,-50%) rotate(122deg)}
+@keyframes burst{from{opacity:1;transform:scale(.35)}to{opacity:0;transform:scale(1.65)}}
+body.bview .act.lunge{animation-duration:.792s}body.bview .act.lungeH,body.bview .act.lungeS{animation-duration:.833s}body.bview .act.lungeC{animation-duration:.875s}
+body.bview .act.recoil{animation-duration:.667s}body.bview .act.big,body.bview .act.fall{animation-duration:.917s}body.bview .act.dodge{animation-duration:.667s}body.bview .act.trip{animation-duration:.917s}body.bview .act.woozy{animation-duration:1.25s}
+body.bview .word,body.bview .dmgn{animation-duration:1.167s}body.bview .stage.shake{animation-duration:.333s}
+body.bview .sandp{animation-duration:.5s}body.bview .stonep{animation-duration:.417s}body.bview .dustc{animation-duration:1.042s}
+body.bview .fighter{transition-duration:2.333s}body.bview .fighter.run .act{animation-duration:.458s}
 @supports not (height:100dvh){ body.bview .stage{height:clamp(210px,calc(100vh - 420px),430px)} body.bview .log{height:clamp(84px,14vh,150px)} }
 </style>
 </head>
@@ -3140,15 +3167,15 @@ function stageBg(){
   let rocks=''; for(let i=0;i<14;i++){ const x=rnd(0,400), y=rnd(268,306), r=rnd(2,6); rocks+=`<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="${r.toFixed(1)}" ry="${(r*0.55).toFixed(1)}" fill="#0f0c0a" opacity=".7"/><ellipse cx="${(x-r*0.2).toFixed(1)}" cy="${(y-r*0.2).toFixed(1)}" rx="${(r*0.6).toFixed(1)}" ry="${(r*0.25).toFixed(1)}" fill="#5a4a3c" opacity=".35"/>`; }
   const brazier=(x)=>`<g><ellipse cx="${x}" cy="248" rx="46" ry="40" fill="url(#fg)"/><path d="M${x-7} 270 L${x-2} 252 M${x+7} 270 L${x+2} 252 M${x} 270 L${x} 252" stroke="#1a1410" stroke-width="2.2"/><path d="M${x-11} 248 Q${x} 258 ${x+11} 248 Z" fill="#2a211a" stroke="#0d0a08"/><g class="flame"><path d="M${x-9} 248 Q${x-10} 236 ${x-3} 228 Q${x-2} 236 ${x} 232 Q${x+2} 220 ${x+4} 214 Q${x+6} 228 ${x+9} 234 Q${x+11} 242 ${x+9} 248 Z" fill="#e8742a"/><path d="M${x-5} 248 Q${x-5} 240 ${x-1} 234 Q${x+1} 240 ${x+3} 230 Q${x+6} 240 ${x+5} 248 Z" fill="#ffc35a"/></g></g>`;
   return `<svg class="sbg" viewBox="0 0 400 310" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><defs>`+
-    `<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5f9be0"/><stop offset=".5" stop-color="#a9cdf0"/><stop offset=".8" stop-color="#e2ecf2"/><stop offset="1" stop-color="#c8d8b0"/></linearGradient>`+
+    `<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#30374d"/><stop offset=".48" stop-color="#77666a"/><stop offset=".78" stop-color="#bf8970"/><stop offset="1" stop-color="#d5ac80"/></linearGradient>`+
     `<radialGradient id="mg"><stop offset="0" stop-color="#e9e4d4" stop-opacity=".35"/><stop offset="1" stop-color="#e9e4d4" stop-opacity="0"/></radialGradient>`+
     `<radialGradient id="fg"><stop offset="0" stop-color="#ff8a3a" stop-opacity=".45"/><stop offset="1" stop-color="#ff8a3a" stop-opacity="0"/></radialGradient>`+
     `<linearGradient id="fog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9b8a3" stop-opacity="0"/><stop offset=".6" stop-color="#c9b8a3" stop-opacity=".12"/><stop offset="1" stop-color="#c9b8a3" stop-opacity="0"/></linearGradient>`+
-    `<linearGradient id="gnd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7aa34e"/><stop offset=".35" stop-color="#6a9444"/><stop offset="1" stop-color="#4f7a34"/></linearGradient>`+
+    `<linearGradient id="gnd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6b7147"/><stop offset=".35" stop-color="#686849"/><stop offset="1" stop-color="#4c4d39"/></linearGradient>`+
     `<radialGradient id="arena" cx=".5" cy=".3" r=".6"><stop offset="0" stop-color="#d6ab6a" stop-opacity="1"/><stop offset=".75" stop-color="#c49a5e" stop-opacity=".9"/><stop offset="1" stop-color="#c49a5e" stop-opacity="0"/></radialGradient>`+
     `<radialGradient id="vig" cx=".5" cy=".55" r=".75"><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></radialGradient></defs>`+
-    `<rect width="400" height="310" fill="url(#sky)"/><circle cx="318" cy="50" r="46" fill="#fff6c8" opacity=".35"/><circle cx="318" cy="50" r="16" fill="#fff4b0"/><g fill="#fff" opacity=".85"><ellipse cx="60" cy="40" rx="38" ry="12.2"/><ellipse cx="46.7" cy="33.2" rx="17.1" ry="11.4"/><ellipse cx="69.5" cy="31.6" rx="19.0" ry="12.9"/></g><g fill="#fff" opacity=".85"><ellipse cx="150" cy="26" rx="28" ry="9.0"/><ellipse cx="140.2" cy="21.0" rx="12.6" ry="8.4"/><ellipse cx="157.0" cy="19.8" rx="14.0" ry="9.5"/></g><g fill="#fff" opacity=".85"><ellipse cx="230" cy="62" rx="30" ry="9.6"/><ellipse cx="219.5" cy="56.6" rx="13.5" ry="9.0"/><ellipse cx="237.5" cy="55.4" rx="15.0" ry="10.2"/></g><g fill="#fff" opacity=".85"><ellipse cx="370" cy="30" rx="26" ry="8.3"/><ellipse cx="360.9" cy="25.3" rx="11.7" ry="7.8"/><ellipse cx="376.5" cy="24.3" rx="13.0" ry="8.8"/></g>`+
-    `<path d="M0 196 L38 150 L62 168 L104 118 L132 146 L168 104 L206 150 L238 128 L276 160 L312 112 L352 150 L400 126 L400 230 L0 230 Z" fill="#7d8ca8"/>`+
+    `<rect width="400" height="310" fill="url(#sky)"/><circle cx="318" cy="50" r="48" fill="#ffd1a0" opacity=".2"/><circle cx="318" cy="50" r="16" fill="#ffe0ad" opacity=".85"/><g fill="#d8c0aa" opacity=".24"><ellipse cx="60" cy="40" rx="38" ry="12.2"/><ellipse cx="46.7" cy="33.2" rx="17.1" ry="11.4"/><ellipse cx="69.5" cy="31.6" rx="19.0" ry="12.9"/></g><g fill="#d8c0aa" opacity=".2"><ellipse cx="150" cy="26" rx="28" ry="9.0"/><ellipse cx="140.2" cy="21.0" rx="12.6" ry="8.4"/><ellipse cx="157.0" cy="19.8" rx="14.0" ry="9.5"/></g><g fill="#d8c0aa" opacity=".2"><ellipse cx="230" cy="62" rx="30" ry="9.6"/><ellipse cx="219.5" cy="56.6" rx="13.5" ry="9.0"/><ellipse cx="237.5" cy="55.4" rx="15.0" ry="10.2"/></g>`+
+    `<path d="M0 196 L38 150 L62 168 L104 118 L132 146 L168 104 L206 150 L238 128 L276 160 L312 112 L352 150 L400 126 L400 230 L0 230 Z" fill="#63626a"/>`+
     `<path d="M92 132 L104 118 L114 128 L106 126 L100 133 Z M158 114 L168 104 L178 116 L170 113 L164 118 Z M302 122 L312 112 L322 124 L314 120 L308 126 Z" fill="#ffffff" opacity=".9"/>`+
     `<rect y="160" width="400" height="70" fill="url(#fog)"/>`+
     `<path d="M0 222 L50 196 L96 214 L150 186 L206 210 L262 190 L318 214 L366 194 L400 206 L400 250 L0 250 Z" fill="#5d8a46"/>`+
@@ -3527,10 +3554,12 @@ function addLine(e){
   const p=document.createElement('p'); p.className=e.kind; p.textContent=e.text; log.appendChild(p);
   log.scrollTop=log.scrollHeight;
 }
+const DUEL_SPEED=1.2;
+const duelMs=ms=>Math.round(ms/DUEL_SPEED);
 function act(id,cls,ms){
   const el=$('#a'+id); if(!el||el.dataset.ko) return;
   el.className='act'; void el.offsetWidth; el.classList.add(cls); el.dataset.at=performance.now(); el.dataset.ac=cls;
-  if(ms) setTimeout(()=>{ if(!el.dataset.ko) el.classList.remove(cls); },ms);
+  if(ms) setTimeout(()=>{ if(!el.dataset.ko) el.classList.remove(cls); },duelMs(ms));
 }
 function pop(text,id,cls,dy){
   const fx=$('#fx'); if(!fx) return;
@@ -3539,10 +3568,18 @@ function pop(text,id,cls,dy){
   d.style.left=Math.round(cx+RI(-14,14)-(cls.indexOf('part')>=0?24:14))+'px';
   d.style.bottom=Math.round(14+hh*R(0.55,0.9)+(dy||0))+'px';
   d.style.setProperty('--r',RI(-8,8)+'deg');
-  fx.appendChild(d); setTimeout(()=>d.remove(),1500);
+  fx.appendChild(d); setTimeout(()=>d.remove(),duelMs(1500));
+}
+function hitBurst(id){
+  if(reduce) return;
+  const fx=$('#fx'); if(!fx) return;
+  const d=document.createElement('i'); d.className='hitburst';
+  d.style.left=((ui.cx&&ui.cx[id])||150)+'px';
+  d.style.bottom=(14+((ui.hh&&ui.hh[id])||150)*0.62)+'px';
+  fx.appendChild(d); setTimeout(()=>d.remove(),duelMs(420));
 }
 function stageShake(){ const s=$('#stage'); if(!s||reduce) return; s.classList.remove('shake'); void s.offsetWidth; s.classList.add('shake'); }
-function later(fn,ms){ const t=setTimeout(fn,ms); (ui.tms||(ui.tms=[])).push(t); }
+function later(fn,ms){ const t=setTimeout(fn,duelMs(ms)); (ui.tms||(ui.tms=[])).push(t); }
 function attackAnim(id,mv){
   const f=$('#f'+id), a=$('#a'+id); if(!f||!a||a.dataset.ko) return;
   if(mv==='tank'){ act(id,'recoil',800); stageShake(); pop('콰광',id,'word',40); return; }
@@ -3554,9 +3591,9 @@ function attackAnim(id,mv){
 function impact(e){
   setHp(e.hpA,e.hpB); setSt(e.sA,e.sB);
   if(e.kind==='hit'||e.kind==='counter'){
-    act(e.target,'recoil',800); pop(e.word,e.target,'word'); if(e.dmg) pop('-'+e.dmg,e.target,'dmgn',24);
+    act(e.target,'recoil',800); hitBurst(e.target); pop(e.word,e.target,'word'); if(e.dmg) pop('-'+e.dmg,e.target,'dmgn',24);
   } else if(e.kind==='crit'){
-    act(e.target,'big',1100); pop(e.word,e.target,'word'); if(e.part) pop(e.part+' 강타!',e.target,'word part',-6);
+    act(e.target,'big',1100); hitBurst(e.target); pop(e.word,e.target,'word'); if(e.part) pop(e.part+' 강타!',e.target,'word part',-6);
     if(e.brk){ (ui.brk||(ui.brk={}))[e.target]=((ui.brk||{})[e.target]||[]).concat([e.brk]); pop((e.brk.t==='arm'?'팔':'다리')+' 골절!',e.target,'word part',-30); }
     if(e.dmg) pop('-'+e.dmg,e.target,'dmgn',30); stageShake();
     if(e.groin){ later(()=>{ const f=$('#f'+e.target); if(f) f.dataset.cu=performance.now()+2200; act(e.target,'curl',2200); },700); }
@@ -3708,16 +3745,16 @@ function play(){
   if(USE3D&&G3.ok){ [fA,fB].forEach(f=>f.style.transition='none'); place(); fA.classList.add('run'); fB.classList.add('run'); }
   else requestAnimationFrame(()=>requestAnimationFrame(()=>{ place(); fA.classList.add('run'); fB.classList.add('run'); }));
   const step=()=>{
-    if(shown>=r.log.length){ ui.timer=setTimeout(finish,1200); return; }
+    if(shown>=r.log.length){ ui.timer=setTimeout(finish,duelMs(1200)); return; }
     const e=r.log[shown++];
     addLine(e); fx(e);
     const T={weather:1600,env:1300,bolt:2600,peace:3200,kill:3000,crit:3100,info:900,hair:2400,tangle:1500,stun:1700,charge:e.move==='takedown'&&e.hit?1500:2500,gp:1150,escape:1400,sand:2300,stone:2300,blind:1600,flee:3400};
-    ui.timer=setTimeout(step,T[e.kind]||2300);
+    ui.timer=setTimeout(step,duelMs(T[e.kind]||2300));
   };
   { const we=r.log.find(x=>x.kind==='weather'); wxStart(we?we.w:'clear'); }
-  ui.reset3=1; ui.mount=null; ui.flee=null; ui.intro={t0:performance.now(),D:reduce?300:2780}; // 시작 문구(1.9초 뒤) 다음 개시 돌진(2.8초)과 딱 맞물리게
+  ui.reset3=1; ui.mount=null; ui.flee=null; ui.intro={t0:performance.now(),D:duelMs(reduce?300:2780)}; // 시작 문구와 개시 돌진의 속도를 함께 맞춘다
   // 달리다 멈추지 않고 그대로 부딪치도록 기록 재생을 달리는 도중에 시작
-  ui.timer=setTimeout(step,reduce?300:1900);
+  ui.timer=setTimeout(step,duelMs(reduce?300:1900));
 }
 function skip(){
   clearTimeout(ui.timer); (ui.tms||[]).forEach(clearTimeout);
@@ -4020,12 +4057,12 @@ async function bustCanvas(h,w,hh){
 /* ---- 3D 결투장: 땅, 산, 숲, 롱하우스, 화톳불, 바위 (픽셀 단위 월드, 무대 바닥 = gy) ---- */
 function arena3d(W,gy){
   const root=N3(null), rnd=(a,b)=>a+Math.random()*(b-a), E={met:2};
-  add3(root,box('#6f9a42',W/2,gy-20,-12000,W*80,40,40000));                 // 땅
+  add3(root,box('#69704b',W/2,gy-20,-12000,W*80,40,40000));                 // 땅
   const ar=add3(root,N3(MS.lathe([[0,1],[1,1]],0.02,1),'#c49a5e')); ar.T=[W/2,gy+0.5,0]; ar.S=[W*0.66,1,W*0.32];   // 결투장 흙바닥
   const ar2=add3(root,N3(MS.lathe([[0,1],[1,1]],0.02,1),'#d4ab6c')); ar2.T=[W/2,gy+0.8,0]; ar2.S=[W*0.42,1,W*0.18];
   // 흙 얼룩, 핏자국, 풀 덤불, 돌
   for(let i=0;i<26;i++){ const d=add3(root,N3(MS.lathe([[0,1],[1,1]],0.02,1),i%5?'#a8814c':'#7a2a1e')); d.T=[W/2+rnd(-W*1.5,W*1.5),gy+0.3,rnd(-500,250)]; d.S=[rnd(15,60),1,rnd(8,30)]; }
-  for(let i=0;i<70;i++){ const x=W/2+rnd(-W*2.5,W*2.5), z=rnd(-1400,300); if(Math.abs(x-W/2)<W*0.5&&z>-300) continue; for(let k=0;k<4;k++){ const bl=add3(root,box(k%2?'#5e8a34':'#4a7228',x+rnd(-6,6),gy+7,z+rnd(-4,4),2,16,2)); bl.R=[rnd(-0.4,0.4),0,rnd(-0.5,0.5)]; } }
+  for(let i=0;i<70;i++){ const x=W/2+rnd(-W*2.5,W*2.5), z=rnd(-1400,300); if(Math.abs(x-W/2)<W*0.5&&z>-300) continue; for(let k=0;k<4;k++){ const bl=add3(root,box(k%2?'#667047':'#4d603a',x+rnd(-6,6),gy+7,z+rnd(-4,4),2,16,2)); bl.R=[rnd(-0.4,0.4),0,rnd(-0.5,0.5)]; } }
   for(let i=0;i<40;i++){ const x=W/2+rnd(-W*1.8,W*1.8), z=rnd(-300,320), r=rnd(3,10); add3(root,sph(i%3?'#8a8478':'#9e978a',x,gy+r*0.25,z,r,r*0.55,r*0.8)); }
   // 울타리 말뚝 + 방패 + 해골 꽂힌 창
   for(let i=0;i<46;i++){ const x=W/2-W*2.2+i*W*0.1; if(Math.abs(x-W/2)<W*0.38) continue; const h=rnd(42,58); add3(root,cyl('#7a5a3a',x,gy+h/2,-620,5,h)); add3(root,N3(MS.lathe([[0,0.001],[1,5]],8,2),'#7a5a3a')).T=[x,gy+h+8,-620];
@@ -4036,8 +4073,8 @@ function arena3d(W,gy){
     add3(root,sph('#ff6a1a',x,gy+72,z,12,22,12,E)); add3(root,sph('#ffd060',x,gy+67,z,6,13,6,E));
     const gl=add3(root,N3(MS.lathe([[0,1],[1,1]],0.02,1),'#b07a40')); gl.T=[x,gy+1,z]; gl.S=[90,1,50]; });
   // 숲
-  for(let i=0;i<220;i++){ const x=W/2+rnd(-W*22,W*22), z=rnd(-14000,-5000), h=rnd(160,360); add3(root,cyl('#5a3e26',x,gy+h*0.12,z,6,h*0.24));
-    const t=add3(root,N3(MS.lathe([[0,0.001],[0.5,h*0.2],[1,h*0.28]],h,4),i%3?'#2e5a2a':'#3a6a32')); t.T=[x,gy+h*1.1,z]; }
+  for(let i=0;i<220;i++){ const x=W/2+rnd(-W*22,W*22), z=rnd(-14000,-5000), h=rnd(160,360); add3(root,cyl('#514132',x,gy+h*0.12,z,6,h*0.24));
+    const t=add3(root,N3(MS.lathe([[0,0.001],[0.5,h*0.2],[1,h*0.28]],h,4),i%3?'#36483d':'#465849')); t.T=[x,gy+h*1.1,z]; }
   // 마을: 롱하우스 여러 채, 불 켜진 창, 지붕 위 연기
   [[-1.4,-1400],[1.6,-1700],[-3,-2200],[2.9,-2500],[0.2,-3000]].forEach(([dx,z],k)=>{ const x=W/2+dx*W, L=rnd(220,300);
     add3(root,box('#7a5634',x,gy+40,z,L,80,120)); const rf=add3(root,box('#5a3a22',x,gy+105,z+35,L+20,14,140)); rf.R=[-0.6,0,0]; const rb=add3(root,box('#5a3a22',x,gy+105,z-35,L+20,14,140)); rb.R=[0.6,0,0];
@@ -4306,9 +4343,9 @@ function fighterAngles(f,now){
     for(const k in G) A[k]=G[k];
     A.a1+=3*s; A.e1-=4*s; A.a0+=3*s; A.e0+=3*s; A.k0+=4*(1+s); A.k1+=4*(1+s);
     const kt=+f.dataset.kt||0, kk=f.dataset.kk;
-    if(kk&&now-kt<950){
+    if(kk&&now-kt<duelMs(950)){
       const name=kk==='w'?'chop':kk==='kick'?'kick':kk==='head'?'head':kk==='bite'?'grab':kk==='slam'?'slam':(f.dataset.kh==='12'?'onetwo':f.dataset.kh==='a0'?'cross':'jab');
-      const set=KF[name], tt=(now-kt)/950;
+      const set=KF[name], tt=(now-kt)/duelMs(950);
       for(const L in set){ const base=kfv(set[L],tt); A[L]=base; }
     }
     return A;
@@ -4360,9 +4397,9 @@ function fighterAngles3(f,now){
     const A={a1:wpn?-36:-52,e1:wpn?-80:-118,a0:-34,e0:-138,z0:-14,z1:-10,l1:-24,k1:30,l0:14,k0:24,ln:12,tw:12,both:1};
     A.a1+=3*s; A.e1-=4*s; A.a0+=3*b; A.e0+=3*s; A.k0+=6*Math.abs(b); A.k1+=6*Math.abs(b);
     const kt=+f.dataset.kt||0, kk=f.dataset.kk;
-    if(kk&&kk!=='tank'&&now-kt<950){
+    if(kk&&kk!=='tank'&&now-kt<duelMs(950)){
       const name=kk.startsWith('c-')?kk.slice(2):kk==='sand'||kk==='stone'?kk:kk==='w'?'chop':kk==='kick'?'kick':kk==='head'?'head':kk==='bite'?'grab':kk==='slam'?'slam':(f.dataset.kh==='12'?'onetwo':f.dataset.kh==='a0'?'cross':'jab');
-      const set=KF3[name], tt=(now-kt)/950; for(const L in set) A[L]=kfv(set[L],tt); if(name==='kick'||name==='fly'||name==='tackle'||name==='takedown'){ delete A.both; if(name==='fly'||name==='tackle') A.free=1; }
+      const set=KF3[name], tt=(now-kt)/duelMs(950); for(const L in set) A[L]=kfv(set[L],tt); if(name==='kick'||name==='fly'||name==='tackle'||name==='takedown'){ delete A.both; if(name==='fly'||name==='tackle') A.free=1; }
     }
     // 모래에 눈이 멀면 팔로 얼굴을 가리고 웅크림
     if((+f.dataset.bl||0)>now){ Object.assign(A,{a0:-112,a1:-118,e0:-145,e1:-140,z0:-26,z1:-26,ln:24,w0:-40,w1:-40}); A.k0=(A.k0||0)+10; A.k1=(A.k1||0)+10; }
