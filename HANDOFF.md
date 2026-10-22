@@ -17,11 +17,12 @@
    node -e "new Function(require('fs').readFileSync('scenes.js','utf8'));console.log('scenes ok')"
    node -e "const s=require('fs').readFileSync('index.html','utf8');[...s.matchAll(/<script>([\s\S]*?)<\/script>/g)].forEach(m=>new Function(m[1]));console.log('index ok')"
    ```
-4. **안전 복구 지점**: 이 문서를 만든 시점의 상태에 git 태그 `handoff-2026-10-22`를 붙여 두었다. 망가지면 이렇게 되돌린다.
+4. **안전 복구 지점**: 이 문서를 만든 시점의 상태를 브랜치 `backup-2026-10-22`로 남겨 두었다. **이 브랜치는 절대 수정하지 말 것.** 망가지면 이렇게 되돌린다.
    ```bash
-   git checkout handoff-2026-10-22 -- index.html online.js scenes.js   # 파일만 되돌리기
+   git fetch origin backup-2026-10-22
+   git checkout origin/backup-2026-10-22 -- index.html online.js scenes.js   # 파일만 되돌리기
    ```
-   GitHub 웹에서도 저장소 → Tags → `handoff-2026-10-22`에서 그때 파일을 받을 수 있다.
+   GitHub 웹에서도 저장소 → 브랜치 선택 → `backup-2026-10-22`에서 그때 파일을 볼 수 있다.
 5. 한글 문자열이 많다. 파일 인코딩은 **UTF-8**을 유지할 것 (BOM 없이).
 6. `firestore.rules`를 바꾸면 `rules.txt`도 **똑같이** 맞출 것 (운영자가 rules.txt를 복사해 Firebase 콘솔에 붙여넣는다).
 
