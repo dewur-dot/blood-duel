@@ -575,6 +575,23 @@ body.bview .act.recoil{animation-duration:.667s}body.bview .act.big,body.bview .
 body.bview .word,body.bview .dmgn{animation-duration:1.167s}body.bview .stage.shake{animation-duration:.333s}
 body.bview .sandp{animation-duration:.5s}body.bview .stonep{animation-duration:.417s}body.bview .dustc{animation-duration:1.042s}
 body.bview .fighter{transition-duration:2.333s}body.bview .fighter.run .act{animation-duration:.458s}
+/* 공통 화면: 석재와 가죽을 겹친 듯한 깊이, 초상화에 집중되는 조명 */
+body{background-image:radial-gradient(ellipse 70% 36% at 50% -6%,rgba(105,69,43,.28),transparent 72%),radial-gradient(ellipse 90% 65% at 50% 110%,rgba(42,26,23,.24),transparent 72%),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.top{padding:4px 0 12px;border-bottom:1px solid #655044;box-shadow:0 1px rgba(246,202,147,.07)}
+.brand{text-shadow:0 2px 12px rgba(222,132,61,.24)}
+.card{background:linear-gradient(145deg,rgba(255,218,160,.035),transparent 30%),linear-gradient(180deg,#28211c,#171311);border-color:#635044;box-shadow:inset 0 1px rgba(255,228,189,.09),0 0 0 1px #090807,0 16px 34px rgba(0,0,0,.42)}
+.panel h2,.sgrp h3,.shh{color:#e7b879}
+.portrait,.pt{position:relative;border-color:#8a694d;background:radial-gradient(ellipse 68% 62% at 50% 35%,#5e4d3d 0%,#312923 54%,#14110f 100%);box-shadow:inset 0 0 0 1px rgba(247,206,149,.14),inset 0 -24px 30px rgba(0,0,0,.45),0 8px 22px rgba(0,0,0,.34)}
+.portrait::after,.pt::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(125deg,rgba(255,226,177,.13),transparent 27%),radial-gradient(ellipse 80% 90% at 50% 40%,transparent 48%,rgba(0,0,0,.26));box-shadow:inset 0 0 0 1px rgba(255,221,168,.09)}
+.btn{border-color:#725948;background:linear-gradient(180deg,#3b3028,#211a16);box-shadow:inset 0 1px rgba(255,232,192,.13),0 0 0 1px #090807,0 5px 0 #080706}
+.btn.primary{background:linear-gradient(180deg,#ef9d4c,#c26323 62%,#9d4519);border-color:#f2b16c;box-shadow:inset 0 1px rgba(255,242,202,.42),0 0 0 1px #24130b,0 5px 0 #321608}
+.btn:focus-visible,.pbtn:focus-visible,.natbtn:focus-visible{outline:2px solid #ffd18b;outline-offset:3px}
+@media(hover:hover){.btn:hover{filter:brightness(1.13)}.item:hover,.rrow:hover,.scard:hover{border-color:#8e6849;background-color:rgba(172,111,56,.08)}}
+.subtabs{border-color:#675143;background:linear-gradient(180deg,#28201b,#17120f);box-shadow:0 7px 18px rgba(0,0,0,.27)}
+.subtabs .st.on{background:linear-gradient(180deg,#e69a4d,#ad5525);color:#180d08;text-shadow:0 1px rgba(255,215,165,.22)}
+.rrow,.scard,.rec,.nat{background:linear-gradient(160deg,#211b17,#13100e);box-shadow:inset 0 1px rgba(255,219,176,.05)}
+.item{border-top-color:#514134}
+@media(prefers-reduced-motion:reduce){.btn{transition:none}}
 @supports not (height:100dvh){ body.bview .stage{height:clamp(210px,calc(100vh - 420px),430px)} body.bview .log{height:clamp(84px,14vh,150px)} }
 </style>
 </head>
@@ -1877,6 +1894,7 @@ function drawHead(g,u,cx,yT,hH,dead,shY){
   let defs=hairDefs(u,hc)+
     `<radialGradient id="fl${u}" cx=".44" cy=".36" r=".72"><stop offset="0" stop-color="#fff" stop-opacity="${dark?0.26:0.2}"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset=".82" stop-color="#000" stop-opacity=".06"/><stop offset="1" stop-color="#000" stop-opacity=".32"/></radialGradient>`+
     `<linearGradient id="fs${u}" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".22"/><stop offset=".28" stop-color="#000" stop-opacity="0"/><stop offset=".72" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".32"/></linearGradient>`+
+    `<pattern id="po${u}" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".36" fill="#351b17" opacity=".18"/><circle cx="3.8" cy="3.2" r=".3" fill="#fff0d6" opacity=".24"/></pattern>`+
     softDot(`sd${u}`,'#2a1408',0.28)+softDot(`bl${u}`,'#d9535a',dark?0.16:0.26)+softDot(`hl${u}`,'#ffffff',dark?0.4:0.35)+
     `<linearGradient id="ll${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mix(lipC,'#000000',0.15)}"/><stop offset=".55" stop-color="${lipC}"/><stop offset="1" stop-color="${mix(lipC,'#000000',0.08)}"/></linearGradient>`+
     [-1,1].map((sd,i)=>{ const ex=cx+sd*dx, rx=RX[i], ry=RY[i], yE=yE0+EY[i]; return `<clipPath id="ec${u}${i}"><path d="M${P2(ex-rx,yE)} Q${P2(ex,yE-ry*1.6)} ${P2(ex+rx,yE)} Q${P2(ex,yE+ry*1.3)} ${P2(ex-rx,yE)} Z"/></clipPath>`; }).join('');
@@ -1915,7 +1933,7 @@ function drawHead(g,u,cx,yT,hH,dead,shY){
   });
   if(FT>0.3){ const dc=hH*(0.04+0.08*FT), w2=jw*0.4;
     o+=`<path class="o" fill="${mix(skin,'#000000',0.06)}" d="M${P2(cx-w2,jY-hH*0.02)} C${P2(cx-w2*0.95,yB+dc*0.6)} ${P2(cx-w2*0.55,yB+dc)} ${P2(cx,yB+dc)} C${P2(cx+w2*0.55,yB+dc)} ${P2(cx+w2*0.95,yB+dc*0.6)} ${P2(cx+w2,jY-hH*0.02)} Z"/>`; }
-  o+=`<path class="o" fill="${skin}" d="${face}"/><path fill="url(#fs${u})" d="${face}"/><path fill="url(#fl${u})" d="${face}"/>`;
+  o+=`<path class="o" fill="${skin}" d="${face}"/><path fill="url(#fs${u})" d="${face}"/><path fill="url(#fl${u})" d="${face}"/><path fill="url(#po${u})" d="${face}" opacity="${dark?'.45':'.62'}"/>`;
   if(!PR) o+=faceAge({g,u,cx,yT,hH,fW,yE,yB,dx,rx,ry,noseW,nBase,mY,mw,lipT,jw,cwd,jY,cbY,skin,sk,F,AG,FT,TH,ANG,dark});
   // 이마 하이라이트, 광대 아래 그림자, 눈두덩 그림자, 턱 아래 그늘 (모두 가장자리가 사라지는 음영)
   o+=`<ellipse cx="${n1(cx-fW*0.06)}" cy="${n1(yT+hH*0.24)}" rx="${n1(fW*0.32)}" ry="${n1(hH*0.12)}" fill="url(#hl${u})"/>`;
@@ -2623,6 +2641,17 @@ function build3(h,dead){
     if(ou.top!==2) shirt.push({t:1.02,w:D.hipW*0.53,f:T*0.19,b:T*0.19},{t:1.14,w:D.hipW*0.58,f:T*0.21,b:T*0.21});
     add3(spine,loft(topCol,shirt,TL,{ta:0.02,tb:ou.top===2?0.8:1.14,inf:0.011,steps:22},{met:metal}));
     if(ou.top===4) [-1,1].forEach(sd=>{ add3(spine,sph(topCol,sd*(D.SW-D.wa*0.3),-T*0.05,0,D.wa*0.75,D.wa*0.5,D.wa*0.72,{met:1})); });
+    // 가슴의 봉제선과 버클: 상의 종류마다 표면 재질이 읽히도록 얇은 입체 장식만 얹는다.
+    const front=T*(ou.top===4?0.215:0.19), trim=ou.top===4?'#9d9381':ou.top===3?'#555f60':'#493225';
+    if(ou.top===2||ou.top===4){
+      [-1,1].forEach(sd=>{
+        const strap=add3(spine,box(trim,sd*D.chestW*0.28,-T*0.34,front,T*0.025,T*0.55,T*0.012,{met:ou.top===4?1:0})); strap.R=[0,0,sd*0.13];
+        add3(spine,sph(ou.top===4?'#d3b276':'#b38953',sd*D.chestW*0.25,-T*0.52,front+T*0.013,T*0.026,T*0.03,T*0.012,{met:1}));
+      });
+    } else if(ou.top===1||ou.top===3){
+      add3(spine,box(trim,0,-T*0.36,front,T*0.008,T*0.56,T*0.008));
+      for(let k=0;k<4;k++) add3(spine,sph(ou.top===3?'#a5a39b':'#ad8760',0,-T*(0.17+k*0.13),front+T*0.01,T*0.012,T*0.012,T*0.006,{met:ou.top===3?1:0}));
+    }
   }
   if(legCol) add3(spine,loft(legCol,TC,TL,{ta:0.6,tb:1.06,cap1:0.6,inf:0.005,steps:12},{met:legMet}));
   if(ou._fringe){ // 풀잎/미역: 허리에 두른 띠 + 사방으로 늘어진 잎
