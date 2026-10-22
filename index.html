@@ -560,7 +560,7 @@ body.bview .after{gap:8px}
 <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
 <script src="./firebase-config.js"></script>
 <script src="./support-config.js?v=10211545"></script>
-<script src="./scenes.js?v=10221025"></script>
+<script src="./scenes.js?v=10221039"></script>
 <script>
 //ENGINE-START
 const RI=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
@@ -3075,7 +3075,7 @@ function detailView(){
 const flg=h=>h&&h.flag?flagSvg(h.flag)+' ':'';
 const isFlag=f=>/^[\u{1F1E6}-\u{1F1FF}]{2}$/u.test(f||'');
 const ARTIFACT_URL='https://claude.ai/artifact/5TPAbwznvYPonbH9Njr5MJ';
-function baseUrl(){ try{ const l=location; if((l.protocol==='https:'||l.protocol==='http:')&&!/claude\.(ai|site)|claudeusercontent/.test(l.hostname)) return l.origin+l.pathname; }catch(e){} return ARTIFACT_URL; }
+function baseUrl(){ try{ const l=location; if(/github\.io$/.test(l.hostname)) return 'https://dewur-dot.github.io/blood-duel/'; if((l.protocol==='https:'||l.protocol==='http:')&&!/claude\.(ai|site)|claudeusercontent/.test(l.hostname)) return l.origin+l.pathname; }catch(e){} return ARTIFACT_URL; }
 const STK=['hp','sta','spd','str','acc','crit','reach','def','dodge','reflex','bal','guts','luck','punch','kick','head','slam','int'];
 const b64=str=>btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const unb64=str=>{ const b=str.replace(/-/g,'+').replace(/_/g,'/'); return decodeURIComponent(escape(atob(b+'==='.slice((b.length+3)%4)))); };
@@ -4397,6 +4397,6 @@ function animTick(now){
 requestAnimationFrame(animTick);
 render();
 </script>
-<script src="./online.js?v=10221025"></script>
+<script src="./online.js?v=10221039"></script>
 </body>
 </html>
