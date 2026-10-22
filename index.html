@@ -575,20 +575,6 @@ body.bview .act.recoil{animation-duration:.667s}body.bview .act.big,body.bview .
 body.bview .word,body.bview .dmgn{animation-duration:1.167s}body.bview .stage.shake{animation-duration:.333s}
 body.bview .sandp{animation-duration:.5s}body.bview .stonep{animation-duration:.417s}body.bview .dustc{animation-duration:1.042s}
 body.bview .fighter{transition-duration:2.333s}body.bview .fighter.run .act{animation-duration:.458s}
-/* 새 결투장: 무대 이미지를 전면에 사용하고 데스크톱에서는 결투가 화면의 중심이 된다. */
-body.bview{background:linear-gradient(90deg,rgba(5,6,9,.9),rgba(5,6,9,.5) 22%,rgba(5,6,9,.5) 78%,rgba(5,6,9,.9)),url('assets/duel-arena.webp') center/cover fixed #0c0c0e}
-body.bview #app{max-width:760px}
-body.bview .stage{background:#211b1a url('assets/duel-arena.webp') center center/cover no-repeat;border:2px solid #a87544;box-shadow:0 0 0 1px #1b0d08,0 0 0 5px rgba(20,13,11,.72),0 24px 60px rgba(0,0,0,.7)}
-body.bview .sbg{display:none}
-body.bview .stage::after{background:radial-gradient(ellipse 80% 74% at 50% 44%,transparent 48%,rgba(5,5,8,.42) 100%),linear-gradient(180deg,rgba(4,7,12,.16),transparent 32%,transparent 72%,rgba(16,6,3,.3));box-shadow:inset 0 0 0 1px rgba(255,197,122,.28)}
-body.bview .st3d{filter:brightness(1.17) saturate(1.12) drop-shadow(0 12px 9px rgba(0,0,0,.82))}
-body.bview .hud>div{border-color:#9c6235;background:linear-gradient(180deg,rgba(57,37,27,.97),rgba(17,15,16,.98));box-shadow:inset 0 1px rgba(255,210,143,.22),0 8px 24px rgba(0,0,0,.52)}
-body.bview .hud>div.r{border-color:#9c6235;background:linear-gradient(180deg,rgba(57,37,27,.97),rgba(17,15,16,.98))}
-body.bview .hud .nm{color:#ffe3bd;font-size:clamp(14px,2.1vw,19px)}
-body.bview .log{border:1px solid #8c5b3b;background:linear-gradient(180deg,rgba(30,22,20,.97),rgba(12,11,12,.98));box-shadow:0 12px 30px rgba(0,0,0,.45)}
-body:not(.bview){background:linear-gradient(90deg,rgba(7,8,11,.91),rgba(7,8,11,.68) 50%,rgba(7,8,11,.91)),url('assets/duel-arena.webp') center top/cover fixed #0d0d10}
-.portrait,.pt{background:linear-gradient(180deg,rgba(14,15,19,.17),rgba(10,7,6,.62)),url('assets/duel-arena.webp') center/cover #1a1716}
-@media(min-width:700px){body.bview .stage{height:clamp(390px,calc(100dvh - 310px),570px)}body.bview .log{height:120px}}
 /* 공통 화면: 석재와 가죽을 겹친 듯한 깊이, 초상화에 집중되는 조명 */
 body{background-image:radial-gradient(ellipse 70% 36% at 50% -6%,rgba(105,69,43,.28),transparent 72%),radial-gradient(ellipse 90% 65% at 50% 110%,rgba(42,26,23,.24),transparent 72%),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 .top{padding:4px 0 12px;border-bottom:1px solid #655044;box-shadow:0 1px rgba(246,202,147,.07)}
@@ -2411,18 +2397,21 @@ function smoothProf(ctrl,L,steps){ // ctrl: [[t, r],...] t 0..1 (위→아래), 
 /* ---- WebGL ---- */
 const VS=`attribute vec3 aP;attribute vec3 aN;uniform mat4 uM;uniform mat4 uPV;uniform mat3 uNM;varying vec3 vN;varying vec3 vP;void main(){vec4 w=uM*vec4(aP,1.0);vP=w.xyz;vN=normalize(uNM*aN);gl_Position=uPV*w;}`;
 const FS=`precision mediump float;varying vec3 vN;varying vec3 vP;uniform vec3 uC;uniform float uMet;uniform float uDes;uniform float uAl;
+float hash(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}
 void main(){vec3 n=normalize(vN);vec3 V=vec3(0.0,0.0,1.0);
 vec3 L1=normalize(vec3(-0.5,0.62,0.6));vec3 L2=normalize(vec3(0.75,0.1,0.35));
 float nl=dot(n,L1);float wrap=max((nl+0.22)/1.22,0.0);float d2=max(dot(n,L2),0.0);
 if(uMet>1.5){gl_FragColor=vec4(uC,uAl);return;}
 vec3 base=pow(uC,vec3(2.2));
-float sss=uMet>0.5?0.0:smoothstep(0.0,0.45,wrap)*(1.0-smoothstep(0.45,0.9,wrap));
+float skin=step(uMet,-0.5),metal=step(0.5,uMet);float grain=hash(floor(vP*95.0));
+base*=mix(1.0,mix(0.9,1.08,grain),skin*0.12);base*=mix(1.0,mix(0.84,1.1,grain),metal*0.1);
+float sss=skin*smoothstep(0.0,0.45,wrap)*(1.0-smoothstep(0.45,0.9,wrap));
 vec3 amb=mix(vec3(0.07,0.06,0.06),vec3(0.17,0.18,0.22),n.y*0.5+0.5);
-vec3 col=base*(amb+vec3(1.0,0.88,0.76)*wrap*wrap*1.25+vec3(0.9,0.25,0.12)*sss*0.22+vec3(0.35,0.45,0.65)*d2*0.4);
+vec3 col=base*(amb+vec3(1.0,0.88,0.76)*wrap*wrap*1.25+vec3(1.0,0.23,0.12)*sss*0.38+vec3(0.35,0.45,0.65)*d2*0.4);
 float rim=pow(1.0-max(dot(n,V),0.0),3.0)*(1.0-smoothstep(0.45,0.85,n.y));col+=vec3(1.0,0.6,0.3)*rim*0.22*(0.4+0.6*max(-n.x,0.0)+0.4);
-vec3 H=normalize(L1+V);float sp=pow(max(dot(n,H),0.0),uMet>0.5?48.0:22.0)*(uMet>0.5?1.0:0.16);col+=vec3(1.0,0.95,0.9)*sp;
+vec3 H=normalize(L1+V);float sp=pow(max(dot(n,H),0.0),metal>0.5?72.0:(skin>0.5?28.0:18.0))*(metal>0.5?1.25:(skin>0.5?0.22:0.08));col+=mix(vec3(1.0,0.72,0.5),vec3(0.85,0.92,1.0),metal)*sp;
 col=col/(1.0+col*0.15);
-col=pow(col,vec3(1.0/2.2));col=mix(col,vec3(0.72,0.82,0.92),smoothstep(-700.0,-18000.0,vP.z)*0.75);float g=dot(col,vec3(0.3,0.59,0.11));col=mix(col,vec3(g)*0.8,uDes);
+col=pow(col,vec3(1.0/2.2));col=mix(col,vec3(0.72,0.82,0.92),(1.0-smoothstep(-18000.0,-700.0,vP.z))*0.75);float g=dot(col,vec3(0.3,0.59,0.11));col=mix(col,vec3(g)*0.8,uDes);
 gl_FragColor=vec4(col,uAl);}`;
 const SVS=`attribute vec2 aQ;uniform vec3 uCtr;uniform vec2 uSz;uniform float uRot;uniform mat4 uPV;varying vec2 vT;void main(){vT=vec2(aQ.x*0.5+0.5,0.5-aQ.y*0.5);vec2 q=aQ*uSz*0.5;float c=cos(uRot),s=sin(uRot);gl_Position=uPV*vec4(uCtr+vec3(q.x*c-q.y*s,q.x*s+q.y*c,0.0),1.0);}`;
 const SFS=`precision mediump float;varying vec2 vT;uniform sampler2D uT;uniform float uDes;void main(){vec4 c=texture2D(uT,vT);if(c.a<0.35)discard;float g=dot(c.rgb,vec3(0.3,0.59,0.11));gl_FragColor=vec4(mix(c.rgb,vec3(g)*0.8,uDes),1.0);}`;
@@ -2495,19 +2484,20 @@ function headTex(h,dead,part){
 function dims3(h){
   const g=h.g, p=g.p, F=g.sex==='f';
   const bM=M.build(p.build), aM=M.arm(p.armLen), lM=M.leg(p.legLen), hM=M.head(p.headSize), sM=M.sh(p.shoulder), nM=M.neck(p.neck);
-  const rawL=0.48*lM, rawT=0.29, rawN=0.042*nM, rawH=0.138*hM*(0.92+p.faceLen*0.016), S=rawL+rawT+rawN+rawH;
+  // 성인 해부학 기준: 머리를 줄이고 흉곽과 다리를 늘려 기본 체형이 약 7.5~8등신이 되게 한다.
+  const rawL=0.49*lM, rawT=0.335, rawN=0.036*nM, rawH=0.128*hM*(0.94+p.faceLen*0.012), S=rawL+rawT+rawN+rawH;
   const legL=rawL/S, torso=rawT/S, neckL=rawN/S, hH=rawH/S;
   // 살집: 체격은 큰데 근육이 적으면 배가 나오고 팔다리·목이 두꺼워짐
   const fat=Math.max(0,Math.min(1,(bM-1.3)/0.75))*(1-0.45*Math.max(0,Math.min(1,((p.muscle||5)-6)/4)));
   const musc=Math.max(0,Math.min(1.15,((p.muscle||5)-1.5)/6))*(F?0.5:1)*(bM<0.7?0.6:1)*(1-0.7*fat);
   const MT=musc+Math.min(2.4,(g.bulk||0)*0.36)*(F?0.6:1), MX=Math.max(0,MT-1), m=Math.min(MT,1.5), mb=Math.min(MT,2.4);
-  const SWf=0.255*sM*(F?0.86:1)*(1+0.12*musc+0.16*MX);
-  const chestW=Math.min(SWf*0.97,SWf*Math.min(1.1+0.06*MX,0.82*(0.45+0.55*bM)*(1+(F?0:0.1)*musc+0.08*MX))*(F?0.92:1));
+  const SWf=0.232*sM*(F?0.9:1)*(1+0.07*musc+0.055*Math.min(MX,1.5));
+  const chestW=Math.min(SWf*0.92,SWf*Math.min(1.02,0.8*(0.48+0.52*bM)*(1+(F?0:0.07)*musc+0.035*Math.min(MX,1.5)))*(F?0.94:1));
   const chestW2=Math.min(chestW,SWf*(F?0.8:0.8+0.03*Math.min(MX,1)));
-  const hipW0=(F?0.2:0.172)*(0.72+0.28*bM)*(1+0.05*Math.min(MT,2)), waistW=F?Math.max(chestW2*0.7,Math.min(chestW2*0.82,hipW0*(0.6+0.08*bM))):Math.max(chestW2*0.78,Math.min(chestW2*0.86,hipW0*(0.84+0.06*bM)*(1+0.04*MX))); // 허리가 가슴보다 너무 홀쭉해 옆구리가 쏙 들어가 보이지 않게
+  const hipW0=(F?0.2:0.178)*(0.72+0.28*bM)*(1+0.05*Math.min(MT,2)), waistW=F?Math.max(chestW2*0.68,Math.min(chestW2*0.8,hipW0*(0.62+0.08*bM))):Math.max(chestW2*(0.7+0.08*fat),Math.min(chestW2*0.82,hipW0*(0.8+0.07*bM)*(1+0.04*MX)));
   const bL=0.62+0.38*Math.min(bM,1.7); // 체격이 커도 팔다리가 풍선처럼 부풀지 않게
-  const wa=Math.min(0.085+0.015*fat,0.05*bL*(F?0.84:1)*(1+0.24*musc+0.14*MX)*(1+0.3*fat)), ua=0.165*aM, fa=0.145*aM;
-  const t0=Math.min(0.105+0.02*fat,0.075*bL*(F?0.98:1)*(1+0.12*musc+0.08*MX)*(1+0.25*fat));
+  const wa=Math.min(0.082+0.014*fat,0.047*bL*(F?0.86:1)*(1+0.2*musc+0.1*MX)*(1+0.25*fat)), ua=0.17*aM, fa=0.15*aM;
+  const t0=Math.min(0.1+0.018*fat,0.071*bL*(F?0.98:1)*(1+0.1*musc+0.06*MX)*(1+0.22*fat));
   const nW=Math.min(0.1+0.02*fat,(0.06*bL+0.017)*(F?0.8:1)*(1+0.22*MX)*(1+0.3*fat));
   const hipW=Math.max(hipW0*(1+0.22*fat),t0*2.45); // 골반은 허벅지 두 개를 담을 만큼은 넓게
   return {fat,F,bM,legL,torso,neckL,hH,musc,MT,MX,m,mb,SWf,SW:SWf/2,chestW:chestW2*(1+0.08*fat),waistW:Math.max(waistW,Math.min(chestW2*1.15,waistW*(1+0.85*fat))),hipW,wa,ua,fa,t0,nW};
@@ -2584,14 +2574,14 @@ function toes3(ft,col,D,sd,FL){
 /* ---- 몸 단면 설계 ---- */
 function torsoCtrl(D,g){
   const F=D.F, T=D.torso, m=D.m, X=Math.min(D.MX,1.6), SW=D.SW, cw=D.chestW/2, ww=D.waistW/2, hw=D.hipW/2, nw=D.nW/2;
-  const shw=SW-D.wa*0.42, bs=F?(g.bust||1)*cw*0.42:0;
+  const shw=SW-D.wa*0.68, bs=F?(g.bust||1)*cw*0.42:0;
   return [
     {t:0,    w:nw*1.02, f:nw*0.9, b:nw*0.95, z:0},
-    {t:0.06, w:nw*1.12+(shw-nw)*(F?0.2:0.28+0.1*m+0.2*X), f:Math.max(T*(0.12+0.01*m),nw*1.05), b:T*(0.125+0.05*X), z:-T*0.005},
-    {t:0.115, w:nw+(shw-nw)*(F?0.68:0.75), f:T*(0.145+0.006*m), b:T*0.15, z:-T*0.004},
-    {t:0.16, w:shw*0.96, f:T*(0.158+0.008*m), b:T*0.158, n:2.1},
+    {t:0.06, w:nw*1.12+(shw-nw)*(F?0.18:0.23+0.07*m+0.08*X), f:Math.max(T*(0.115+0.008*m),nw*1.05), b:T*(0.12+0.025*X), z:-T*0.005},
+    {t:0.115, w:nw+(shw-nw)*(F?0.62:0.66), f:T*(0.14+0.005*m), b:T*0.145, z:-T*0.004},
+    {t:0.17, w:shw*0.88, f:T*(0.15+0.006*m), b:T*0.152, n:2.1},
     {t:0.22, w:Math.max(cw*1.0,shw*0.86), f:T*(F?0.165:0.166+0.006*m), b:T*0.17, ps:F?0.2:0.25, pk:F?bs*0.35:T*(0.014+0.02*m), gv:F?bs*0.06:T*(0.006+0.008*m), n:2.1},
-    {t:0.3, w:cw*(1+(F?0:0.04*m+0.05*X)), f:T*(F?0.16:0.168+0.006*m), b:T*0.165, ps:F?0.21:0.25, pk:F?bs*0.95:T*(0.022+0.024*m+0.03*D.fat), gv:F?bs*0.14:T*(0.008+0.01*m), n:F?2.4:2.1},
+    {t:0.3, w:cw*(1+(F?0:0.025*m+0.02*X)), f:T*(F?0.16:0.165+0.005*m), b:T*0.162, ps:F?0.21:0.25, pk:F?bs*0.95:T*(0.022+0.02*m+0.02*D.fat), gv:F?bs*0.14:T*(0.008+0.01*m), n:F?2.4:2.1},
     {t:0.36, w:cw*(F?0.88:0.95+0.03*X), f:T*(F?0.15:0.163), b:T*0.155, ps:F?0.2:0.25, pk:F?bs*0.55:T*0.012*m, gv:F?0:T*0.008*m},
     {t:0.41, w:cw*(F?0.85:0.92), f:T*0.145, b:T*0.15, pk:F?0:T*0.004*m},
     {t:0.5, w:(cw*(F?0.85:0.92)*0.5+ww*0.5)*(1-0.05*D.fat)+ww*0.08*D.fat, f:T*(0.145+0.05*D.fat), b:T*(0.15+0.01*D.fat)},
@@ -2614,18 +2604,18 @@ function foreArmCtrl(D){ const w=D.wa*0.5, m=D.m; return [
 function handCtrl(D){ const w=D.wa*0.5; return [   // x=두께, z=손바닥 폭
   {t:0,w:w*0.42,f:w*0.48,b:w*0.48},{t:0.3,w:w*0.4,f:w*0.66,b:w*0.62},{t:0.68,w:w*0.42,f:w*0.66,b:w*0.6},{t:1,w:w*0.34,f:w*0.5,b:w*0.5}]; }
 function thighCtrl(D){ const r=D.t0, m=D.m, F=D.F; return [
-  {t:0,w:r*(F?0.74:0.6),f:r*0.54,b:r*(F?0.62:0.56)},{t:0.2,w:r*(F?0.76:0.64+0.03*m),f:r*(0.6+0.08*m),b:r*(F?0.62:0.58)},
-  {t:0.45,w:r*(F?0.62:0.55),f:r*(0.56+0.04*m),b:r*0.52},{t:0.6,w:r*0.5,f:r*(0.55+0.04*m),b:r*0.5},{t:0.85,w:r*0.41,f:r*0.42,b:r*0.38},{t:1,w:r*0.37,f:r*0.38,b:r*0.36}]; }
+  {t:0,w:r*(F?0.72:0.64),f:r*0.58,b:r*(F?0.64:0.6)},{t:0.18,w:r*(F?0.78:0.68+0.03*m),f:r*(0.65+0.06*m),b:r*(F?0.68:0.62)},
+  {t:0.42,w:r*(F?0.65:0.58),f:r*(0.58+0.04*m),b:r*0.55},{t:0.62,w:r*0.49,f:r*(0.52+0.03*m),b:r*0.48},{t:0.86,w:r*0.36,f:r*0.38,b:r*0.34},{t:1,w:r*0.31,f:r*0.33,b:r*0.3}]; }
 function calfCtrl(D){ const r=D.t0, m=D.m; return [
-  {t:0,w:r*0.37,f:r*0.38,b:r*0.36},{t:0.24,w:r*(0.37+0.05*m),f:r*0.33,b:r*(0.44+0.1*m)},
-  {t:0.5,w:r*0.3,f:r*0.29,b:r*0.32},{t:0.86,w:r*0.21,f:r*0.21,b:r*0.2},{t:1,w:r*0.21,f:r*0.22,b:r*0.2}]; }
+  {t:0,w:r*0.31,f:r*0.33,b:r*0.3},{t:0.18,w:r*0.34,f:r*0.31,b:r*(0.42+0.09*m)},
+  {t:0.44,w:r*(0.34+0.03*m),f:r*0.3,b:r*(0.48+0.08*m)},{t:0.7,w:r*0.27,f:r*0.26,b:r*0.3},{t:0.9,w:r*0.19,f:r*0.19,b:r*0.18},{t:1,w:r*0.18,f:r*0.2,b:r*0.18}]; }
 function footCtrl(D){ const r=D.t0; return [   // f=위(발등), b=아래(발바닥, 평평)
   {t:0,w:r*0.22,f:r*0.2,b:r*0.13},{t:0.22,w:r*0.26,f:r*0.42,b:r*0.15},{t:0.42,w:r*0.31,f:r*0.36,b:r*0.15},
   {t:0.75,w:r*0.36,f:r*0.24,b:r*0.15},{t:1,w:r*0.35,f:r*0.18,b:r*0.13}]; }
 /* ---- 몸 만들기 ---- */
 function build3(h,dead){
   const g=h.g, D=dims3(h), ou=visOut(h), F=D.F, m=D.m, T=D.torso;
-  const skin=SKIN[g.skin-1], uw=ou._fringe?mix(ou._fringe,'#000000',0.25):(g.uw||'#1E1E22');
+  const skin=SKIN[g.skin-1], skinMat={met:-1}, uw=ou._fringe?mix(ou._fringe,'#000000',0.25):(g.uw||'#1E1E22');
   const topCol=ou._tc, metal=ou._tmet?1:0;
   const legCol=ou._lc, legMet=ou._lmet?1:0;
   const root=N3(null), J={root};
@@ -2640,7 +2630,7 @@ function build3(h,dead){
     {t:0.345,w:0.014,d:T*(0.003+0.005*m),x:0.42,s:0.24},
     {t:0.82,w:0.05,d:T*0.005*m,x:0.48,s:0.14},
     {b:1,t:0.32,w:0.1,d:-T*0.005*m,x:0.62,s:0.2}]:[])), abs=(!F&&m>0.25)?{t0:0.39,t1:0.67,n:3,a:T*0.014*m,x:0.2,s:0.1}:null;
-  add3(spine,loft(skin,TC,TL,{steps:64,seg:40,cap1:0.6,dents,abs}));
+  add3(spine,loft(skin,TC,TL,{steps:64,seg:40,cap1:0.6,dents,abs},skinMat));
   if(!F&&!topCol){ const cw=D.chestW/2, nz=T*(0.172+0.008*m)+T*(0.01+0.018*m)*0.85; [-1,1].forEach(sd=>{ add3(spine,sph(mix(skin,'#5a2a1a',0.3),sd*cw*0.5,-T*0.305,nz,T*0.014,T*0.012,T*0.006)); }); }
   // 속옷 (몸통 표면을 살짝 부풀린 껍데기)
   if(!legCol) add3(spine,loft(uw,TC,TL,{ta:F?0.86:0.82,tb:1.1,cap1:0.6,inf:0.006,steps:10}));
@@ -2666,6 +2656,16 @@ function build3(h,dead){
       add3(spine,box(trim,0,-T*0.36,front,T*0.008,T*0.56,T*0.008));
       for(let k=0;k<4;k++) add3(spine,sph(ou.top===3?'#a5a39b':'#ad8760',0,-T*(0.17+k*0.13),front+T*0.01,T*0.012,T*0.012,T*0.006,{met:ou.top===3?1:0}));
     }
+    if(ou.top===4){
+      add3(spine,box('#6d7378',0,-T*0.35,front+T*0.012,T*0.012,T*0.58,T*0.01,{met:1}));
+      for(let k=0;k<4;k++){
+        const yy=-T*(0.16+k*0.15), ww=D.chestW*(0.43-k*0.025);
+        add3(spine,box(k%2?'#777d82':'#8a9095',0,yy,front+T*0.009,ww,T*0.018,T*0.012,{met:1}));
+        [-1,1].forEach(sd=>add3(spine,sph('#c5b07d',sd*ww*0.88,yy,front+T*0.024,T*0.012,T*0.012,T*0.007,{met:1})));
+      }
+    } else if(ou.top===3){
+      for(let y=0;y<5;y++) for(let x=-3;x<=3;x++) add3(spine,sph('#767d7e',(x+(y%2)*0.5)*D.chestW*0.105,-T*(0.15+y*0.12),front+T*0.012,T*0.009,T*0.009,T*0.005,{met:1}));
+    }
   }
   if(legCol) add3(spine,loft(legCol,TC,TL,{ta:0.6,tb:1.06,cap1:0.6,inf:0.005,steps:12},{met:legMet}));
   if(ou._fringe){ // 풀잎/미역: 허리에 두른 띠 + 사방으로 늘어진 잎
@@ -2676,21 +2676,21 @@ function build3(h,dead){
   // 목 (턱 밑에서 몸통 속으로)
   const nw=D.nW/2, NL=D.neckL+D.hH*0.2+T*0.02;
   const cT=Math.min(0.45,(D.hH*0.2)/NL); // 턱 높이 (목 위쪽에서부터의 비율)
-  const nk=add3(spine,loft(skin,[{t:0,w:nw*0.78,f:nw*0.75,b:nw*0.85},{t:cT,w:nw*0.88,f:nw*0.86,b:nw*0.92},{t:cT+0.15,w:nw*0.95,f:nw*0.92,b:nw*0.96},{t:0.6,w:nw,f:nw*0.92,b:nw},{t:1,w:nw*1.05,f:nw*0.8,b:nw*1.05}],NL,{steps:10,cap1:0.5}));
+  const nk=add3(spine,loft(skin,[{t:0,w:nw*0.78,f:nw*0.75,b:nw*0.85},{t:cT,w:nw*0.88,f:nw*0.86,b:nw*0.92},{t:cT+0.15,w:nw*0.95,f:nw*0.92,b:nw*0.96},{t:0.6,w:nw,f:nw*0.92,b:nw},{t:1,w:nw*1.05,f:nw*0.8,b:nw*1.05}],NL,{steps:10,cap1:0.5},skinMat));
   nk.T=[0,D.neckL+D.hH*0.2,-nw*0.12];
   J.chin=add3(spine,N3(null)); J.chin.T=[0,D.neckL,0]; J.chin.cap=1;
   // 다리
   J.leg=[]; const lp=g.legPose||[4,4];
   [-1,1].forEach((sd,i)=>{
-    const hip=add3(pel,N3(null)); hip.T=[sd*Math.max(D.hipW*(F?0.24:0.22),D.t0*0.6),-D.torso*0.03,0]; hip.base=[0,0,sd*(lp[i]||4)*0.01];
+    const hip=add3(pel,N3(null)); hip.T=[sd*Math.max(D.hipW*(F?0.27:0.26),D.t0*0.58),-D.torso*0.03,0]; hip.base=[0,0,sd*(lp[i]||4)*0.01];
     const L1=D.legL*0.5, L2=D.legL*0.5-0.022, lc=legCol||skin;
     if(g.legOk[i]){
       const THC=thighCtrl(D);
-      add3(hip,loft(lc,THC,L1,{cap0:0.55,cap1:1,steps:22,seg:32,dents:legCol?null:[{t:0.8,w:0.08,d:-D.t0*0.05*(0.5+m),x:0.55,s:0.3},{t:0.45,w:0.25,d:D.t0*0.03*m,x:0.35,s:0.12}]},{met:legCol?legMet:0}));
-      add3(hip,sph(lc,0,-L1*0.96,D.t0*0.2,D.t0*0.17,D.t0*0.19,D.t0*0.1)); // 무릎뼈
+      add3(hip,loft(lc,THC,L1,{cap0:0.55,cap1:1,steps:22,seg:32,dents:legCol?null:[{t:0.8,w:0.08,d:-D.t0*0.05*(0.5+m),x:0.55,s:0.3},{t:0.45,w:0.25,d:D.t0*0.03*m,x:0.35,s:0.12}]},{met:legCol?legMet:-1}));
+      add3(hip,sph(lc,0,-L1*0.96,D.t0*0.16,D.t0*0.15,D.t0*0.17,D.t0*0.09,{met:legCol?legMet:-1})); // 무릎뼈
       const kn=add3(hip,N3(null)); kn.T=[0,-L1,0];
       const CC=calfCtrl(D);
-      add3(kn,loft(lc,CC,L2,{cap0:1,cap1:1,steps:20,seg:28,dents:legCol?null:[{b:1,t:0.26,w:0.1,d:-D.t0*0.05*(0.5+m),x:0.42,s:0.3},{b:1,t:0.3,w:0.12,d:D.t0*0.02,x:0,s:0.08}]},{met:legCol?legMet:0}));
+      add3(kn,loft(lc,CC,L2,{cap0:1,cap1:1,steps:20,seg:28,dents:legCol?null:[{b:1,t:0.26,w:0.1,d:-D.t0*0.05*(0.5+m),x:0.42,s:0.3},{b:1,t:0.3,w:0.12,d:D.t0*0.02,x:0,s:0.08}]},{met:legCol?legMet:-1}));
       if(ou._greave) add3(kn,loft(ou._greave,CC,L2,{ta:0.12,tb:0.92,inf:0.009,steps:8},{met:1}));
       const fc=ou.boots?'#2B2118':skin, FL=D.t0*1.75;
       const an=add3(kn,N3(null)); an.T=[0,-L2+D.t0*0.06,0]; const ft=add3(an,N3(null)); ft.T=[0,-0.022+D.t0*0.09,-D.t0*0.32]; ft.R=[-Math.PI/2,0,0]; add3(ft,loft(fc,footCtrl(D),FL*0.8,{cap0:1,cap1:0.4,steps:10})); if(ou.boots) add3(ft,sph(fc,0,-FL*0.92,-D.t0*0.02,D.t0*0.3,D.t0*0.16,D.t0*0.12)); else toes3(ft,fc,D,sd,FL);
@@ -2714,13 +2714,13 @@ function build3(h,dead){
     const armCol=(ou.top===1||ou.top===3)?topCol:skin, wr=D.wa*0.5;
     // 어깨 살: 몸통 어깨선과 팔 윗부분을 둥글게 이어 줌 (몸통에 붙어 있음)
     { const px=sh.T[0], py=sh.T[1], bc=topCol||skin, inf=topCol?0.008:0;
-      const kc=topCol?0.85:1; add3(spine,sph(bc,px-sd*wr*0.6,py+wr*0.2*kc,-wr*0.05,wr*(1.35+0.25*m)*kc+inf,wr*(0.95+0.12*m)*kc+inf,wr*(1.0+0.15*m)*kc+inf,{met:metal&&ou.top===4?1:0})); }
+      const kc=topCol?0.84:1; add3(spine,sph(bc,px-sd*wr*0.42,py+wr*0.12*kc,-wr*0.04,wr*(0.92+0.14*m)*kc+inf,wr*(0.82+0.08*m)*kc+inf,wr*(0.88+0.1*m)*kc+inf,{met:topCol?(metal&&ou.top===4?1:0):-1})); }
     // 삼각근: 어깨를 덮는 둥근 뚜껑
-    add3(sh,loft(ou.top===4?topCol:armCol,[{t:0,w:wr*(1.0+0.14*m),f:wr*(1.0+0.1*m),b:wr*(1.02+0.1*m)},{t:0.6,w:wr*(1.0+0.12*m),f:wr*(0.98+0.05*m),b:wr*(1.0+0.05*m)},{t:1,w:wr*0.8,f:wr*0.78,b:wr*0.8}],D.ua*0.5,{cap0:1,cap1:1,steps:6},{met:ou.top===4?1:0})).T=[sd*wr*0.06,-wr*0.3,0];
+    add3(sh,loft(ou.top===4?topCol:armCol,[{t:0,w:wr*(0.86+0.1*m),f:wr*(0.9+0.08*m),b:wr*(0.92+0.08*m)},{t:0.55,w:wr*(0.98+0.1*m),f:wr*(0.96+0.05*m),b:wr*(0.98+0.05*m)},{t:1,w:wr*0.8,f:wr*0.78,b:wr*0.8}],D.ua*0.46,{cap0:1,cap1:1,steps:6},{met:ou.top===4?1:(armCol===skin?-1:0)})).T=[sd*wr*0.03,-wr*0.18,0];
     if(g.armOk[i]){
-      add3(sh,loft(armCol,upArmCtrl(D),D.ua,{cap0:1,cap1:1,steps:12},{met:ou.top===3&&metal?1:0}));
+      add3(sh,loft(armCol,upArmCtrl(D),D.ua,{cap0:1,cap1:1,steps:12},{met:armCol===skin?-1:(ou.top===3&&metal?1:0)}));
       const el=add3(sh,N3(null)); el.T=[0,-D.ua,0];
-      add3(el,loft(skin,foreArmCtrl(D),D.fa,{cap0:1,cap1:0.6,steps:12}));
+      add3(el,loft(skin,foreArmCtrl(D),D.fa,{cap0:1,cap1:0.6,steps:12},skinMat));
       if(ou.top===4||ou.top===1||ou.top===3) add3(el,loft(ou.top===4?topCol:'#2B2118',foreArmCtrl(D),D.fa,{ta:0.45,tb:0.95,inf:0.005,steps:4},{met:ou.top===4&&metal?1:0}));
       const hd=add3(el,N3(null)); hd.T=[0,-D.fa+wr*0.25,0];
       fist3(hd,skin,D,sd);
@@ -2733,6 +2733,8 @@ function build3(h,dead){
     }
   });
   if(h.weapon&&h.weapon.kind==='tank') J.tank=add3(root,tank3(D));
+  // 손·발처럼 여러 함수에서 만들어진 맨살도 동일한 피부 재질로 통일한다.
+  const sk=hex3(skin), markSkin=n=>{ if(n.c&&n.met===0&&Math.abs(n.c[0]-sk[0])+Math.abs(n.c[1]-sk[1])+Math.abs(n.c[2]-sk[2])<0.001) n.met=-1; n.ch.forEach(markSkin); }; markSkin(root);
   J.D=D; J.h=h; J.dead=!!dead;
   return J;
 }
@@ -4336,11 +4338,17 @@ function battle3d(now){
     pose3(J,fighterAngles3(f,now),0);
     figs.push({J,M:M4.mul(M4.mul(M4.T(x,ybot,0),M4.RZ(roll)),M4.S(s,s*sya,s)),des:ko,roll});
   });
-  // 결투장의 환경 그림은 CSS 배경으로 합성하고, WebGL은 전사만 투명하게 그린다.
+  // 3D 배경: 원근 카메라가 높고 먼 곳에서 스윽 내려와 결투 각도로
   let u=1; if(ui.intro){ u=Math.max(0,Math.min(1,(now-ui.intro.t0)/ui.intro.D)); if(u>=1&&now-ui.intro.t0>ui.intro.D+50) ui.intro=null; }
-  // 사람은 정사영으로 그림 (어떤 경우에도 화면을 뚫고 커지지 않음)
+  const gy=ui.b3.gy??(ui.b3.gy=Math.max(0,Math.min(Hs*0.3,ui.b3.yA??Hs*0.06))); if(!ui.b3.world||ui.b3.wW!==W){ ui.b3.world=arena3d(W,gy); ui.b3.wW=W; }
+  const e=1-Math.pow(1-u,2.4), Dz=2600, lerp=(a,b)=>a+(b-a)*e;
+  const eye=[W/2+lerp(-W*0.5,0),lerp(Hs*0.5+1500,Hs*0.5),lerp(Dz+3600,Dz)], tgt=[W/2,lerp(gy,Hs*0.5),lerp(-300,0)];
+  const PV=M4.mul(M4.persp(2*Math.atan(Hs/2/Dz),W/Hs,60,90000),M4.look(eye,tgt,[0,1,0]));
+  const sbg=st.querySelector('.sbg'); if(sbg&&!sbg._sky){ sbg._sky=1; sbg.querySelectorAll('path,ellipse:not(.cl),rect:not(:first-of-type),circle').forEach(n=>{ if(!n.closest('g[fill="#fff"]')) n.style.display='none'; }); }
+  g3render([{J:{root:ui.b3.world,noHead:true},M:M4.I(),des:false}],{PV},cw,ch);
+  // 사람은 정사영으로 그 위에 그림
   const Z=1+1.3*Math.pow(1-u,1.4);
-  g3render(figs,{l:W/2-W/2*Z,r:W/2+W/2*Z,b:0,t:Hs*Z},cw,ch);
+  g3render(figs,{l:W/2-W/2*Z,r:W/2+W/2*Z,b:0,t:Hs*Z,keep:1},cw,ch);
   const ctx=cv.getContext('2d'); ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cw,ch); ctx.drawImage(G3.cv,0,0,cw,ch);
 }
 function g3frame(now){
