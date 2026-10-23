@@ -247,6 +247,8 @@ function Valhalla(cv,folk,opt){
   function inZone(p,z){ return Math.hypot((p.x-z.x),(p.fy-z.y)*1.6)<z.r; }
   function slotFor(p){ const live=S.folk.filter(q=>!q.gone&&!q.burn), k=Math.max(0,live.indexOf(p)), n=live.length; return [n>1?0.08+0.84*k/(n-1):0.5,0.6+(n>4?(k%2)*0.065:0)]; }
   function setAltar(on){ S.altar=!!on; const now=performance.now(); S.folk.forEach(p=>{ p.until=now+rnd(0,600); p.partner=null; p.nextShout=now+rnd(300,4000); if(S.altar&&!p.gone&&!p.held){ const sl=slotFor(p); p.x=sl[0]; p.y=sl[1]; p.tx=p.x; p.ty=p.y; p.act='shout'; } }); }
+  // 제단 앞에 고정된 전사들: 제물이 생기면 자기 자리에서 다시 시도
+  function retryPinned(){ S.folk.forEach(q=>{ if(!q.pin||q.gone||q.burn) return; const z=q.pin.zone; if(opt.onDrop(q.info,z)===true){ q.pin=null; remove(q,z==='pyre'); } }); }
   function remove(p,burn){ if(burn){ p.burn=t; for(let i=0;i<26;i++) S.fx.push({k:'spark',x:p.x+rnd(-0.03,0.03),y:p.y-rnd(0,0.15),vx:rnd(-0.03,0.03),vy:-rnd(0.05,0.2),t0:t,life:rnd(0.6,1.4),c:pick(['#ffb030','#ff5a1a','#ffe08a'])}); S.fx.push({k:'txt',x:p.x,y:p.y-0.2,txt:'영혼이 불타 사라진다…',col:'#ffb35c',t0:t,life:2}); } else p.gone=true; }
   function stop(){ alive=false; cancelAnimationFrame(raf); }
   // 잡아서 옮기기: 누르면 등덜미를 잡혀 축 늘어지고, 놓으면 떨어짐
@@ -259,8 +261,10 @@ function Valhalla(cv,folk,opt){
     const hgt=(p._box?p._box[3]:q.H*0.18); p.x=clamp(q.x/q.W,0.03,0.97); p.fy=clamp((q.y+hgt*0.92)/q.H,0.5,1.05); p.y=p.fy; p.hy=clamp(p.fy,0.6,0.99); p.swing=(p.swing||0)*0.8+(e.movementX||0)*0.02; e.preventDefault(); });
   const up=e=>{ if(!down) return; const d=down; down=null; const p=d.p;
     if(p&&d.moved){ p.held=false; const gy=clamp(p.y,0.6,0.99);
-      if(S.altar&&opt.onDrop){ const z=inZone(p,PYRE)?'pyre':inZone(p,ALTAR)?'altar':null; if(z&&opt.onDrop(p.info,z)===true){ if(z==='pyre'){ remove(p,true); S.folk.forEach(q=>{ if(q.pin&&!q.gone&&!q.burn&&opt.onDrop(q.info,'altar')===true){ q.pin=null; remove(q,false); } }); } else { p.pin=null; remove(p,false); } return; }
-        if(z==='altar'){ p.pin={x:clamp(ALTAR.x+rnd(-0.04,0.04),0.05,0.95),y:ALTAR.y+0.03}; p.x=p.pin.x; p.y=p.pin.y; p.fall=null; return; } }
+      if(S.altar&&opt.onDrop){ const z=inZone(p,PYRE)?'pyre':inZone(p,ALTAR)?'altar':null; if(z&&opt.onDrop(p.info,z)===true){ if(z==='pyre'){ remove(p,true); retryPinned(); } else { p.pin=null; remove(p,false); } return; }
+        if(z){ const Z=z==='pyre'?PYRE:ALTAR; const cnt=opt.offerCount?opt.offerCount():0;
+          p.pin={x:clamp(Z.x+rnd(-0.05,0.05),0.05,0.95),y:Z.y+0.03,zone:z}; p.x=p.pin.x; p.y=p.pin.y; p.fall=null;
+          floatTxt(p.x,p.y-0.2,z==='pyre'?'제물은 이미 찼다! 부활의 제단으로!':`제물이 부족하다 (${cnt}/3)`,'#ffb38a'); return; } }
       p.fall={vy:0,gy:Math.max(gy,0.62)}; p.y=Math.min(p.y,p.fall.gy); return; }
     const hit=p||hitAt(d.x,d.y); S.sel=hit?hit.i:-1; if(opt.onSelect) opt.onSelect(hit?hit.info:null); };
   cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
