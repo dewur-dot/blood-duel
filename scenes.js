@@ -146,6 +146,7 @@ function Valhalla(cv,folk,opt){
   function update(dt,now){
     S.folk.forEach(p=>{ if(p.gone) return;
       if(p.held){ p.moving=false; return; }
+      if(p.pin){ p.tx=p.pin.x; p.ty=p.pin.y; p.act='cower'; p.until=now+1e9; }
       if(p.fall){ p.fall.vy+=2.6*dt; p.y+=p.fall.vy*dt; if(p.y>=p.fall.gy){ p.y=p.fall.gy; if(p.fall.vy>0.5){ floatTxt(p.x,p.y-0.2,pick(['쿵!','아이고!','으억!']),'#fff'); p.hitT=t; } p.fall=null; p.until=now+800; p.act='cheer'; } return; }
       if(S.altar&&now>p.until){ p.slot=slotFor(p); p.tx=p.slot[0]+rnd(-0.008,0.008); p.ty=p.slot[1]; p.act='shout'; p.partner=null; p.until=now+rnd(4000,7000); }
       if(now>p.until){ if(p.act==='fight'&&p.partner){ const q=p.partner; q.partner=null; if(q.act==='fight') q.until=now; } nextAct(p,now); }
@@ -254,11 +255,12 @@ function Valhalla(cv,folk,opt){
   const hitAt=(x,y)=>{ let hit=null; S.folk.filter(p=>!p.gone&&!p.burn).sort((a,b)=>b.y-a.y).some(p=>{ const b=p._box; if(b&&x>=b[0]-6&&x<=b[0]+b[2]+6&&y>=b[1]&&y<=b[1]+b[3]){ hit=p; return true; } return false; }); return hit; };
   cv.addEventListener('pointerdown',e=>{ const q=pt(e), p=hitAt(q.x,q.y); down={x:q.x,y:q.y,p,moved:false}; if(p){ cv.setPointerCapture&&cv.setPointerCapture(e.pointerId); e.preventDefault(); } });
   cv.addEventListener('pointermove',e=>{ if(!down||!down.p) return; const q=pt(e); if(!down.moved&&Math.hypot(q.x-down.x,q.y-down.y)<8) return;
-    const p=down.p; if(!down.moved){ down.moved=true; p.held=true; p.fall=null; p.partner=null; p.hy=p.y; floatTxt(p.x,p.y-0.22,pick(['놔라!','어어?!','이게 무슨 짓이냐!']),'#fff'); }
+    const p=down.p; if(!down.moved){ down.moved=true; p.held=true; p.pin=null; p.fall=null; p.partner=null; p.hy=p.y; floatTxt(p.x,p.y-0.22,pick(['놔라!','어어?!','이게 무슨 짓이냐!']),'#fff'); }
     const hgt=(p._box?p._box[3]:q.H*0.18); p.x=clamp(q.x/q.W,0.03,0.97); p.fy=clamp((q.y+hgt*0.92)/q.H,0.5,1.05); p.y=p.fy; p.hy=clamp(p.fy,0.6,0.99); p.swing=(p.swing||0)*0.8+(e.movementX||0)*0.02; e.preventDefault(); });
   const up=e=>{ if(!down) return; const d=down; down=null; const p=d.p;
     if(p&&d.moved){ p.held=false; const gy=clamp(p.y,0.6,0.99);
-      if(S.altar&&opt.onDrop){ const z=inZone(p,PYRE)?'pyre':inZone(p,ALTAR)?'altar':null; if(z&&opt.onDrop(p.info,z)===true){ if(z==='pyre') remove(p,true); else remove(p,false); return; } }
+      if(S.altar&&opt.onDrop){ const z=inZone(p,PYRE)?'pyre':inZone(p,ALTAR)?'altar':null; if(z&&opt.onDrop(p.info,z)===true){ if(z==='pyre'){ remove(p,true); S.folk.forEach(q=>{ if(q.pin&&!q.gone&&!q.burn&&opt.onDrop(q.info,'altar')===true){ q.pin=null; remove(q,false); } }); } else { p.pin=null; remove(p,false); } return; }
+        if(z==='altar'){ p.pin={x:clamp(ALTAR.x+rnd(-0.04,0.04),0.05,0.95),y:ALTAR.y+0.03}; p.x=p.pin.x; p.y=p.pin.y; p.fall=null; return; } }
       p.fall={vy:0,gy:Math.max(gy,0.62)}; p.y=Math.min(p.y,p.fall.gy); return; }
     const hit=p||hitAt(d.x,d.y); S.sel=hit?hit.i:-1; if(opt.onSelect) opt.onSelect(hit?hit.info:null); };
   cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
