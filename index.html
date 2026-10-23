@@ -604,7 +604,7 @@ body{background-image:radial-gradient(ellipse 70% 36% at 50% -6%,rgba(105,69,43,
 <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
 <script src="./firebase-config.js"></script>
 <script src="./support-config.js?v=10231530"></script>
-<script src="./scenes.js?v=10231559"></script>
+<script src="./scenes.js?v=10231610"></script>
 <script>
 //ENGINE-START
 const RI=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
@@ -972,7 +972,7 @@ function visOut(h){
 // 보상 뽑기: 좋은 장비일수록 확률이 낮음
 function rollGear(slot){ const list=CLOTHES.filter(c=>c.slot===slot&&!c.fun).sort((a,b)=>a.tier-b.tier); let r=Math.random()*100; for(const c of list){ r-=TIER_W[c.tier-1]; if(r<0) return c; } return list[0]; }
 // 얻은 장비: 지금 것보다 좋으면 바로 착용, 아니면 창고(보유 목록)에
-function giveGear(h,it){ h.loot=h.loot||[]; const key=it.slot+':'+it.id; if(!h.loot.includes(key)) h.loot.push(key); h.outfit=h.outfit||{}; const cur=gearOf(it.slot,h.outfit[it.slot]); const better=!cur||it.tier>cur.tier; if(better) h.outfit[it.slot]=it.id; return better; }
+function giveGear(h,it){ h.loot=h.loot||[]; const key=it.slot+':'+it.id; if(!h.loot.includes(key)) h.loot.push(key); S.owned=S.owned||[]; if(!S.owned.includes(key)) S.owned.push(key); h.outfit=h.outfit||{}; const cur=gearOf(it.slot,h.outfit[it.slot]); const better=!cur||it.tier>cur.tier; if(better) h.outfit[it.slot]=it.id; return better; }
 const LOOT_AT={1:'helm',3:'top',5:'bottom',10:'weapon'}; // 연승 보상: 1승 투구 · 3승 갑옷 · 5승 바지 · 10승 무기
 const WEAPON_W={club:45,axe:32,sword:16,maul:7}; // 10승 무기 뽑기 확률(%)
 function rollWeapon(){ const l=WEAPONS.filter(w=>!w.off&&WEAPON_W[w.kind]); let r=Math.random()*100; for(const w of l){ r-=WEAPON_W[w.kind]; if(r<0) return w; } return l[0]; }
@@ -2864,7 +2864,7 @@ function loadState(){ try{ const cur=JSON.parse(localStorage.getItem(KEY)); if(c
   }catch(e){ return {}; } }
 function saveState(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
 let S=Object.assign({hero:null,yard:[],fights:0,board:[],seeded:false,flag:'',duels:[],handledDuels:[]},loadState());
-if(!Number.isFinite(S.gold)) S.gold=500; if(!Array.isArray(S.owned)) S.owned=[]; if(!Number.isFinite(S.renameT)) S.renameT=0;
+if(!Number.isFinite(S.gold)) S.gold=500; if(!Array.isArray(S.owned)) S.owned=[]; if(S.hero){ const ks=[...(S.hero.loot||[])]; Object.entries(S.hero.outfit||{}).forEach(([sl,id])=>{ if(id) ks.push(sl+':'+id); }); if(S.hero.weapon&&S.hero.weapon.kind) ks.push('w:'+S.hero.weapon.kind); ks.forEach(k=>{ if(!S.owned.includes(k)) S.owned.push(k); }); } if(!Number.isFinite(S.renameT)) S.renameT=0;
 const SUPPORT_URL='./support.html';
 const owns=k=>S.owned.includes(k)||(S.hero&&(S.hero.loot||[]).includes(k));
 const fmtG=n=>Math.round(n).toLocaleString('ko-KR')+' 골드';
@@ -3577,8 +3577,9 @@ function startFight(foeIn,opts){
 function reviveYard(i){ const y=S.yard[i]; if(!y) return;
   const sn=S.board.filter(e=>e.name===y.name&&!e.sample).sort((a,b)=>(b.kills||0)-(a.kills||0))[0]||(ui.board||[]).find(e=>e.name===y.name);
   let h;
-  if(sn&&sn.st){ h={id:sn.id,name:y.name,flag:sn.flag||y.flag||'',nick:sn.nick||makeNick(y.g),g:y.g,st:JSON.parse(JSON.stringify(sn.st)),cm:y.cm||sn.cm,kg:sn.kg,outfit:y.outfit||sn.outfit||{},weapon:sn.weapon||null,tags:sn.tags||makeTags(y.g),wins:y.wins||sn.kills||0}; }
-  else { const c=calcStats(y.g); h={id:uid(),name:y.name,flag:y.flag||'',nick:makeNick(y.g),g:y.g,st:c.st,cm:c.cm,kg:c.kg,outfit:y.outfit||{},weapon:null,tags:makeTags(y.g),wins:y.wins||0}; }
+  if(sn&&sn.st){ h={id:sn.id,name:y.name,flag:sn.flag||y.flag||'',nick:sn.nick||makeNick(y.g),g:y.g,st:JSON.parse(JSON.stringify(sn.st)),cm:y.cm||sn.cm,kg:sn.kg,outfit:{},weapon:null,tags:sn.tags||makeTags(y.g),wins:y.wins||sn.kills||0}; }
+  else { const c=calcStats(y.g); h={id:uid(),name:y.name,flag:y.flag||'',nick:makeNick(y.g),g:y.g,st:c.st,cm:c.cm,kg:c.kg,outfit:{},weapon:null,tags:makeTags(y.g),wins:y.wins||0}; }
+  h.loot=[];
   h.maxhp=h.st.hp; h.hp=h.maxhp; clampSt(h);
   S.yard.splice(i,1); S.hero=h; if(h.flag) S.flag=h.flag; ui.revConf=null; sync(h,true); saveState();
   ui.notice=`${h.name}, 발할라에서 끌려 내려왔다. 다시 피를 볼 시간이다.`; view='card'; ui.tab='stat'; render(); window.scrollTo(0,0); }
