@@ -936,6 +936,7 @@ const WEAPONS=[
   {kind:'axe',name:'도끼',atk:16,price:500},
   {kind:'sword',name:'장검',atk:22,price:1000},
   {kind:'maul',name:'오함마',atk:26,price:1500},
+  {kind:'vaxe',name:'바이킹 도끼',atk:30,price:5000},
   {kind:'tank',name:'탱크',atk:240,price:100000,off:true} // 밸런스 문제로 잠시 중지
 ];
 // 장비: 투구·상의·하의 각 10단계 (나무→철투구, 짐승가죽→철갑옷). id는 예전 저장/링크와 호환되게 유지하고 tier로 순서를 정함
@@ -1208,7 +1209,7 @@ function makeFoe(avoid){
   let h=newHero(); for(let i=0;i<5&&h.name===avoid;i++) h=newHero();
   const w=pick([0,0,1,1,2,3]);
   for(let i=0;i<w;i++) grow(h);
-  if(Math.random()<0.3){ const wp=pick(WEAPONS.filter(w=>w.kind!=='tank')); h.weapon={...wp}; }
+  if(Math.random()<0.3){ const wp=pick(WEAPONS.filter(w=>w.kind!=='tank'&&w.kind!=='vaxe')); h.weapon={...wp}; }
   h.outfit=randOutfit(); h.flag=randFlagFor(h.g.eth);
   return h;
 }
@@ -1224,6 +1225,7 @@ const WOOD='#6B4A2B', IRON='#8F969C', IRON_D='#575C62', STEEL='#B7BEC4', LEATHER
 function weaponShape(kind){
   if(kind==='club') return `<path class="o" d="M-3 4 L3 4 L7.5 -42 Q0 -50 -7.5 -42 Z" fill="${WOOD}"/><path d="M-2 -8 L-3.5 -34 M2 -10 L3.5 -36" stroke="#3E2A15" stroke-width=".8" fill="none"/><circle cx="-3" cy="-38" r="1.3" fill="${IRON}"/><circle cx="3" cy="-33" r="1.3" fill="${IRON}"/>`;
   if(kind==='axe') return `<rect class="o" x="-2" y="-48" width="4" height="54" fill="${WOOD}"/><path class="o" d="M2 -47 L19 -53 Q24 -39 19 -25 L2 -31 Z" fill="${IRON}"/><path d="M19 -52 Q23 -39 19 -26" stroke="#E4E9ED" stroke-width="1.2" fill="none"/>`;
+  if(kind==='vaxe') return `<rect class="o" x="-2.5" y="-50" width="5" height="62" fill="${WOOD}"/><path class="o" d="M2 -46 L26 -62 Q32 -40 26 -22 L2 -30 Z" fill="${IRON}"/><path d="M26 -60 Q30 -40 26 -24" stroke="#E4E9ED" stroke-width="1.2" fill="none"/><circle class="o" cx="0" cy="-54" r="4" fill="#E8DCC0"/>`;
   if(kind==='sword') return `<path class="o" d="M-3 -10 L3 -10 L2.4 -64 L0 -70 L-2.4 -64 Z" fill="${STEEL}"/><path d="M0 -12 L0 -64" stroke="#7E868D" stroke-width="1"/><rect class="o" x="-10" y="-12" width="20" height="4" fill="${IRON_D}"/><rect class="o" x="-2" y="-8" width="4" height="13" fill="${LEATHER}"/><circle class="o" cx="0" cy="7" r="3.2" fill="${IRON_D}"/>`;
   return `<rect class="o" x="-2.5" y="-48" width="5" height="54" fill="${WOOD}"/><rect class="o" x="-14" y="-64" width="28" height="19" fill="${IRON_D}"/><rect x="-14" y="-57" width="28" height="3" fill="#3A3E43"/><path d="M-14 -64 L14 -64" stroke="#8D949A" stroke-width="1.2"/>`;
 }
@@ -1249,6 +1251,7 @@ function tankShape(W,u){
   return o;
 }
 function weaponIcon(kind){
+  if(kind==='vaxe') return `<img src="img/viking-axe.jpg" alt="바이킹 도끼" style="width:100%;max-width:90px;height:auto;display:block;margin:0 auto">`;
   if(kind==='tank') return `<svg viewBox="-60 -50 120 60" aria-hidden="true">${tankShape(110,'i')}</svg>`;
   return `<svg viewBox="-26 -76 52 90" aria-hidden="true"><g transform="rotate(14)">${weaponShape(kind)}</g></svg>`;
 }
@@ -2743,6 +2746,7 @@ function weapon3(kind,D){
   const w=N3(null), s=0.0036; w.T=[0,-D.wa*0.4,0]; w.R=[-1.15,0,0];
   if(kind==='club'){ add3(w,N3(MS.lathe([[0,0.012],[0.6,0.022],[1,0.028]],0.2,4),'#6B4A2B')); }
   else if(kind==='axe'){ add3(w,cyl('#6B4A2B',0,-0.1,0,0.009,0.22)); add3(w,box('#8F969C',0,-0.19,-0.035,0.012,0.06,0.07,{met:1})); } // 도끼날은 상대 쪽으로
+  else if(kind==='vaxe'){ add3(w,cyl('#6B4A2B',0,-0.12,0,0.011,0.26)); add3(w,box('#6F767C',0,-0.23,-0.05,0.015,0.13,0.1,{met:1})); add3(w,sph('#E8DCC0',0,-0.36,0,0.028,0.03,0.028)); }
   else if(kind==='sword'){ add3(w,cyl('#3A3E43',0,0.02,0,0.008,0.06)); add3(w,box('#575C62',0,-0.012,0,0.016,0.012,0.07,{met:1})); add3(w,box('#B7BEC4',0,-0.17,0,0.006,0.3,0.026,{met:1})); }
   else { add3(w,cyl('#6B4A2B',0,-0.1,0,0.01,0.24)); add3(w,box('#575C62',0,-0.22,0,0.08,0.06,0.07,{met:1})); }
   return w;
@@ -4139,7 +4143,7 @@ function war3d(cv,opt){
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const sol=[], fx=[], arrows=[];
   const heroH=opt.hero;
-  const mk=(team,isHero,hIn)=>{ let h=hIn; if(!h){ h=newHero(); h.cm=RI(160,200); h.g.cm=h.cm; h.outfit=randOutfit(); h.weapon=Math.random()<0.55?{...pick(WEAPONS.filter(w=>!w.off&&w.kind!=='maul'))}:null; }
+  const mk=(team,isHero,hIn)=>{ let h=hIn; if(!h){ h=newHero(); h.cm=RI(160,200); h.g.cm=h.cm; h.outfit=randOutfit(); h.weapon=Math.random()<0.55?{...pick(WEAPONS.filter(w=>!w.off&&w.kind!=='maul'&&w.kind!=='vaxe'))}:null; }
     h=Object.assign({},h,{g:Object.assign({},h.g,{expr:pick(['angry','snarl','gape','angry'])})});
     return {team,hero:!!isHero,h,J:build3(h,false),x:0,d:rnd2(0,1),dir:team===0?1:-1,state:'run',foe:null,hp:isHero?99:RI(2,4),kt:-9,kn:'jab',hitT:-9,ph:Math.random()*6.3,dead:null,cm:h.cm||175}; };
   function rnd2(a,b){ return a+Math.random()*(b-a); }
